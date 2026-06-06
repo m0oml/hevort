@@ -12,6 +12,12 @@
 
 while true
 
+    ; --- 0. Ensure globals and serial port are ready ---
+    ; Guards against daemon.g starting before config.g has completed (SBC mode)
+    if { !exists(global.chamberHeartbeat) }
+        M98 P"/sys/vars.g"
+        G4 S10
+
     ; --- 1. Heartbeat Counter ---
     ; Increments each cycle so PLC can detect stale comms
     set global.chamberHeartbeat = { global.chamberHeartbeat + 1 }
@@ -41,7 +47,6 @@ while true
     ; --- 4. Read from PLC ---
     M98 P"/sys/plc_read.g"
 
-        
     ; --- 5. Water Pump Gate ---
     ; Pump runs only when hotend is above 50C
     ; Below 50C hotend: pump forced off regardless of coolant temp
