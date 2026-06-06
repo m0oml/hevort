@@ -1,6 +1,8 @@
 /opt/dsf/sd/macros/chamber_abort.g
 /opt/dsf/sd/macros/chamber_heat.g
 /opt/dsf/sd/macros/plc_status.g
+/opt/dsf/sd/macros/printend.g
+/opt/dsf/sd/macros/printstart.g
 /opt/dsf/sd/sys/bed.g
 /opt/dsf/sd/sys/config_default.g
 /opt/dsf/sd/sys/config.g
@@ -14,6 +16,8 @@
 /opt/dsf/sd/sys/pause.g
 /opt/dsf/sd/sys/plc_read.g
 /opt/dsf/sd/sys/resume.g
+/opt/dsf/sd/sys/sleep.g
+/opt/dsf/sd/sys/stop.g
 /opt/dsf/sd/sys/tfree0.g
 /opt/dsf/sd/sys/tpost0.g
 /opt/dsf/sd/sys/tpre0.g
