@@ -43,12 +43,23 @@ while true
     ; --- 4. Read from PLC ---
     ; M261.1 V"plcRegs" errors if variable exists, so delete first then re-create
     ; (Workaround for RRF 3.6.2 M261.1 semantics)
-    if exists(global.plcRegs)
-        set global.plcRegs = null
+    ;if exists(global.plcRegs)
+    ;    set global.plcRegs = null
+    ;M261.1 P2 A1 F3 R0 B5 V"plcRegs"
+    ;if { global.plcRegs != null }
+    ;    set global.chamberPV = { global.plcRegs[3] }
+    ;    set global.chamberStatus = { global.plcRegs[4] }
+
+    ; --- 4. Read from PLC ---
+    if { !exists(global.plcRegs) }
+        global plcRegs = {0,0,0,0,0}
+    else
+        set global.plcRegs = {0,0,0,0,0}
     M261.1 P2 A1 F3 R0 B5 V"plcRegs"
-    if { global.plcRegs != null }
-        set global.chamberPV = { global.plcRegs[3] }
-        set global.chamberStatus = { global.plcRegs[4] }
+    set global.chamberPV = { global.plcRegs[3] }
+    set global.chamberStatus = { global.plcRegs[4] }
+
+
 
     ; --- 5. Water Pump Gate ---
     ; Pump runs only when hotend is above 50C
