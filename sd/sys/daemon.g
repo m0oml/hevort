@@ -1,7 +1,5 @@
-
-
 ; ======================================================================================
-; Daemon Script - HevORT Chamber PLC Communication + Water Pump 
+; Daemon Script - HevORT Chamber PLC Communication + Water Pump
 ; Polls Siemens S7-1200 every 5 seconds via Modbus RTU over RS485
 ;
 ; Register Map (Holding Registers):
@@ -41,35 +39,23 @@ while true
     M260.1 P2 A1 F16 R0 B{global.chamberSP, global.chamberHeartbeat, global.duetControl, 0, 0}
 
     ; --- 4. Read from PLC ---
-    ; M261.1 V"plcRegs" errors if variable exists, so delete first then re-create
-    ; (Workaround for RRF 3.6.2 M261.1 semantics)
-    ;if exists(global.plcRegs)
-    ;    set global.plcRegs = null
-    ;M261.1 P2 A1 F3 R0 B5 V"plcRegs"
-    ;if { global.plcRegs != null }
-    ;    set global.chamberPV = { global.plcRegs[3] }
-    ;    set global.chamberStatus = { global.plcRegs[4] }
-
-    ; --- 4. Read from PLC ---
-    set global.plcRegs = null
+    ; global.plcRegs declared as null in vars.g
+    ; M261.1 overwrites null global each cycle, reset to null after reading
     M261.1 P2 A1 F3 R0 B5 V"plcRegs"
     if { global.plcRegs != null }
         set global.chamberPV = { global.plcRegs[3] }
         set global.chamberStatus = { global.plcRegs[4] }
-
+        set global.plcRegs = null
 
     ; --- 5. Water Pump Gate ---
     ; Pump runs only when hotend is above 50C
-    ; Speed controlled by coolant temp thermostatic (S3/H3 T25:40)
     ; Below 50C hotend: pump forced off regardless of coolant temp
     if { heat.heaters[1].current > 50 }
         M106 P2 H3 T25:40                               ; Hand control to coolant temp sensor S3
     else
         M106 P2 S0                                      ; Hotend cold - pump off
 
-
-    ; --- 7. Poll Interval ---
+    ; --- 6. Poll Interval ---
     G4 S5                                               ; 5 second poll cycle
 
-while ends
-
+; while ends
