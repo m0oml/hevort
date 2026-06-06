@@ -51,14 +51,11 @@ while true
     ;    set global.chamberStatus = { global.plcRegs[4] }
 
     ; --- 4. Read from PLC ---
-    if { !exists(global.plcRegs) }
-        global plcRegs = {0,0,0,0,0}
-    else
-        set global.plcRegs = {0,0,0,0,0}
+    set global.plcRegs = null
     M261.1 P2 A1 F3 R0 B5 V"plcRegs"
-    set global.chamberPV = { global.plcRegs[3] }
-    set global.chamberStatus = { global.plcRegs[4] }
-
+    if { global.plcRegs != null }
+        set global.chamberPV = { global.plcRegs[3] }
+        set global.chamberStatus = { global.plcRegs[4] }
 
 
     ; --- 5. Water Pump Gate ---
