@@ -28,3 +28,5 @@ global chamberStatus = 0
 ;   Bit 0 = Printer_Active (set when printing/paused)
 global duetControl = 0
 
+; --- Abort flag (set to 1 from console to abort chamber_heat.g) ---
+global chamberAbort = 0
