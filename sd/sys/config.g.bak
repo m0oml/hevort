@@ -95,7 +95,8 @@ M307 H1 R2.43 D5.5 E1.35 K0.56 B0                      ; Hotend PID model (PLACE
 ; PID controlled from bed interior sensor S1 (temp1)
 ; Independent over-temp cutout on mat surface sensor S2 (temp2), limit 125C
 M950 H0 C"out7" T1                                      ; Bed heater SSR on out7, PID from S1
-M143 H0 P0 T1 C2 S125 A0                                ; Bed safety limit 125C on mat sensor S2
+M143 H0 P0 T1 S200 A0                                  ; Bed primary limit 200C on sensor S1
+M143 H0 P1 T2 S125 A0                                  ; Bed mat safety cutout 125C on sensor S2
 M307 H0 R2.43 D5.5 E1.35 K0.56 B0                      ; Bed PID model (PLACEHOLDER - autotune required)
 
 ; Map bed heater
