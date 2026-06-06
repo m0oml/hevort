@@ -28,5 +28,3 @@ global chamberStatus = 0
 ;   Bit 0 = Printer_Active (set when printing/paused)
 global duetControl = 0
 
-; --- PLC Register Read Buffer ---
-global plcRegs = {0,0,0,0,0}
