@@ -10,7 +10,7 @@ landed.
 
 SESSION BOOTSTRAP
 At the start of each session fetch:
-- This file: https://raw.githubusercontent.com/m0oml/hevort/main/sd/sys/hevort_project_brief.txt
+- This file: https://raw.githubusercontent.com/m0oml/hevort/main/sd/sys/project.txt
 - File list:  https://raw.githubusercontent.com/m0oml/hevort/main/sd/sys/filelist.txt
 Then fetch relevant config files from filelist.txt as needed.
 
