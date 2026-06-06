@@ -5,13 +5,16 @@
 ; ======================================================================================
 
 ; --- Chamber Setpoint (tenths °C, e.g. 500 = 50.0°C) ---
-global chamberSP = 0
+if !exists(global.chamberSP)
+    global chamberSP = 0
 
 ; --- Chamber Process Value (tenths °C, read from PLC) ---
-global chamberPV = 0
+if !exists(global.chamberPV)
+    global chamberPV = 0
 
 ; --- Heartbeat Counter (0-32767, increments each daemon cycle) ---
-global chamberHeartbeat = 0
+if !exists(global.chamberHeartbeat)
+    global chamberHeartbeat = 0
 
 ; --- Status Bits from PLC (R4) ---
 ;   Bit 0 = Chamber sensor fault
@@ -22,11 +25,14 @@ global chamberHeartbeat = 0
 ;   Bit 5 = PLC running
 ;   Bit 6 = Duet comms OK
 ;   Bit 7 = Duet comms fault
-global chamberStatus = 0
+if !exists(global.chamberStatus)
+    global chamberStatus = 0
 
 ; --- Control Bits to PLC (R2) ---
 ;   Bit 0 = Printer_Active (set when printing/paused)
-global duetControl = 0
+if !exists(global.duetControl)
+    global duetControl = 0
 
 ; --- Abort flag (set to 1 from console to abort chamber_heat.g) ---
-global chamberAbort = 0
+if !exists(global.chamberAbort)
+    global chamberAbort = 0
