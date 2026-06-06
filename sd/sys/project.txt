@@ -10,7 +10,7 @@ landed.
 
 SESSION BOOTSTRAP
 At the start of each session fetch:
-- This file: https://raw.githubusercontent.com/m0oml/hevort/main/sd/sys/project.txt
+- This file: https://raw.githubusercontent.com/m0oml/hevort/main/sd/sys/hevort_project_brief.txt
 - File list:  https://raw.githubusercontent.com/m0oml/hevort/main/sd/sys/filelist.txt
 Then fetch relevant config files from filelist.txt as needed.
 
@@ -53,10 +53,14 @@ CHAMBER HEATING SYSTEM
 ================================================================================
 
 Heater             : 1400W PTC with shaded-pole motor
-Heater contactor   : K1 — two-pole
-SSR1 / SSR2        : ENMG SDR25A2032 25A
-K2                 : Fan relay
-K3                 : PLC safety pilot relay — 2-pole, coil driven by Duet OUT8
+SSR1               : ENMG SDR25A2032 25A — bed heater, gate from Duet OUT7
+SSR2               : ENMG SDR25A2032 25A — chamber heater, gate from PLC Q13.2
+K1                 : Two-pole contactor — mains gate to SSR2, coil driven by R2
+K2                 : Contactor — shaded-pole fan, coil driven by R3
+R1                 : Pilot relay — coil from Duet OUT8 (24V), NO contact -> PLC %I0.0
+R2                 : Pilot relay — coil from PLC Q13.0, contact drives K1 coil
+R3                 : Pilot relay — coil from PLC Q13.1, contact drives K2 coil
+R4                 : Pilot relay — coil from PLC Q13.3, contact drives elec bay fans
 PLC                : Siemens S7-1200 CPU 1212C DC/DC/Rly, FW V4.3, TIA Portal V15.1 Update 8
 RTD module         : SM1231 8-channel — Slot 2, addresses IW96-IW110
 RS485 module       : CB1241 RS485, hardware ID 269, MODE=4 in DB2
@@ -70,14 +74,13 @@ PROFINET Network: 192.168.32.0/24, no router
   Pi 4 (DWC)         : 192.168.32.68
 
 ================================================================================
-SAFETY CIRCUIT — Duet -> PLC Relay (K3)
+SAFETY CIRCUIT — Duet -> PLC (R1)
 ================================================================================
 
-Duet OUT8 drives K3 coil directly. HIGH = relay energised = system healthy.
+Duet OUT8 drives R1 coil directly. HIGH = relay energised = system healthy.
 Drops on any Duet stop/estop.
 
-- K3 Pole 1 NO -> PLC %I0.0 (DI_EStop_PLC) — 24V when relay energised
-- K3 Pole 2 NO -> spare (TBD)
+- R1 NO contact -> PLC %I0.0 (DI_EStop_PLC) — 24V when relay energised
 - No SR latch in PLC — %I0.0 used directly in FC4. Duet OUT8 is the only latch.
 - Duet OUT8 asserted HIGH in config.g at startup.
 - Drops via M42 P0 S0 in sleep.g, trigger0.g, trigger3.g.
@@ -140,15 +143,11 @@ OB30 (cyclic interrupt):
   N5  FC5 FC_Heater_Output — PID output -> Int 0-100
   N6  FC7 FC_Heater_PWM — time-proportioning SSR, 2s cycle -> Chamber_Heat_SSR
 
-SM1222 Output Map (Slot 3, DQ 8x24VDC, base %QB12):
-  Q12.0  spare
-  Q12.1  spare
-  Q12.2  spare
-  Q12.3  spare
-  Q13.0  Chamber_Heat_En   K1 contactor coil
-  Q13.1  Chamber_Heat_Fan  K2 fan relay coil
-  Q13.2  Chamber_Heat_SSR  Chamber heater SSR (SSR1/SSR2)
-  Q13.3  Bay_Fans          Elec bay fan relay (FC2)
+SM1222 Output Map (Slot 3, DQ 8x24VDC, base %QB13):
+  Q13.0  Chamber_Heat_En   R2 coil -> K1 contactor
+  Q13.1  Chamber_Heat_Fan  R3 coil -> K2 contactor
+  Q13.2  Chamber_Heat_SSR  SSR2 gate (chamber heater)
+  Q13.3  Bay_Fans          R4 coil -> elec bay fans
   Q13.4-7 Spare
 
 Key PLC Tags:
@@ -170,7 +169,7 @@ Key PLC Tags:
   Chamber_Estop           %M20.0  NOT %I0.0
   Chamber_Heater_Fault_Trig %M20.4 Live fault trigger
   Cooling_PrinterOn       %M21.1  Fans minimum speed flag
-  DI_EStop_PLC            %I0.0   Duet OUT8 -> K3 pole 1 -> PLC input
+  DI_EStop_PLC            %I0.0   Duet OUT8 -> R1 NO contact -> PLC input
 
 ================================================================================
 DUET IO MAP
@@ -181,11 +180,11 @@ Output Ports:
   OUT1  Available
   OUT2  Available
   OUT3  Z brakes (commoned, 24V) — power to release, auto via M569.2
-  OUT4  Duet enclosure fan (Noctua NF-A4x10 24V PWM) — inverted (!out4), off <40C, 100% at 60C
+  OUT4  Duet enclosure fan (Noctua NF-A4x10 24V PWM) — off <40C, 100% at 60C
   OUT5  WS7040 CPAP (part cooling) — manual/slicer, tach on out5.tach
   OUT6  Water pump PWM — gated by hotend >50C in daemon.g, 40% min 25C, 100% at 40C coolant
-  OUT7  Bed heater SSR gate — low-side switched
-  OUT8  PLC safety relay K3 coil — HIGH=healthy, drops on stop/estop only
+  OUT7  Bed heater SSR1 gate — low-side switched
+  OUT8  R1 pilot relay coil — HIGH=healthy, drops on stop/estop only
 
 IO Ports:
   IO1   RS485 Modbus — reserved, RS485_EN jumper fitted
@@ -194,13 +193,14 @@ IO Ports:
   IO4   Z probe — digital probe
   IO5   Flow switch — NC, closed=flow present, trigger0
   IO6   Filament sensor — TBD, commented out
-  IO7   Pause button — NO, make to pause/abort chamber heat
-  IO8   Stop button — NC, break to stop
+  IO7   Available
+  IO8   Pause button — NO, make to pause/abort chamber heat
+  IO9   Stop button — NC, break to stop
 
 Temperature Inputs:
   TEMP0  Hotend           PT1000
-  TEMP1  Bed interior     NTC 10K B3950 — PID source for H0
-  TEMP2  Bed mat surface  NTC 10K B3950 — safety limit 125C on H0
+  TEMP1  Bed interior     100K NTC B3950 — PID source for H0
+  TEMP2  Bed mat surface  100K NTC B3950 — safety limit 125C on H0
   TEMP3  Coolant          Alphacool Eiszapfen G1/4, NTC 10K B3950, acetal body
   S10    MCU temp         Requires cold-start calibration before use
   S11    Driver temp      Binary states: 0/100/130C
@@ -244,10 +244,10 @@ POWER SUPPLIES
   T4  Meanwell MDR-60-24   60W/2.5A    +24V control always-on (PLC, KTP700)
 
 AC Mains Distribution:
-  MCB1  10A C   Bed heater SSR (CHANGE from 6A — undersized for 1500W)
-  MCB2  13A C   Chamber heater — must remain 13A
-  MCB3  10A C   Printer PSUs (T1, T2)
-  MCB4  6A B    Always-on PSUs (T3, T4)
+  MCB1  1A C    Always-on PSUs (T3 MDR-60-5, T4 MDR-60-24)
+  MCB2  6A C    Printer LRS PSUs (T1 LRS-450-24, T2 LRS-450-48)
+  MCB3  6A C    Bed heater SSR1 (pending final wattage confirmation)
+  MCB4  10A C   Chamber heater
 
 DC Wiring Colour Standard (BS 7671:2018):
   AC Line (L)       Brown
@@ -297,7 +297,7 @@ Temperature sensing:
   Primary (PID)   : PT1000 in 4mm copper capillary in slab edge, mid-depth
                     ~10mm from bottom, 20-30mm deep, thermal paste filled
                     -> Duet TEMP1 (S1)
-  Secondary (safety): NTC 10K B3950 in heater mat -> Duet TEMP2 (S2)
+  Secondary (safety): NTC 100K B3950 in heater mat -> Duet TEMP2 (S2)
                     Safety cutout only, 125C limit
 
 Thermal fuse  : 200C, built into heater mat — hardware last resort
@@ -330,21 +330,22 @@ OUTSTANDING WORK
 10. White H07V-K 1.5mm² ordered — DC 0V wiring pending arrival
 11. Brown heatshrink ordered — AC neutral identification bands pending
 12. HMI review — Temp_Fan_PWM, Fan_Cycle_Count, Cooling_FanActive,
-    Cooling_TempFault orphaned tag references to be removed
-13. MCB1 change to 10A C-curve (currently 6A — undersized for 1500W)
+    Cooling_TempFault tag references after FC8 removal
+13. MCB3 rating to be confirmed once bed heater wattage finalised
 14. M23CL motors not yet arrived
 
 DONE (recent):
 - PLC firmware V4.3, PROFINET switch configured, project downloaded
-- Safety circuit: Duet OUT8 -> K3 -> %I0.0, trigger macros, stop.g/sleep.g
+- Safety circuit: Duet OUT8 -> R1 -> %I0.0, trigger macros, stop.g/sleep.g
 - Modbus comms loop fully working: SP write, PV read, status bits live
 - M261.1 var scope bug worked around via plc_read.g sub-macro
 - M143 C parameter error fixed (two separate M143 lines, no C param)
 - chamber_heat.g abort via pause button (trigger2.g) and global.chamberAbort
-- FC8 removed, SM1222 output rationalisation, OB1 N8 latch removed
-- Bed SSR wired OUT7, network cables run
-- All bed/coolant thermistors corrected to NTC 10K B3950 (T10000) in config.g
-- Bed PID model updated to calculated granite values: R0.18 D25 K0.005 B0
+- FC2 Electronics_Cooling rewritten, FC8 removed
+- SM1222 output rationalisation, OB1 N8 latch removed
+- Bed SSR1 wired OUT7, network cables run
+- Electronics bay relay/contactor designations corrected (R1-R4, K1-K2)
+- MCB schedule corrected (MCB1 1A, MCB2 6A, MCB3 6A, MCB4 10A)
 
 ================================================================================
 ELECTRONICS BAY LAYOUT (v5)
@@ -355,12 +356,12 @@ Face panel (570mm wide, 900mm tall — outer face of right side panel, 5mm Al):
   Zone C (170-290mm)    : Belt path clear top 80mm; PLC top duct at 250-390mm
   Zone B (290-400mm)    : S7-1212C PLC between motor towers (80mm each side)
   Zone A (400-900mm)    : Pi 4 + Duet 3 6HC (Noctua enclosure) + TDB (top)
-                          Mains DIN rail: MCBs, PSUs, relay, contactor,
-                          SSR bed, SSR chamber (bottom)
+                          Mains DIN rail: MCBs, PSUs, R1-R4 relays, K1-K2
+                          contactors, SSR1 bed, SSR2 chamber (bottom)
 
 Rear panel (250mm deep):
   Top    : 240mm radiator (Alphacool ES T38) + 2x 120mm exhaust fans
-           (12V PC fans in series on 24V rail, Bay_Fans relay Q13.3, driven by FC2)
+           (12V PC fans in series on 24V rail, R4 relay Q13.3)
   Middle : Clear
   Bottom : LRS-450-24 + LRS-450-48 flat (225x124x35mm each, side by side)
 
