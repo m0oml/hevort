@@ -141,11 +141,15 @@ OB30 (cyclic interrupt):
   N6  FC7 FC_Heater_PWM — time-proportioning SSR, 2s cycle -> Chamber_Heat_SSR
 
 SM1222 Output Map (Slot 3, DQ 8x24VDC, base %QB12):
-  Q12.0  Chamber_Heat_En   K1 contactor coil
-  Q12.1  Chamber_Heat_Fan  K2 fan relay coil
-  Q12.2  Chamber_Heat_SSR  Chamber heater SSR (SSR1/SSR2)
-  Q12.3  Bay_Fans          Elec bay fan relay
-  Q12.4-7 Spare
+  Q12.0  spare
+  Q12.1  spare
+  Q12.2  spare
+  Q12.3  spare
+  Q13.0  Chamber_Heat_En   K1 contactor coil
+  Q13.1  Chamber_Heat_Fan  K2 fan relay coil
+  Q13.2  Chamber_Heat_SSR  Chamber heater SSR (SSR1/SSR2)
+  Q13.3  Bay_Fans          Elec bay fan relay (FC2)
+  Q13.4-7 Spare
 
 Key PLC Tags:
   Temp_Chamber_PV         %MD30   Weighted chamber average (Real, degC)
@@ -177,7 +181,7 @@ Output Ports:
   OUT1  Available
   OUT2  Available
   OUT3  Z brakes (commoned, 24V) — power to release, auto via M569.2
-  OUT4  Duet enclosure fan (Noctua NF-A4x10 24V PWM) — off <40C, 100% at 60C
+  OUT4  Duet enclosure fan (Noctua NF-A4x10 24V PWM) — inverted (!out4), off <40C, 100% at 60C
   OUT5  WS7040 CPAP (part cooling) — manual/slicer, tach on out5.tach
   OUT6  Water pump PWM — gated by hotend >50C in daemon.g, 40% min 25C, 100% at 40C coolant
   OUT7  Bed heater SSR gate — low-side switched
@@ -190,14 +194,13 @@ IO Ports:
   IO4   Z probe — digital probe
   IO5   Flow switch — NC, closed=flow present, trigger0
   IO6   Filament sensor — TBD, commented out
-  IO7   Available
-  IO8   Pause button — NO, make to pause/abort chamber heat
-  IO9   Stop button — NC, break to stop
+  IO7   Pause button — NO, make to pause/abort chamber heat
+  IO8   Stop button — NC, break to stop
 
 Temperature Inputs:
   TEMP0  Hotend           PT1000
-  TEMP1  Bed interior     100K NTC B3950 — PID source for H0
-  TEMP2  Bed mat surface  100K NTC B3950 — safety limit 125C on H0
+  TEMP1  Bed interior     NTC 10K B3950 — PID source for H0
+  TEMP2  Bed mat surface  NTC 10K B3950 — safety limit 125C on H0
   TEMP3  Coolant          Alphacool Eiszapfen G1/4, NTC 10K B3950, acetal body
   S10    MCU temp         Requires cold-start calibration before use
   S11    Driver temp      Binary states: 0/100/130C
@@ -294,7 +297,7 @@ Temperature sensing:
   Primary (PID)   : PT1000 in 4mm copper capillary in slab edge, mid-depth
                     ~10mm from bottom, 20-30mm deep, thermal paste filled
                     -> Duet TEMP1 (S1)
-  Secondary (safety): NTC 100K B3950 in heater mat -> Duet TEMP2 (S2)
+  Secondary (safety): NTC 10K B3950 in heater mat -> Duet TEMP2 (S2)
                     Safety cutout only, 125C limit
 
 Thermal fuse  : 200C, built into heater mat — hardware last resort
@@ -327,7 +330,7 @@ OUTSTANDING WORK
 10. White H07V-K 1.5mm² ordered — DC 0V wiring pending arrival
 11. Brown heatshrink ordered — AC neutral identification bands pending
 12. HMI review — Temp_Fan_PWM, Fan_Cycle_Count, Cooling_FanActive,
-    Cooling_TempFault tag references after FC8 removal
+    Cooling_TempFault orphaned tag references to be removed
 13. MCB1 change to 10A C-curve (currently 6A — undersized for 1500W)
 14. M23CL motors not yet arrived
 
@@ -338,9 +341,10 @@ DONE (recent):
 - M261.1 var scope bug worked around via plc_read.g sub-macro
 - M143 C parameter error fixed (two separate M143 lines, no C param)
 - chamber_heat.g abort via pause button (trigger2.g) and global.chamberAbort
-- FC2 Electronics_Cooling rewritten, FC8 removed
-- SM1222 output rationalisation, OB1 N8 latch removed
+- FC8 removed, SM1222 output rationalisation, OB1 N8 latch removed
 - Bed SSR wired OUT7, network cables run
+- All bed/coolant thermistors corrected to NTC 10K B3950 (T10000) in config.g
+- Bed PID model updated to calculated granite values: R0.18 D25 K0.005 B0
 
 ================================================================================
 ELECTRONICS BAY LAYOUT (v5)
@@ -356,7 +360,7 @@ Face panel (570mm wide, 900mm tall — outer face of right side panel, 5mm Al):
 
 Rear panel (250mm deep):
   Top    : 240mm radiator (Alphacool ES T38) + 2x 120mm exhaust fans
-           (12V PC fans in series on 24V rail, Bay_Fans relay Q12.3)
+           (12V PC fans in series on 24V rail, Bay_Fans relay Q13.3, driven by FC2)
   Middle : Clear
   Bottom : LRS-450-24 + LRS-450-48 flat (225x124x35mm each, side by side)
 
