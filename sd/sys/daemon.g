@@ -39,14 +39,9 @@ while true
     M260.1 P2 A1 F16 R0 B{global.chamberSP, global.chamberHeartbeat, global.duetControl, 0, 0}
 
     ; --- 4. Read from PLC ---
-    ; global.plcRegs declared as null in vars.g
-    ; M261.1 overwrites null global each cycle, reset to null after reading
-    M261.1 P2 A1 F3 R0 B5 V"plcRegs"
-    if { global.plcRegs != null }
-        set global.chamberPV = { global.plcRegs[3] }
-        set global.chamberStatus = { global.plcRegs[4] }
-        set global.plcRegs = null
+    M98 P"/sys/plc_read.g"
 
+        
     ; --- 5. Water Pump Gate ---
     ; Pump runs only when hotend is above 50C
     ; Below 50C hotend: pump forced off regardless of coolant temp
