@@ -104,7 +104,7 @@ M140 P0 H0                                              ; Map to bed slot
 ; ======================== Fans ========================
 ; Fan 0: Duet enclosure fan (Noctua NF-A4x10 24V PWM) on OUT4
 ; Thermostatic: off below 40C, 100% at 60C, driven by MCU and driver temps
-M950 F0 C"out4" Q500                                    ; Fan 0: enclosure fan, 500Hz PWM
+M950 F0 C"!out4" Q500                                    ; Fan 0: enclosure fan, 500Hz PWM
 M106 P0 H10:11 T40:60                                   ; Off below 40C, full at 60C, thermostatic control
 
 ; Fan 1: WS7040 CPAP (part cooling) on OUT5 with tach
