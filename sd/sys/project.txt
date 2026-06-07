@@ -9,10 +9,11 @@ electronics bay wiring phase — panel wired, 50-core umbilical terminals being
 landed.
 
 SESSION BOOTSTRAP
-At the start of each session fetch:
-- This file: https://raw.githubusercontent.com/m0oml/hevort/main/sd/sys/hevort_project_brief.txt
-- File list:  https://raw.githubusercontent.com/m0oml/hevort/main/sd/sys/filelist.txt
-Then fetch relevant config files from filelist.txt as needed.
+At the start of each session:
+1. Read project.txt from Google Drive (file ID: 1vUyR-GAOokGul_1y6veX-NaXTW39Isfh)
+2. For config files, search the sys folder (ID: 1gLAcXXCszW8oZrBpZwaeeRTaJNPs9gTI)
+   or macros folder (ID: 1oXYyhdUJHUqfROvr4jJeL3fo5T1uOwUI) by filename
+3. Do not fetch from GitHub raw URLs — Drive is the live source
 
 WORKING STYLE
 - Direct and technically precise. No hand-holding.
@@ -264,6 +265,30 @@ DC Wiring Colour Standard (BS 7671:2018):
                     blue reserved for AC Neutral only
 
 ================================================================================
+TERMINAL SCHEDULE
+================================================================================
+
+LOW Block (21 cores):
+  T1   Z brake +          -> Duet OUT3 signal
+  T2   Z brake 0V         -> Duet OUT3 GND
+  T3   Z0 B1 (red)        -> Duet driver 0.0
+  T4   Z0 B2 (blue)       -> Duet driver 0.0
+  T5   Z0 A1 (green)      -> Duet driver 0.0
+  T6   Z0 A2 (black)      -> Duet driver 0.0
+  T7   Z1 B1 (red)        -> Duet driver 0.1
+  T8   Z1 B2 (blue)       -> Duet driver 0.1
+  T9   Z1 A1 (green)      -> Duet driver 0.1
+  T10  Z1 A2 (black)      -> Duet driver 0.1
+  T11  Z2 B1 (red)        -> Duet driver 0.2
+  T12  Z2 B2 (blue)       -> Duet driver 0.2
+  T13  Z2 A1 (green)      -> Duet driver 0.2
+  T14  Z2 A2 (black)      -> Duet driver 0.2
+  T15-22  TBD (RTD bottom + RTD air-off, direct or terminal TBC)
+
+HIGH Block (29 cores):
+  TBD
+
+================================================================================
 WATER COOLING LOOP
 ================================================================================
 
@@ -381,6 +406,3 @@ Rear panel (250mm deep):
   Bottom : LRS-450-24 + LRS-450-48 flat (225x124x35mm each, side by side)
 
 Cable trunking: 25x80mm slotted, ~2690mm total
-
-
- === push test ====
