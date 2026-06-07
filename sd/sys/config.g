@@ -140,12 +140,18 @@ M950 J3 C"io8.in"                                       ; Input 3: stop button
 M581 T3 P3 S0 R0                                        ; Trigger 3 on stop button break
 
 ; ======================= Outputs ======================
-; OUT8: PLC safety relay K3 coil
+; OUT8: PLC safety relay R1 coil
 ; HIGH = relay latched = PLC %I0.0 healthy = heater enabled
 ; Drops on any Duet stop/estop condition via trigger macros
 ; Initialise HIGH at startup - machine in known good state
 M950 P0 C"out8"                                         ; GPIO 0: PLC safety relay coil
-M42 P0 S1                                               ; Assert OUT8 high at startup
+M42 P0 S0                                               ; Hold OUT8 low until stop button confirmed
+
+if { sensors.gpIn[3].value = 1 }
+    M42 P0 S1
+    M118 P0 S"[BOOT] Stop button OK - PLC relay enabled"
+else
+    M118 P0 S"[BOOT] Stop button open - PLC relay held off, press pause to reset"
 
 ; ======================= Modbus =======================
 ; RS485 to Siemens S7-1200 PLC for chamber heating control
