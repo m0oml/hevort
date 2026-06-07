@@ -136,7 +136,7 @@ M950 J2 C"io7.in"                                       ; Input 2: pause button
 M581 T2 P2 S1 R0                                        ; Trigger 2 on pause button make, during print only
 
 ; Stop button on IO8 (NC - break to stop)
-M950 J3 C"io8.in"                                       ; Input 3: stop button
+M950 J3 C"!io8.in"                                       ; Input 3: stop button
 M581 T3 P3 S0 R0                                        ; Trigger 3 on stop button break
 
 ; ======================= Outputs ======================
