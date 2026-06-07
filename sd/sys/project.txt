@@ -358,6 +358,8 @@ DONE (recent):
 - HMI dead tags removed, Cooling_FanActive repointed to Bay_Fans Q13.3
 - Chamber SSR2 and K1/K2 AC wiring complete (MCB4 -> SSR2 -> K1 -> heater element; MCB4 -> K2 -> fan motor; neutral through both contactors)
 - Pause button wired IO7 (GND pin1, io7.in pin3), trigger2 confirmed working
+- HevORT stop button: IO8 NC momentary, GND=safe/open=stop. Pin inverted (!io8.in). Boot holds OUT8 low until IO8 confirmed low. Pause button resets OUT8 if IO8 low and OUT8 currently low. No latch needed.
+- HevORT PLC safety: all fault conditions tested — board reset, Modbus loss, estop all correctly drop chamber heater. Safety relay hold test passed.
 
 
 ================================================================================
