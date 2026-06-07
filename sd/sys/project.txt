@@ -5,8 +5,7 @@ Last updated: 06/06/2026
 
 ABOUT THIS PROJECT
 Large-format HevORT 3D printer build. 415x415x440mm print volume. Currently in
-electronics bay wiring phase — panel wired, 50-core umbilical terminals being
-landed.
+electronics bay wiring phase
 
 SESSION BOOTSTRAP
 At the start of each session:
@@ -41,7 +40,6 @@ Motion controller  : Duet 3 6HC v1.02c SBC mode, RRF 3.6.3
 Toolhead           : Mellow CNC Vz-HextrudORT water-cooled, Goliath hotend
 Extruder           : NEMA14
 Endstops           : Omron EE-SX67x optical (physical, not sensorless)
-Umbilical          : 50 cores — HIGH block 29 cores, LOW block 21 cores
 SBC                : Raspberry Pi 4
 Display            : Waveshare DSI — undecided size, 10.1" preferred candidate
 
@@ -268,25 +266,50 @@ DC Wiring Colour Standard (BS 7671:2018):
 TERMINAL SCHEDULE
 ================================================================================
 
-LOW Block (21 cores):
-  T1   Z brake +          -> Duet OUT3 signal
-  T2   Z brake 0V         -> Duet OUT3 GND
-  T3   Z0 B1 (red)        -> Duet driver 0.0
-  T4   Z0 B2 (blue)       -> Duet driver 0.0
-  T5   Z0 A1 (green)      -> Duet driver 0.0
-  T6   Z0 A2 (black)      -> Duet driver 0.0
-  T7   Z1 B1 (red)        -> Duet driver 0.1
-  T8   Z1 B2 (blue)       -> Duet driver 0.1
-  T9   Z1 A1 (green)      -> Duet driver 0.1
-  T10  Z1 A2 (black)      -> Duet driver 0.1
-  T11  Z2 B1 (red)        -> Duet driver 0.2
-  T12  Z2 B2 (blue)       -> Duet driver 0.2
-  T13  Z2 A1 (green)      -> Duet driver 0.2
-  T14  Z2 A2 (black)      -> Duet driver 0.2
-  T15-22  TBD (RTD bottom + RTD air-off, direct or terminal TBC)
+HIGH Block (23 terminals):
+  T1    Y endstop 5V              -> Chamber harness
+  T2    Y endstop Signal          -> Chamber harness
+  T3    Y endstop GND             -> Chamber harness
+  —     RTD_Top (direct to PLC)      4-wire, Chamber harness
+  T4    Thermistor slab edge PT1000 +  -> Bed drag chain
+  T5    Thermistor slab edge PT1000 -  -> Bed drag chain
+  T6    Thermistor mat safety NTC +    -> Bed drag chain
+  T7    Thermistor mat safety NTC -    -> Bed drag chain
+  T8    Bed heater L              -> Bed drag chain
+  T9    Bed heater N              -> Bed drag chain
+  T10   Bed heater E              -> Bed drag chain
+  —     RTD_Chamber (direct to PLC)   4-wire, Bed drag chain
+  T11   X endstop 5V              -> Toolhead bundle
+  T12   X endstop Signal          -> Toolhead bundle
+  T13   X endstop GND             -> Toolhead bundle
+  T14   Z probe Signal            -> Toolhead bundle
+  T15   Z probe GND               -> Toolhead bundle
+  T16   Extruder stepper B1       -> Toolhead bundle
+  T17   Extruder stepper B2       -> Toolhead bundle
+  T18   Extruder stepper A1       -> Toolhead bundle
+  T19   Extruder stepper A2       -> Toolhead bundle
+  T20   Hotend thermistor +       -> Toolhead bundle
+  T21   Hotend thermistor -       -> Toolhead bundle
+  T22   Hotend heater +           -> Toolhead bundle
+  T23   Hotend heater -           -> Toolhead bundle
 
-HIGH Block (29 cores):
-  TBD
+LOW Block (14 terminals):
+  T1    Z brake +                 -> Duet OUT3 signal
+  T2    Z brake GND               -> Duet OUT3 GND
+  T3    Z0 B1 (red)               -> Duet driver 0.0
+  T4    Z0 B2 (blue)              -> Duet driver 0.0
+  T5    Z0 A1 (green)             -> Duet driver 0.0
+  T6    Z0 A2 (black)             -> Duet driver 0.0
+  T7    Z1 B1 (red)               -> Duet driver 0.1
+  T8    Z1 B2 (blue)              -> Duet driver 0.1
+  T9    Z1 A1 (green)             -> Duet driver 0.1
+  T10   Z1 A2 (black)             -> Duet driver 0.1
+  T11   Z2 B1 (red)               -> Duet driver 0.2
+  T12   Z2 B2 (blue)              -> Duet driver 0.2
+  T13   Z2 A1 (green)             -> Duet driver 0.2
+  T14   Z2 A2 (black)             -> Duet driver 0.2
+  —     RTD_Bottom (direct to PLC)    4-wire
+  —     RTD_AirOff (direct to PLC)    4-wire
 
 ================================================================================
 WATER COOLING LOOP
@@ -349,7 +372,7 @@ Print surface retention: Spring steel edge clips only — NO magnetic sheet
 OUTSTANDING WORK
 ================================================================================
 
-1.  Land all 50 umbilical terminals on bench
+1.  Land all terminals on bench
 2.  Fit panel to machine
 3.  Post-fit wiring: elec bay cooling fans, water loop signals, flow switch
 5.  CAN address assignment and encoder calibration for 4x M23CL-76-2804 motors
