@@ -190,15 +190,15 @@ Output Ports:
   OUT8  R1 pilot relay coil — HIGH=healthy, drops on stop/estop only
 
 IO Ports:
+  IO0   Reserved paneldue
   IO1   RS485 Modbus — reserved, RS485_EN jumper fitted
   IO2   X endstop — Omron EE-SX67x, homes to max (right)
   IO3   Y endstop — Omron EE-SX67x, homes to min (front)
   IO4   Z probe — digital probe
   IO5   Flow switch — NC, closed=flow present, trigger0
   IO6   Filament sensor — TBD, commented out
-  IO7   Available
-  IO8   Pause button — NO, make to pause/abort chamber heat
-  IO9   Stop button — NC, break to stop
+  IO7   Pause button — NO, make to pause/abort chamber heat
+  IO8   Stop button — NC, break to stop
 
 Temperature Inputs:
   TEMP0  Hotend           PT1000
@@ -356,6 +356,9 @@ DONE (recent):
 - DC 0V wiring (white H07V-K) complete
 - AC neutral heatshrink bands removed blue is the only colour 
 - HMI dead tags removed, Cooling_FanActive repointed to Bay_Fans Q13.3
+- Chamber SSR2 and K1/K2 AC wiring complete (MCB4 -> SSR2 -> K1 -> heater element; MCB4 -> K2 -> fan motor; neutral through both contactors)
+- Pause button wired IO7 (GND pin1, io7.in pin3), trigger2 confirmed working
+
 
 ================================================================================
 ELECTRONICS BAY LAYOUT (v5)
