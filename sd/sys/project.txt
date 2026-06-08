@@ -248,12 +248,6 @@ POWER SUPPLIES
   T3  Meanwell MDR-60-5    60W/12A     +5V always-on (Duet, Pi, display)
   T4  Meanwell MDR-60-24   60W/2.5A    +24V control always-on (PLC, KTP700)
 
-AC Mains Distribution:
-  MCB1  1A C    Always-on PSUs (T3 MDR-60-5, T4 MDR-60-24)
-  MCB2  6A C    Printer LRS PSUs (T1 LRS-450-24, T2 LRS-450-48)
-  MCB3  6A C    Bed heater SSR1 (pending final wattage confirmation)
-  MCB4  10A C   Chamber heater
-
 DC Wiring Colour Standard (BS 7671:2018):
   AC Line (L)       Brown
   AC Neutral (N)    Blue + brown heatshrink band at each end
@@ -261,6 +255,36 @@ DC Wiring Colour Standard (BS 7671:2018):
   DC positive       Red (labelled +5V / +24V / +48V at every termination)
   DC negative / 0V  WHITE (H07V-K 1x1.5mm²) — BS 7671 compliant deviation,
                     blue reserved for AC Neutral only
+
+================================================================================
+CIRCUIT PROTECTION
+================================================================================
+
+AC Protection (MCBs, all C-curve):
+ MCB1  1A C    Always-on PSUs (T3 MDR-60-5, T4 MDR-60-24)
+ MCB2  6A C    Printer LRS PSUs (T1 LRS-450-24, T2 LRS-450-48)
+ MCB3  6A C    Bed heater SSR1 (pending final wattage confirmation)
+ MCB4  10A C   Chamber heater
+
+DC Fuse Block (8-position, mixed supply inputs):
+ F1    3.15A   5V MDR     Pi 4, Duet logic (5V select jumper), DSI display
+ F2    500mA   24V MDR    R2, R3, R4 pilot relay coil commons (RXG21D24 x3)
+ F3    1A      24V MDR    PLC CPU S7-1212C + SM1231 RTD module
+ F4    500mA   24V MDR    SM1222 transistor module L+ (SSR2 signal + 3x RXG21D24 coils)
+ F5    500mA   24V MDR    KTP700 HMI
+ F6    500mA   24V MDR    Helmholz PROFINET switch
+ F7    1A      24V LRS    Electronics bay fans (2x 120mm PC fans in series)
+ F8    5A      24V LRS    WS7040 CPAP blower
+
+48V Rail — TDB only, no upstream DC fuse (MCB2 covers AC primary):
+ TDB1  3A      M23CL-76-2804 X1 (back-right,  CAN 70.0)
+ TDB2  3A      M23CL-76-2804 X2 (front-left,  CAN 71.0)
+ TDB3  3A      M23CL-76-2804 Y1 (front-right, CAN 72.0)
+ TDB4  3A      M23CL-76-2804 Y2 (back-left,   CAN 73.0)
+
+24V Printer Rail — no external DC fuses:
+ Duet 3 6HC board fuse (15A) covers all OUT port loads, Z brakes, R1 coil.
+ OUT0 hotend heater protected by 5A on-board fuse.
 
 ================================================================================
 TERMINAL SCHEDULE
