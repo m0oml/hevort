@@ -73,6 +73,31 @@ PROFINET Network: 192.168.32.0/24, no router
   Helmholz PN Switch : 192.168.32.73  (Port 1=PLC, Port 2=HMI, Port 3=Pi, Port 4=uplink)
 
 ================================================================================
+CHAMBER INSULATION
+================================================================================
+
+Material            : 25 mm PIR foam board (lambda 0.023 W/m·K)
+Application         : Bonded to outer face of aluminium panels
+Insulated faces     : Left side, right side, rear, bottom
+Uninsulated faces   : Front doors, top lid (polycarbonate — clear)
+
+Panel stack (insulated): 6 mm aluminium + 25 mm PIR = 31 mm total
+Panel stack (doors)    : 3 mm polycarbonate (single skin)
+
+Sealing
+  Fixed panels     : Silicone RTV applied during installation
+  Front doors      : 10×3 mm silicone foam tape on door frame face
+  Top lid          : 10×3 mm silicone foam tape on lid perimeter
+  Panel joints     : 10×3 mm silicone foam tape between panels
+  Note             : All seals silicone-based — handles 60°C+ chamber temp
+
+Thermal estimate (60°C chamber, 20°C ambient, ΔT = 40°C):
+  Insulated area ~0.93 m²  — loss ~29 W
+  Clear PC area  ~0.48 m²  — loss ~103 W
+  Total estimated chamber heat loss ~132 W
+  Note: polycarbonate faces dominate (78% of loss, 34% of area)
+
+================================================================================
 SAFETY CIRCUIT — Duet -> PLC (R1)
 ================================================================================
 
