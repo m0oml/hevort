@@ -61,9 +61,9 @@ M201 X500 Y500 Z20 E250                                 ; Accelerations (mm/s^2)
 ; OUT3 switches to GND (low-side): output HIGH = 24V to coil = released
 ; Brakes auto-engage on motor disable via M569.2
 ; R100 = 100ms delay before brake engages after motor disable
-M569.2 P0.0 S1 A1 C"out3" R100                         ; Z0 brake on out3, active high = release
-M569.2 P0.1 S1 A1 C"out3" R100                         ; Z1 brake on out3 (commoned)
-M569.2 P0.2 S1 A1 C"out3" R100                         ; Z2 brake on out3 (commoned)
+M569.2 P0.0 S1 A1 C"out1" R100                         ; Z0 brake on out3, active high = release
+M569.2 P0.1 S1 A1 C"out1" R100                         ; Z1 brake on out3 (commoned)
+M569.2 P0.2 S1 A1 C"out1" R100                         ; Z2 brake on out3 (commoned)
 
 ; =================== Endstops & Probes ================
 ; X homes to max (right), Y homes to min (front)
