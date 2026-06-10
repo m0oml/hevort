@@ -58,12 +58,12 @@ M201 X500 Y500 Z20 E250                                 ; Accelerations (mm/s^2)
 
 ; --- Z Brake Control ---
 ; Brakes are power-to-release (24V releases, de-energised engages)
-; OUT3 switches to GND (low-side): output HIGH = 24V to coil = released
-; Brakes auto-engage on motor disable via M569.2
-; R100 = 100ms delay before brake engages after motor disable
-M569.2 P0.0 S1 A1 C"out1" R100                         ; Z0 brake on out3, active high = release
-M569.2 P0.1 S1 A1 C"out1" R100                         ; Z1 brake on out3 (commoned)
-M569.2 P0.2 S1 A1 C"out1" R100                         ; Z2 brake on out3 (commoned)
+; OUT1 switches to GND (low-side): output HIGH = 24V to coil = released
+; Brakes auto-engage on motor disable via M569.7
+; S200 = 200ms delay before driver disables after brake engages (placeholder - tune on hardware)
+M569.7 P0.0 C"out1" S200                               ; Z0 brake on OUT1
+M569.7 P0.1 C"out1" S200                               ; Z1 brake on OUT1 (commoned)
+M569.7 P0.2 C"out1" S200                               ; Z2 brake on OUT1 (commoned)
 
 ; =================== Endstops & Probes ================
 ; X homes to max (right), Y homes to min (front)
