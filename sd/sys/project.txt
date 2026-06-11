@@ -1,11 +1,12 @@
 ================================================================================
 HevORT Build — Project Brief
-Last updated: 10/06/2026
+Last updated: 11/06/2026
 ================================================================================
 
 ABOUT THIS PROJECT
-Large-format HevORT 3D printer build. 415x415x440mm print volume. Currently in
-electronics bay wiring phase
+Large-format HevORT 3D printer build. 415x415x440mm print volume. 50-core
+umbilical terminal landing complete (HIGH 29 + LOW 21). Next phase:
+continuity testing / commissioning.
 
 SESSION BOOTSTRAP
 At the start of each session:
@@ -28,74 +29,74 @@ PRINTER HARDWARE SPECIFICATION
 ================================================================================
 
 Build volume : 415 x 415 x 440 mm
-Gantry       : HD12 SPAWD AWD
-Belts        : 12mm 2GT Gates EPDM
-Pulleys      : 20T GT2
-X beam       : 20x20x2mm CF tube
-X/Y rails    : MGN12H 550mm
-Z axis       : ZR V2.6, SFU1204 ball screws, WobbleX WS12 isolators
-Z motors     : 42HSB47A41505 brake steppers (79mm, 60 Ncm, 24V brake, 1.5A) — power to release
+Gantry : HD12 SPAWD AWD
+Belts : 12mm 2GT Gates EPDM
+Pulleys : 20T GT2
+X beam : 20x20x2mm CF tube
+X/Y rails : MGN12H 550mm
+Z axis : ZR V2.6, SFU1204 ball screws, WobbleX WS12 isolators
+Z motors : 42HSB47A41505 brake steppers (79mm, 60 Ncm, 24V brake, 1.5A) — power to release
 XY/AWD motors: M23CL-76-2804 (18.9 kg/cm, 0.48 kg/cm² rotor inertia) on CAN-FD, assisted open-loop (D3)
 Motion controller: Duet 3 6HC v1.02c SBC mode, RRF 3.6.3
-Toolhead     : Mellow CNC Vz-HextrudORT water-cooled, Goliath hotend
-Extruder     : NEMA14
-Endstops     : Omron EE-SX67x optical (physical, not sensorless)
-SBC          : Raspberry Pi 4
-Display      : Waveshare DSI — undecided size, 10.1" preferred candidate
+Toolhead : Mellow CNC Vz-HextrudORT water-cooled, Goliath hotend
+Extruder : NEMA14
+Endstops : Omron EE-SX67x optical (physical, not sensorless)
+SBC : Raspberry Pi 4
+Display : Waveshare DSI — undecided size, 10.1" preferred candidate
 
 AWD Motor Layout (top-down, front at bottom):
-  Back-left: 73.0 Y2 | Back-right: 70.0 X1
-  Front-left: 71.0 X2 | Front-right: 72.0 Y1
+ Back-left: 73.0 Y2 | Back-right: 70.0 X1
+ Front-left: 71.0 X2 | Front-right: 72.0 Y1
 
 ================================================================================
 CHAMBER HEATING SYSTEM
 ================================================================================
 
-Heater       : 1400W PTC with shaded-pole motor
-SSR1         : ENMG SDR25A2032 25A — bed heater, gate from Duet OUT7
-SSR2         : ENMG SDR25A2032 25A — chamber heater, gate from PLC Q13.2
-K1           : Two-pole contactor — mains gate to SSR2, coil driven by R2
-K2           : Contactor — shaded-pole fan, coil driven by R3
-R1           : Pilot relay — coil from Duet OUT8 (24V), NO contact -> PLC %I0.0
-R2           : Pilot relay — coil from PLC Q13.0, contact drives K1 coil
-R3           : Pilot relay — coil from PLC Q13.1, contact drives K2 coil
-R4           : Pilot relay — coil from PLC Q13.3, contact drives elec bay fans
-PLC          : Siemens S7-1200 CPU 1212C DC/DC/Rly, FW V4.3.1, TIA Portal V15.1 Update 8
-RTD module   : SM1231 8-channel — Slot 2, addresses IW96-IW110
+Heater : 1400W PTC with shaded-pole motor
+SSR1 : ENMG SDR25A2032 25A — bed heater, gate from Duet OUT7
+SSR2 : ENMG SDR25A2032 25A — chamber heater, gate from PLC Q13.2
+K1 : Two-pole contactor — mains gate to SSR2, coil driven by R2
+K2 : Contactor — shaded-pole fan, coil driven by R3
+R1 : Pilot relay — coil from Duet OUT8 (24V), NO contact -> PLC %I0.0
+R2 : Pilot relay — coil from PLC Q13.0, contact drives K1 coil
+R3 : Pilot relay — coil from PLC Q13.1, contact drives K2 coil
+R4 : Pilot relay — coil from PLC Q13.3, contact drives elec bay fans
+PLC : Siemens S7-1200 CPU 1212C DC/DC/Rly, FW V4.3.1, TIA Portal V15.1 Update 8
+RTD module : SM1231 8-channel — Slot 2, addresses IW96-IW110
 RS485 module : CB1241 RS485, hardware ID 269, MODE=4 in DB2
-HMI          : Siemens KTP700 Basic PN, single screen, status indicators only
+HMI : Siemens KTP700 Basic PN, single screen, status indicators only
 PROFINET switch: Helmholz 700-850-4PS01 managed switch
 
 PROFINET Network: 192.168.32.0/24, no router
-  Pi 4 (DWC)        : 192.168.32.70
-  PLC_1 (S7-1212C)  : 192.168.32.71
-  KTP700 HMI        : 192.168.32.72
-  Helmholz PN Switch: 192.168.32.73 (Port 1=PLC, Port 2=HMI, Port 3=Pi, Port 4=uplink)
+ Pi 4 (DWC) : 192.168.32.70
+ PLC_1 (S7-1212C) : 192.168.32.71
+ KTP700 HMI : 192.168.32.72
+ Helmholz PN Switch: 192.168.32.73 (Port 1=PLC, Port 2=HMI, Port 3=Pi, Port 4=uplink)
 
 ================================================================================
 CHAMBER INSULATION
 ================================================================================
 
-Material         : 25 mm PIR foam board (lambda 0.023 W/m·K)
-Application      : Bonded to outer face of aluminium panels
-Insulated faces  : Left side, right side, rear, bottom
+Material : 25 mm PIR foam board (lambda 0.023 W/m·K)
+Application : Bonded to outer face of aluminium panels
+Insulated faces : Left side, right side, rear, bottom
 Uninsulated faces: Front doors, top lid (polycarbonate — clear)
 
 Panel stack (insulated): 6 mm aluminium + 25 mm PIR = 31 mm total
-Panel stack (doors)    : 3 mm polycarbonate (single skin)
+Panel stack (doors) : 3 mm polycarbonate (single skin)
 
 Sealing
-  Fixed panels : Silicone RTV applied during installation
-  Front doors  : 10×3 mm silicone foam tape on door frame face
-  Top lid      : 10×3 mm silicone foam tape on lid perimeter
-  Panel joints : 10×3 mm silicone foam tape between panels
-  Note         : All seals silicone-based — handles 60°C+ chamber temp
+ Fixed panels : Silicone RTV applied during installation
+ Front doors : 10×3 mm silicone foam tape on door frame face
+ Top lid : 10×3 mm silicone foam tape on lid perimeter
+ Panel joints : 10×3 mm silicone foam tape between panels
+ Note : All seals silicone-based — handles 60°C+ chamber temp
 
 Thermal estimate (60°C chamber, 20°C ambient, ΔT = 40°C):
-  Insulated area ~0.93 m² — loss ~29 W
-  Clear PC area  ~0.48 m² — loss ~103 W
-  Total estimated chamber heat loss ~132 W
-  Note: polycarbonate faces dominate (78% of loss, 34% of area)
+ Insulated area ~0.93 m² — loss ~29 W
+ Clear PC area ~0.48 m² — loss ~103 W
+ Total estimated chamber heat loss ~132 W
+ Note: polycarbonate faces dominate (78% of loss, 34% of area)
 
 ================================================================================
 SAFETY CIRCUIT — Duet -> PLC (R1)
@@ -115,208 +116,208 @@ MODBUS RTU — Duet <-> PLC
 ================================================================================
 
 Physical layer : Duet 3 6HC onboard RS485 transceiver. RS485_EN jumper fitted.
-                 IO1 dedicated — do not use IO1 for anything else.
-Cable          : OSP1 1x2x24AWG overall screened, drain grounded at PLC end only,
-                 260mm run — no termination resistor needed
-Duet config    : M575 P2 B9600 S7
-Protocol       : 9600 8N1, Duet = master, PLC CB1241 = slave address 1
-Polling        : daemon.g reads all 5 registers every 5s via M261.1 F3 R0 B5
-                 Read implemented via sub-macro sys/plc_read.g (var scope workaround
-                 for RRF 3.6.x M261.1 — V parameter creates new var only, never
-                 overwrites. Sub-macro scope destroys var on return.)
-Note           : RRF 3.6.x has NO bitwise operators — use mod arithmetic for bit
-                 extraction
-WARNING        : RRF 3.7.0 changes M575 port numbering — P2 becomes P3 for first
-                 serial port. Do not upgrade to 3.7.x without updating M575 in
-                 config.g.
+ IO1 dedicated — do not use IO1 for anything else.
+Cable : OSP1 1x2x24AWG overall screened, drain grounded at PLC end only,
+ 260mm run — no termination resistor needed
+Duet config : M575 P2 B9600 S7
+Protocol : 9600 8N1, Duet = master, PLC CB1241 = slave address 1
+Polling : daemon.g reads all 5 registers every 5s via M261.1 F3 R0 B5
+ Read implemented via sub-macro sys/plc_read.g (var scope workaround
+ for RRF 3.6.x M261.1 — V parameter creates new var only, never
+ overwrites. Sub-macro scope destroys var on return.)
+Note : RRF 3.6.x has NO bitwise operators — use mod arithmetic for bit
+ extraction
+WARNING : RRF 3.7.0 changes M575 port numbering — P2 becomes P3 for first
+ serial port. Do not upgrade to 3.7.x without updating M575 in
+ config.g.
 
 Register Map (DB1, HR40001 base):
-  R0  Chamber_SP        Duet->PLC  Int, tenths degC
-  R1  Duet_Heartbeat    Duet->PLC  Int, 0-32767
-  R2  Duet_Control_Bits Duet->PLC  Bit0 = Printer_Active
-  R3  Chamber_PV        PLC->Duet  Int, tenths degC
-  R4  Status_Bits       PLC->Duet  See below
+ R0 Chamber_SP Duet->PLC Int, tenths degC
+ R1 Duet_Heartbeat Duet->PLC Int, 0-32767
+ R2 Duet_Control_Bits Duet->PLC Bit0 = Printer_Active
+ R3 Chamber_PV PLC->Duet Int, tenths degC
+ R4 Status_Bits PLC->Duet See below
 
 Status_Bits (R4):
-  Bit 0  Chamber sensor fault
-  Bit 1  Top sensor fault
-  Bit 2  Bottom sensor fault
-  Bit 3  Heater fault
-  Bit 4  PLC heartbeat toggle
-  Bit 5  PLC running
-  Bit 6  Duet comms OK
-  Bit 7  Duet comms fault
+ Bit 0 Chamber sensor fault
+ Bit 1 Top sensor fault
+ Bit 2 Bottom sensor fault
+ Bit 3 Heater fault
+ Bit 4 PLC heartbeat toggle
+ Bit 5 PLC running
+ Bit 6 Duet comms OK
+ Bit 7 Duet comms fault
 
 ================================================================================
 PLC PROGRAM STRUCTURE
 ================================================================================
 
 OB1:
-  N1  MB_COMM_LOAD (REQ=FirstScan, PORT=269, BAUD=9600, PARITY=0)
-  N2  MB_SLAVE (addr=1, MB_HOLD_REG=P#DB1.DBX0.0 BYTE 10)
-  N3  FC1 Chamber_Temp_Calc — weighted RTD avg (50/25/25%), fault exclusion
-  N4  FB1 FB_Chamber_Comms — Status_Bits assembly, Duet watchdog (10000 scan threshold)
-  N5  FC2 Electronics_Cooling — elec bay fan on/off, 30/35C hysteresis + printer active
-  N6  FC3 AirOff_Sensor — sensor validation, RTD_AirOff -> %MD36
-  N7  FC4 FC_Safety — %I0.0 direct, Heater_Enable, PID_Clamp, Fans_MinSpeed, Heater_Fan
-  N8  Chamber heater fault — live assignment, no latch
-  N9  REAL_TO_INT Temp_Chamber_PV x 10 -> Modbus_Registers.Chamber_PV
+ N1 MB_COMM_LOAD (REQ=FirstScan, PORT=269, BAUD=9600, PARITY=0)
+ N2 MB_SLAVE (addr=1, MB_HOLD_REG=P#DB1.DBX0.0 BYTE 10)
+ N3 FC1 Chamber_Temp_Calc — weighted RTD avg (50/25/25%), fault exclusion
+ N4 FB1 FB_Chamber_Comms — Status_Bits assembly, Duet watchdog (10000 scan threshold)
+ N5 FC2 Electronics_Cooling — elec bay fan on/off, 30/35C hysteresis + printer active
+ N6 FC3 AirOff_Sensor — sensor validation, RTD_AirOff -> %MD36
+ N7 FC4 FC_Safety — %I0.0 direct, Heater_Enable, PID_Clamp, Fans_MinSpeed, Heater_Fan
+ N8 Chamber heater fault — live assignment, no latch
+ N9 REAL_TO_INT Temp_Chamber_PV x 10 -> Modbus_Registers.Chamber_PV
 
 OB30 (cyclic interrupt):
-  N1  FC6 FC_SP_Convert — Modbus tenths -> Real degC, clamped 0-120C
-  N2  PID_Compact_1 (DB5) — outer loop
-  N3  FB2 FB_AirOff_Scale — outer PID -> inner SP, safety cut
-  N4  PID_Compact_2 (DB6) — inner loop
-  N5  FC5 FC_Heater_Output — PID output -> Int 0-100
-  N6  FC7 FC_Heater_PWM — time-proportioning SSR, 2s cycle -> Chamber_Heat_SSR
+ N1 FC6 FC_SP_Convert — Modbus tenths -> Real degC, clamped 0-120C
+ N2 PID_Compact_1 (DB5) — outer loop
+ N3 FB2 FB_AirOff_Scale — outer PID -> inner SP, safety cut
+ N4 PID_Compact_2 (DB6) — inner loop
+ N5 FC5 FC_Heater_Output — PID output -> Int 0-100
+ N6 FC7 FC_Heater_PWM — time-proportioning SSR, 2s cycle -> Chamber_Heat_SSR
 
 SM1222 Output Map (Slot 3, DQ 8x24VDC, base %QB13):
-  Q13.0  Chamber_Heat_En   R2 coil -> K1 contactor
-  Q13.1  Chamber_Heat_Fan  R3 coil -> K2 contactor
-  Q13.2  Chamber_Heat_SSR  SSR2 gate (chamber heater)
-  Q13.3  Bay_Fans          R4 coil -> elec bay fans
-  Q13.4-7 Spare
+ Q13.0 Chamber_Heat_En R2 coil -> K1 contactor
+ Q13.1 Chamber_Heat_Fan R3 coil -> K2 contactor
+ Q13.2 Chamber_Heat_SSR SSR2 gate (chamber heater)
+ Q13.3 Bay_Fans R4 coil -> elec bay fans
+ Q13.4-7 Spare
 
 Key PLC Tags:
-  Temp_Chamber_PV           %MD30   Weighted chamber average (Real, degC)
-  Temp_Sensor_Fault         %MW44   Sensor fault word
-  Temp_AirOff_PV            %MD36   Air-off temperature (Real, degC)
-  Chamber_SP_Real           %MD50   Chamber setpoint (Real, degC)
-  Outer_PID_Output          %MD54
-  Inner_SP_Real             %MD58
-  Inner_PID_Output          %MD62
-  Heater_Output             %MW42   0-100 Int
-  Heater_Cycle_Count        %MW46   FC7 PWM cycle counter
-  PID_Clamp                 %M22.3
-  Duet_Comms_OK             %M22.4
-  AirOff_SafetyCut          %M22.5
-  AirOff_Valid              %M22.0
-  Chamber_HeaterFault       %M20.1  Live (no latch)
-  Chamber_Active            %M20.3
-  Chamber_Estop             %M20.0  NOT %I0.0
-  Chamber_Heater_Fault_Trig %M20.4  Live fault trigger
-  Cooling_PrinterOn         %M21.1  Fans minimum speed flag
-  DI_EStop_PLC              %I0.0   Duet OUT8 -> R1 NO contact -> PLC input
+ Temp_Chamber_PV %MD30 Weighted chamber average (Real, degC)
+ Temp_Sensor_Fault %MW44 Sensor fault word
+ Temp_AirOff_PV %MD36 Air-off temperature (Real, degC)
+ Chamber_SP_Real %MD50 Chamber setpoint (Real, degC)
+ Outer_PID_Output %MD54
+ Inner_SP_Real %MD58
+ Inner_PID_Output %MD62
+ Heater_Output %MW42 0-100 Int
+ Heater_Cycle_Count %MW46 FC7 PWM cycle counter
+ PID_Clamp %M22.3
+ Duet_Comms_OK %M22.4
+ AirOff_SafetyCut %M22.5
+ AirOff_Valid %M22.0
+ Chamber_HeaterFault %M20.1 Live (no latch)
+ Chamber_Active %M20.3
+ Chamber_Estop %M20.0 NOT %I0.0
+ Chamber_Heater_Fault_Trig %M20.4 Live fault trigger
+ Cooling_PrinterOn %M21.1 Fans minimum speed flag
+ DI_EStop_PLC %I0.0 Duet OUT8 -> R1 NO contact -> PLC input
 
 ================================================================================
 DUET IO MAP
 ================================================================================
 
 Output Ports:
-  OUT0  Hotend heater (15A, highest rated)
-  OUT1  Available
-  OUT2  Available
-  OUT3  Z brakes (commoned, 24V) — power to release, auto via M569.2
-  OUT4  Duet enclosure fan (Noctua NF-A4x10 24V PWM) — off <40C, 100% at 60C
-  OUT5  WS7040 CPAP (part cooling) — manual/slicer, tach on out5.tach
-  OUT6  Water pump PWM — gated by hotend >50C in daemon.g, 40% min 25C, 100% at 40C coolant
-  OUT7  Bed heater SSR1 gate — low-side switched
-  OUT8  R1 pilot relay coil — HIGH=healthy, drops on stop/estop only
+ OUT0  Hotend heater (15A, highest rated)
+ OUT1  Z brakes (commoned, 24V) — power to release, auto via M569.7
+ OUT2  Available
+ OUT3  Available
+ OUT4  Duet enclosure fan (Noctua NF-A4x10 24V PWM) — off <40C, 100% at 60C
+ OUT5  WS7040 CPAP (part cooling) — manual/slicer, tach on out5.tach
+ OUT6  Water pump PWM — gated by hotend >50C in daemon.g, 40% min 25C, 100% at 40C coolant
+ OUT7  Bed heater SSR1 gate — low-side switched
+ OUT8  R1 pilot relay coil — HIGH=healthy, drops on stop/estop only
 
 IO Ports:
-  IO0  Reserved paneldue
-  IO1  RS485 Modbus — reserved, RS485_EN jumper fitted
-  IO2  X endstop — Omron EE-SX67x, homes to max (right)
-  IO3  Y endstop — Omron EE-SX67x, homes to min (front)
-  IO4  Z probe — digital probe
-  IO5  Flow switch — NC, closed=flow present, trigger0
-  IO6  Filament sensor — TBD, commented out
-  IO7  Pause button — NO, make to pause/abort chamber heat
-  IO8  Stop button — NC, break to stop
+ IO0  Reserved paneldue
+ IO1  RS485 Modbus — reserved, RS485_EN jumper fitted
+ IO2  X endstop — Omron EE-SX67x, homes to max (right)
+ IO3  Y endstop — Omron EE-SX67x, homes to min (front)
+ IO4  Z probe — digital probe
+ IO5  Flow switch — NC, closed=flow present, trigger0
+ IO6  Filament sensor — TBD, commented out
+ IO7  Pause button — NO, make to pause/abort chamber heat
+ IO8  Stop button — NC, break to stop
 
 Temperature Inputs:
-  TEMP0  Hotend PT1000
-  TEMP1  Bed interior 100K NTC B3950 — PID source for H0
-  TEMP2  Bed mat surface 100K NTC B3950 — safety limit 125C on H0
-  TEMP3  Coolant Alphacool Eiszapfen G1/4, NTC 10K B3950, acetal body
-  S10    MCU temp  Cold-start calibration done (M912)
-  S11    Driver temp  Binary states: 0/100/130C
+ TEMP0 Hotend PT1000
+ TEMP1 Bed slab edge PT1000 — PID source for H0
+ TEMP2 Bed mat surface 100K NTC B3950 — safety limit 125C on H0
+ TEMP3 Coolant Alphacool Eiszapfen G1/4, NTC 10K B3950, acetal body
+ S10   MCU temp — cold-start calibration done (M912)
+ S11   Driver temp — binary states: 0/100/130C
 
 Stepper Drivers:
-  0.0  Z0        0.3  Available
-  0.1  Z1        0.4  Available
-  0.2  Z2        0.5  Extruder
-  70.0  X1 (CAN, back-right)
-  71.0  X2 (CAN, front-left)
-  72.0  Y1 (CAN, front-right)
-  73.0  Y2 (CAN, back-left)
+ 0.0 Z0     0.3 Available
+ 0.1 Z1     0.4 Available
+ 0.2 Z2     0.5 Extruder
+ 70.0 X1 (CAN, back-right)
+ 71.0 X2 (CAN, front-left)
+ 72.0 Y1 (CAN, front-right)
+ 73.0 Y2 (CAN, back-left)
 
 ================================================================================
 DUET FILES
 ================================================================================
 
-  config.g          Full machine config
-  vars.g            Globals: chamberSP, chamberPV, chamberHeartbeat,
-                    chamberStatus, duetControl, plcRegs=null, chamberAbort=0
-                    All declarations guarded with exists() check — safe to
-                    call multiple times
-  daemon.g          Polls PLC every 5s, writes R0-R2, reads via plc_read.g,
-                    gates water pump on hotend temp
-  sys/plc_read.g    M261.1 sub-macro — var scope workaround for RRF 3.6.x
-  sys/trigger0.g    Flow switch loss -> M42 P0 S0 + heaters off + pump off
-  sys/trigger2.g    Pause button -> abort chamber heat if heating, else M25
-  sys/trigger3.g    Stop button -> M42 P0 S0 + M0
-  sleep.g           M42 P0 S0 to drop R1 on sleep
-  macros/chamber_heat.g   Chamber preheat — S param or popup menu, abort via
-                          global.chamberAbort=1 or pause button
-  macros/chamber_abort.g  Sets global.chamberAbort=1 (use from second DWC tab)
-  macros/plc_status.g     Live PLC status report
-  macros/printstart.g     OUTSTANDING
-  macros/printend.g       OUTSTANDING
+ config.g Full machine config
+ vars.g Globals: chamberSP, chamberPV, chamberHeartbeat,
+ chamberStatus, duetControl, plcRegs=null, chamberAbort=0
+ All declarations guarded with exists() check — safe to
+ call multiple times
+ daemon.g Polls PLC every 5s, writes R0-R2, reads via plc_read.g,
+ gates water pump on hotend temp
+ sys/plc_read.g M261.1 sub-macro — var scope workaround for RRF 3.6.x
+ sys/trigger0.g Flow switch loss -> M42 P0 S0 + heaters off + pump off
+ sys/trigger2.g Pause button -> abort chamber heat if heating, else M25
+ sys/trigger3.g Stop button -> M42 P0 S0 + M0
+ sleep.g M42 P0 S0 to drop R1 on sleep
+ macros/chamber_heat.g Chamber preheat — S param or popup menu, abort via
+ global.chamberAbort=1 or pause button
+ macros/chamber_abort.g Sets global.chamberAbort=1 (use from second DWC tab)
+ macros/plc_status.g Live PLC status report
+ macros/printstart.g OUTSTANDING
+ macros/printend.g OUTSTANDING
 
 ================================================================================
 POWER SUPPLIES
 ================================================================================
 
-  T1  Meanwell LRS-450-24  450W/18.8A  +24V printer
-  T2  Meanwell LRS-450-48  450W/9.4A   +48V motors only — no other loads
-  T3  Meanwell MDR-60-5    60W/12A     +5V always-on (Duet, Pi, display)
-  T4  Meanwell MDR-60-24   60W/2.5A    +24V control always-on (PLC, KTP700)
+ T1 Meanwell LRS-450-24 450W/18.8A +24V printer
+ T2 Meanwell LRS-450-48 450W/9.4A +48V motors only — no other loads
+ T3 Meanwell MDR-60-5 60W/12A +5V always-on (Duet, Pi, display)
+ T4 Meanwell MDR-60-24 60W/2.5A +24V control always-on (PLC, KTP700)
 
 DC Wiring Colour Standard (BS 7671:2018):
-  AC Line (L)      Brown
-  AC Neutral (N)   Blue + brown heatshrink band at each end
-  AC PE            Green/Yellow
-  DC positive      Red (labelled +5V / +24V / +48V at every termination)
-  DC negative / 0V WHITE (H07V-K 1x1.5mm²) — BS 7671 compliant deviation,
-                   blue reserved for AC Neutral only
+ AC Line (L) Brown
+ AC Neutral (N) Blue + brown heatshrink band at each end
+ AC PE Green/Yellow
+ DC positive Red (labelled +5V / +24V / +48V at every termination)
+ DC negative / 0V WHITE (H07V-K 1x1.5mm²) — BS 7671 compliant deviation,
+ blue reserved for AC Neutral only
 
 ================================================================================
 CIRCUIT PROTECTION
 ================================================================================
 
 AC Protection (MCBs, all C-curve):
-  MCB1  1A C   Always-on PSUs (T3 MDR-60-5, T4 MDR-60-24)
-  MCB2  6A C   Printer LRS PSUs (T1 LRS-450-24, T2 LRS-450-48)
-  MCB3  6A C   Bed heater SSR1 (pending final wattage confirmation)
-  MCB4  10A C  Chamber heater
+ MCB1 1A C Always-on PSUs (T3 MDR-60-5, T4 MDR-60-24)
+ MCB2 6A C Printer LRS PSUs (T1 LRS-450-24, T2 LRS-450-48)
+ MCB3 6A C Bed heater SSR1 (pending final wattage confirmation)
+ MCB4 10A C Chamber heater
 
 DC Fuse Block (8-position, mixed supply inputs):
-  F1  3.15A  5V MDR   Pi 4, Duet logic (5V select jumper), DSI display
-  F2  500mA  24V MDR  R2, R3, R4 pilot relay coil commons (RXG21D24 x3)
-  F3  1A     24V MDR  PLC CPU S7-1212C + SM1231 RTD module
-  F4  500mA  24V MDR  SM1222 transistor module L+ (SSR2 signal + 3x RXG21D24 coils)
-  F5  1A     24V MDR  KTP700 HMI + Helmholz PROFINET switch
-  F6  1A     24V LRS  Electronics bay fans (2x 120mm PC fans in series)
-  F7  2A     24V LRS  Water pump Lowara D5 PWM
-  F8  5A     24V LRS  WS7040 CPAP blower
+ F1 3.15A 5V MDR Pi 4, Duet logic (5V select jumper), DSI display
+ F2 500mA 24V MDR R2, R3, R4 pilot relay coil commons (RXG21D24 x3)
+ F3 1A 24V MDR PLC CPU S7-1212C + SM1231 RTD module
+ F4 500mA 24V MDR SM1222 transistor module L+ (SSR2 signal + 3x RXG21D24 coils)
+ F5 1A 24V MDR KTP700 HMI + Helmholz PROFINET switch
+ F6 1A 24V LRS Electronics bay fans (2x 120mm PC fans in series)
+ F7 2A 24V LRS Water pump Lowara D5 PWM
+ F8 5A 24V LRS WS7040 CPAP blower
 
 48V Rail — TDB only, no upstream DC fuse (MCB2 covers AC primary):
-  TDB1  3A  M23CL-76-2804 X1 (back-right, CAN 70.0)
-  TDB2  3A  M23CL-76-2804 X2 (front-left, CAN 71.0)
-  TDB3  3A  M23CL-76-2804 Y1 (front-right, CAN 72.0)
-  TDB4  3A  M23CL-76-2804 Y2 (back-left, CAN 73.0)
+ TDB1 3A M23CL-76-2804 X1 (back-right, CAN 70.0)
+ TDB2 3A M23CL-76-2804 X2 (front-left, CAN 71.0)
+ TDB3 3A M23CL-76-2804 Y1 (front-right, CAN 72.0)
+ TDB4 3A M23CL-76-2804 Y2 (back-left, CAN 73.0)
 
 24V Printer Rail — no external DC fuses:
-  Duet 3 6HC board fuse (15A) covers all OUT port loads, Z brakes, R1 coil.
-  OUT0 hotend heater protected by 5A on-board fuse.
+ Duet 3 6HC board fuse (15A) covers all OUT port loads, Z brakes, R1 coil.
+ OUT0 hotend heater protected by 5A on-board fuse.
 
 IO Signal Wiring Colour Standard (panel to terminal blocks):
-  Red     5V supply
-  Yellow  Signal
-  White   GND / 0V (consistent with DC 0V standard)
-  Gauge   24 AWG (0.2mm²) for IO signals
-          1.5mm² for hotend heater panel-side runs
+ Red 5V supply
+ Yellow Signal
+ White GND / 0V (consistent with DC 0V standard)
+ Gauge 24 AWG (0.2mm²) for IO signals
+ 1.5mm² for hotend heater panel-side runs
 
 ================================================================================
 CABLE GLANDS
@@ -324,204 +325,97 @@ CABLE GLANDS
 
 All glands: nickel-plated brass. Panel hole = thread size (M12=12mm, M20=20mm, M32=32mm).
 
-  G1  M32  CPAP hose — WS7040 15mm ID hose, ~19-20mm OD, face panel Zone D
-  G2  M20  Toolhead bundle — 13 cores (11x0.5mm², 2x1.0mm²) + WIKA TF45 4mm sub-cable, ~10-11mm OD
-  G3  M20  Bed drag chain bundle — 6 cores (4x0.5mm², 2x1.0mm²) + RTD_Chamber 4mm sub-cable, ~9-10mm OD
-  G4  M12  Chamber bundle — RTD_Top 3-core 0.5mm² cable, ~2mm OD
-  G5  M12  Water cooling in
-  G6  M12  Water cooling out
+ G1 M32 CPAP hose — WS7040 15mm ID hose, ~19-20mm OD, face panel Zone D
+ G2 M20 Toolhead bundle — 13 cores (11x0.5mm², 2x1.0mm²) + WIKA TF45 4mm sub-cable, ~10-11mm OD
+ G3 M20 Bed drag chain bundle — 6 cores (4x0.5mm², 2x1.0mm²) + RTD_Chamber 4mm sub-cable, ~9-10mm OD
+ G4 M12 Chamber bundle — RTD_Top 3-core 0.5mm² cable, ~2mm OD
+ G5 M12 Water cooling in
+ G6 M12 Water cooling out
 
 ================================================================================
 TERMINAL SCHEDULE
 ================================================================================
 
-HIGH Block (29 terminals):
-  T1   Y endstop 5V          → Chamber harness
-  T2   Y endstop Signal      → Chamber harness
-  T3   Y endstop GND         → Chamber harness
-  T4   RTD_Top wire 1        → Chamber harness
-  T5   RTD_Top wire 2        → Chamber harness
-  T6   RTD_Top wire 3        → Chamber harness
-  T7   X endstop 5V          → Toolhead bundle
-  T8   X endstop Signal      → Toolhead bundle
-  T9   X endstop GND         → Toolhead bundle
-  T10  Z probe Signal        → Toolhead bundle
-  T11  Z probe GND           → Toolhead bundle
-  T12  Extruder stepper B1   → Toolhead bundle
-  T13  Extruder stepper B2   → Toolhead bundle
-  T14  Extruder stepper A1   → Toolhead bundle
-  T15  Extruder stepper A2   → Toolhead bundle
-  T16  Hotend thermistor +   → Toolhead bundle
-  T17  Hotend thermistor -   → Toolhead bundle
-  T18  Hotend heater +       → Toolhead bundle
-  T19  Hotend heater -       → Toolhead bundle
-  T20  Thermistor slab edge PT1000 +  → Bed drag chain
-  T21  Thermistor slab edge PT1000 -  → Bed drag chain
-  T22  Thermistor mat safety NTC +    → Bed drag chain
-  T23  Thermistor mat safety NTC -    → Bed drag chain
-  T24  RTD_Chamber wire 1    → Bed drag chain
-  T25  RTD_Chamber wire 2    → Bed drag chain
-  T26  RTD_Chamber wire 3    → Bed drag chain
-  T27  RTD_Chamber wire 4    → Bed drag chain
-  T28  Bed heater L          → Bed drag chain
-  T29  Bed heater N          → Bed drag chain
+HIGH Block (29 terminals) — ALL LANDED:
+ T1 Y endstop 5V → Chamber harness
+ T2 Y endstop Signal → Chamber harness
+ T3 Y endstop GND → Chamber harness
+ T4 RTD_Top wire 1 → Chamber harness
+ T5 RTD_Top wire 2 → Chamber harness
+ T6 RTD_Top wire 3 → Chamber harness
+ T7 X endstop 5V → Toolhead bundle
+ T8 X endstop Signal → Toolhead bundle
+ T9 X endstop GND → Toolhead bundle
+ T10 Z probe Signal → Toolhead bundle
+ T11 Z probe GND → Toolhead bundle
+ T12 Extruder stepper B1 → Toolhead bundle
+ T13 Extruder stepper B2 → Toolhead bundle
+ T14 Extruder stepper A1 → Toolhead bundle
+ T15 Extruder stepper A2 → Toolhead bundle
+ T16 Hotend thermistor + → Toolhead bundle
+ T17 Hotend thermistor - → Toolhead bundle
+ T18 Hotend heater + → Toolhead bundle
+ T19 Hotend heater - → Toolhead bundle
+ T20 Thermistor slab edge PT1000 + → Bed drag chain
+ T21 Thermistor slab edge PT1000 - → Bed drag chain
+ T22 Thermistor mat safety NTC + → Bed drag chain
+ T23 Thermistor mat safety NTC - → Bed drag chain
+ T24 RTD_Chamber wire 1 → Bed drag chain
+ T25 RTD_Chamber wire 2 → Bed drag chain
+ T26 RTD_Chamber wire 3 → Bed drag chain
+ T27 RTD_Chamber wire 4 → Bed drag chain
+ T28 Bed heater L → Bed drag chain
+ T29 Bed heater N → Bed drag chain
 
-LOW Block (21 terminals):
-  T1   Z brake +             → Duet OUT3 signal
-  T2   Z brake GND           → Duet OUT3 GND
-  T3   Z0 B1 (red)           → Duet driver 0.0
-  T4   Z0 B2 (blue)          → Duet driver 0.0
-  T5   Z0 A1 (green)         → Duet driver 0.0
-  T6   Z0 A2 (black)         → Duet driver 0.0
-  T7   Z1 B1 (red)           → Duet driver 0.1
-  T8   Z1 B2 (blue)          → Duet driver 0.1
-  T9   Z1 A1 (green)         → Duet driver 0.1
-  T10  Z1 A2 (black)         → Duet driver 0.1
-  T11  Z2 B1 (red)           → Duet driver 0.2
-  T12  Z2 B2 (blue)          → Duet driver 0.2
-  T13  Z2 A1 (green)         → Duet driver 0.2
-  T14  Z2 A2 (black)         → Duet driver 0.2
-  T15  RTD_Bottom wire 1     → PLC SM1231 Ch5
-  T16  RTD_Bottom wire 2     → PLC SM1231 Ch5
-  T17  RTD_Bottom wire 3     → PLC SM1231 Ch5
-  T18  RTD_AirOff wire 1     → PLC SM1231 Ch4
-  T19  RTD_AirOff wire 2     → PLC SM1231 Ch4
-  T20  RTD_AirOff wire 3     → PLC SM1231 Ch4
-  T21  RTD_AirOff wire 4     → PLC SM1231 Ch4
+LOW Block (21 terminals) — ALL LANDED:
+ T1 Z brake + → Duet OUT1 signal
+ T2 Z brake GND → Duet OUT1 GND
+ T3 Z0 B1 (red) → Duet driver 0.0
+ T4 Z0 B2 (blue) → Duet driver 0.0
+ T5 Z0 A1 (green) → Duet driver 0.0
+ T6 Z0 A2 (black) → Duet driver 0.0
+ T7 Z1 B1 (red) → Duet driver 0.1
+ T8 Z1 B2 (blue) → Duet driver 0.1
+ T9 Z1 A1 (green) → Duet driver 0.1
+ T10 Z1 A2 (black) → Duet driver 0.1
+ T11 Z2 B1 (red) → Duet driver 0.2
+ T12 Z2 B2 (blue) → Duet driver 0.2
+ T13 Z2 A1 (green) → Duet driver 0.2
+ T14 Z2 A2 (black) → Duet driver 0.2
+ T15 RTD_Bottom wire 1 → PLC SM1231 Ch5
+ T16 RTD_Bottom wire 2 → PLC SM1231 Ch5
+ T17 RTD_Bottom wire 3 → PLC SM1231 Ch5
+ T18 RTD_AirOff wire 1 → PLC SM1231 Ch4
+ T19 RTD_AirOff wire 2 → PLC SM1231 Ch4
+ T20 RTD_AirOff wire 3 → PLC SM1231 Ch4
+ T21 RTD_AirOff wire 4 → PLC SM1231 Ch4
+
+Toolhead bundle (T7-T19) Duet-side mapping:
+ T7-T9   X endstop          -> IO2
+ T10-T11 Z probe            -> IO4
+ T12-T15 Extruder stepper   -> E0
+ T16-T17 Hotend PT1000      -> TEMP0
+ T18-T19 Hotend heater      -> OUT0
+
+Bed thermistors (T20-T23) Duet-side mapping:
+ T20-T21 Slab PT1000 -> TEMP1
+ T22-T23 Mat NTC     -> TEMP2
 
 ================================================================================
 WATER COOLING LOOP
 ================================================================================
 
-Water block   : Mellow CNC Vz-HextrudORT WC (motor, heatbreak, Goliath cold zone)
-Loop order    : Pump outlet -> Goliath block -> NEMA14 motor plate ->
-                rad top in -> rad bottom out -> reservoir -> pump
-Pump          : Xylem Lowara D5 PWM
-Reservoir     : Alphacool Eisbecher Lite 250mm acetal (mounts on pump)
-Radiator      : Alphacool ES Aluminium 240mm T38 — portrait orientation
+Water block : Mellow CNC Vz-HextrudORT WC (motor, heatbreak, Goliath cold zone)
+Loop order : Pump outlet -> Goliath block -> NEMA14 motor plate ->
+ rad top in -> rad bottom out -> reservoir -> pump
+Pump : Xylem Lowara D5 PWM
+Reservoir : Alphacool Eisbecher Lite 250mm acetal (mounts on pump)
+Radiator : Alphacool ES Aluminium 240mm T38 — portrait orientation
 Coolant sensor: Alphacool Eiszapfen flat G1/4, NTC 10K B3950 — spare rad port
-Fittings 4mm  : John Guest PM010821E (G1/4 x 4mm acetal) — DO NOT use PM010411E
+Fittings 4mm : John Guest PM010821E (G1/4 x 4mm acetal) — DO NOT use PM010411E
 Fittings 10mm : John Guest PM011421E (G1/4 x 10mm acetal) — rad outlet to res
-Toolhead      : SMC KQ2VS04-M5A swivel fittings at M5 block ports
-Tubing        : 4mm OD silicone (toolhead), 10mm OD silicone (static rad-to-res)
-Coolant       : Mayhems X1 Clear Premix — aluminium-safe ONLY
-                NO copper/brass in wetted path. NO pastel coolants.
-Pump control  : Duet OUT6 PWM, gated hotend >50C, 40% min at 25C, 100% at 40C
-
-================================================================================
-BED DESIGN
-================================================================================
-
-Bed plate     : 440x440x20mm polished granite slab (kitchen worktop offcut)
-                Specify square 90deg edges — fabricators default to bullnose
-                CTE ~7 um/m·K vs aluminium ~23 um/m·K — minimal thermal bow
-                One-time mesh capture recalled every print — no re-probe needed
-
-Heater        : 400x400mm custom polyimide (Kapton) film, 220V AC
-                1500W or 2000W TBD pending supplier quote
-                Serpentine element pattern, NTC 100K B3950, 200C thermal fuse
-                No adhesive backing — bonded full-face with high-temp RTV silicone
-                (standard red RTV 260C preferred over neutral-cure 180C)
-
-Insulation    : 3mm ceramic fibre paper RTV'd to heater mat underside
-
-Temperature sensing:
-  Primary (PID)    : PT1000 in 4mm copper capillary in slab edge, mid-depth
-                     ~10mm from bottom, 20-30mm deep, thermal paste filled
-                     -> Duet TEMP1 (S1)
-  Secondary (safety): NTC 100K B3950 in heater mat -> Duet TEMP2 (S2)
-                     Safety cutout only, 125C limit
-
-Thermal fuse  : 200C, built into heater mat — hardware last resort
-
-PID model (calculated, no autotune needed):
-  Granite mass  10.5kg (440x440x20mm x 2700 kg/m³)
-  R = 0.18 degC/s (1500W) or 0.24 (2000W)
-  D = 25s (thermal lag through 20mm granite to edge sensor)
-  K = 0.005 (loss with ceramic fibre + heated chamber)
-  M307 H0 R0.18 D25 K0.005 B0
-
-Print surface retention: Spring steel edge clips only — NO magnetic sheet
-  430x430mm interchangeable surfaces
-  Fixed clips rear, slide-on front — outside 415mm print area
-  Available: PEO/PEI spring steel, textured PEI, FR4/Garolite (custom PCBWay)
-
-Bed frame earth bond : Direct bond wire to machine frame — no PE through terminal block
-
-================================================================================
-OUTSTANDING WORK
-================================================================================
-
-1.  Complete HIGH block terminal landing — chamber harness (T1-T6),
-    toolhead bundle IO signals (T7-T19) outstanding, bed thermistors
-    and RTD_Chamber (T20-T27) outstanding. T28/T29 bed heater L/N done.
-2.  Fit panel to machine
-3.  Post-fit wiring: elec bay cooling fans, water loop signals, flow switch
-4.  Rear electronics bay penetration for bed drag chain + water cooling (shared grommet)
-5.  Rad bracket for portrait orientation
-6.  CAN address assignment and encoder calibration for 4x M23CL-76-2804 motors
-7.  PID autotune — hotend and bed once physically wired
-8.  Input shaper tuning — accelerations currently placeholder (500 mm/s²)
-9.  printstart.g and printend.g — chamber setpoint handling
-10. QElectroTech Sheet 2 — DC distribution schematic
-11. MCB3 rating to be confirmed once bed heater wattage finalised
-12. M23CL motors not yet arrived
-13. Air-off safety cut threshold: revise from 85°C to ~130-150°C once sealed
-14. Outer PLC loop tuning (PID_Compact_1): deferred until chamber mechanically complete
-15. AWD CAN drivers (nodes 70-73): not yet arrived, commissioning pending
-
-DONE (recent):
-- PLC firmware V4.3.1, PROFINET switch configured, project downloaded
-- Safety circuit: Duet OUT8 -> R1 -> %I0.0, trigger macros, stop.g/sleep.g
-- Modbus comms loop fully working: SP write, PV read, status bits live
-- M261.1 var scope bug worked around via plc_read.g sub-macro
-- M143 C parameter error fixed (two separate M143 lines, no C param)
-- chamber_heat.g abort via pause button (trigger2.g) and global.chamberAbort
-- FC2 Electronics_Cooling rewritten, FC8 removed, thresholds 30/35C
-- SM1222 output rationalisation, OB1 N8 latch removed
-- Bed SSR1 wired OUT7, network cables run
-- Electronics bay relay/contactor designations corrected (R1-R4, K1-K2)
-- MCB schedule corrected (MCB1 1A, MCB2 6A, MCB3 6A, MCB4 10A)
-- vars.g exists() guards added — safe to call multiple times
-- IP addresses corrected: Pi .70, PLC .71, HMI .72, Switch .73
-- IP conflict resolved (ESPHome/unknown device had grabbed .71)
-- Duet firmware updated to RRF 3.6.3
-- K3 references purged from config.g and sleep.g — correct designation is R1
-- MCU temp sensor cold-start calibration done (M912)
-- DC 0V wiring (white H07V-K) complete
-- AC neutral heatshrink bands removed — blue is the only colour
-- HMI dead tags removed, Cooling_FanActive repointed to Bay_Fans Q13.3
-- Chamber SSR2 and K1/K2 AC wiring complete
-- Pause button wired IO7, trigger2 confirmed working
-- HevORT stop button: IO8 NC momentary, GND=safe/open=stop
-- HevORT PLC safety: all fault conditions tested and passed
-- Terminal schedule revised: HIGH 29 terminals, LOW 21 terminals, total 50
-- Fuse schedule revised: F5 1A HMI+switch, F6 1A bay fans, F7 2A pump, F8 5A CPAP
-- Bed frame earth bond via direct wire to machine frame (no PE terminal)
-- Rad orientation changed to portrait to accommodate rear panel exit routing
-- IO wiring colour scheme defined: Red=5V, Yellow=Signal, White=GND, 24AWG
-- LOW block wiring complete, all RTDs landed at terminal blocks
-- Bed heater L/N (HIGH T28/T29) landed from SSR1 output
-- LOW block T1/T2 corrected to OUT3 (not OUT1)
-- Cable gland schedule defined: 6x nickel-plated brass (1xM32, 2xM20, 3xM12)
-
-================================================================================
-ELECTRONICS BAY LAYOUT (v5)
-================================================================================
-
-Face panel (570mm wide, 900mm tall — outer face of right side panel, 5mm Al):
-  Zone D (0-170mm top)  : CPAP blower left, umbilical entry right
-  Zone C (170-290mm)    : Belt path clear top 80mm; PLC top duct at 250-390mm
-  Zone B (290-400mm)    : S7-1212C PLC between motor towers (80mm each side)
-  Zone A (400-900mm)    : Pi 4 + Duet 3 6HC (Noctua enclosure) + TDB (top)
-                          Mains DIN rail: MCBs, PSUs, R1-R4 relays, K1-K2
-                          contactors, SSR1 bed, SSR2 chamber (bottom)
-
-Rear panel (250mm deep):
-  Top         : 240mm radiator (Alphacool ES T38) + 2x 120mm exhaust fans — portrait orientation
-                (12V PC fans in series on 24V rail, R4 relay Q13.3)
-  Penetration : shared grommet for bed drag chain + water cooling loop
-  Middle      : Clear
-  Bottom      : LRS-450-24 + LRS-450-48 flat (225x124x35mm each, side by side)
-
-Cable trunking: 25x80mm slotted, ~2690mm total
+Toolhead : SMC KQ2VS04-M5A swivel fittings at M5 block ports
+Tubing : 4mm OD silicone (toolhead), 10mm OD silicone (static rad-to-res)
+Coolant : Mayhems X1 Clear Premix — aluminium-safe ONLY
+ NO copper/brass in wetted path. NO pastel coolants.
+Pump cont
