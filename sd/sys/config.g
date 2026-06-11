@@ -61,9 +61,7 @@ M201 X500 Y500 Z20 E250                                 ; Accelerations (mm/s^2)
 ; OUT1 switches to GND (low-side): output HIGH = 24V to coil = released
 ; Brakes auto-engage on motor disable via M569.7
 ; S200 = 200ms delay before driver disables after brake engages (placeholder - tune on hardware)
-M569.7 P0.0 C"out1" S200                               ; Z0 brake on OUT1
-M569.7 P0.1 C"out1" S200                               ; Z1 brake on OUT1 (commoned)
-M569.7 P0.2 C"out1" S200                               ; Z2 brake on OUT1 (commoned)
+M569.7 P0.0 C"out1" S200                                ; Z brakes on OUT1 (commoned across Z0/Z1/Z2 — single brake config covers all three via shared output)
 
 ; =================== Endstops & Probes ================
 ; X homes to max (right), Y homes to min (front)
@@ -109,7 +107,7 @@ M950 F0 C"!out4" Q500                                    ; Fan 0: enclosure fan,
 M106 P0 H10:11 T40:60                                   ; Off below 40C, full at 60C, thermostatic control
 
 ; Fan 1: WS7040 CPAP (part cooling) on OUT5 with tach
-M950 F1 C"out5+out5.tach" Q500                          ; Fan 1: CPAP, 500Hz PWM, tach on out5.tach
+M950 F1 C"out9+out5.tach" Q500 K1                      ; Fan 1: CPAP, 500Hz PWM, tach on out9 (0-5v out5.tach) with 1pprpm
 M106 P1 S0 L0 X1 H-1                                   ; Manual/slicer control, no thermostatic
 
 ; Fan 2: Water pump PWM on OUT6
