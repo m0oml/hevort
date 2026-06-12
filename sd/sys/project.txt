@@ -215,15 +215,15 @@ Output Ports:
  OUT8  R1 pilot relay coil — HIGH=healthy, drops on stop/estop only
 
 IO Ports:
- IO0  Reserved paneldue
- IO1  RS485 Modbus — reserved, RS485_EN jumper fitted
- IO2  X endstop — Omron EE-SX67x, homes to max (right)
- IO3  Y endstop — Omron EE-SX67x, homes to min (front)
- IO4  Z probe — digital probe
- IO5  Flow switch — NC, closed=flow present, trigger0
- IO6  Filament sensor — TBD, commented out
- IO7  Pause button — NO, make to pause/abort chamber heat
- IO8  Stop button — NC, break to stop
+ IO0 Reserved paneldue
+ IO1 RS485 Modbus — reserved, RS485_EN jumper fitted
+ IO2 X endstop — Omron EE-SX67x, homes to max (right)
+ IO3 Filament sensor — TBD, commented out
+ IO4 Flow switch — NC, closed=flow present, trigger0
+ IO5 Y endstop — Omron EE-SX67x, homes to min (front)
+ IO6 Z probe — digital probe
+ IO7 Pause button — NO, make to pause/abort chamber heat
+ IO8 Stop button — NC, break to stop
 
 Temperature Inputs:
  TEMP0 Hotend PT1000
@@ -337,62 +337,62 @@ TERMINAL SCHEDULE
 ================================================================================
 
 HIGH Block (29 terminals) — ALL LANDED:
- T1 Y endstop 5V → Chamber harness
- T2 Y endstop Signal → Chamber harness
- T3 Y endstop GND → Chamber harness
- T4 RTD_Top wire 1 → Chamber harness
- T5 RTD_Top wire 2 → Chamber harness
- T6 RTD_Top wire 3 → Chamber harness
- T7 X endstop 5V → Toolhead bundle
- T8 X endstop Signal → Toolhead bundle
- T9 X endstop GND → Toolhead bundle
- T10 Z probe Signal → Toolhead bundle
- T11 Z probe GND → Toolhead bundle
- T12 Extruder stepper B1 → Toolhead bundle
- T13 Extruder stepper B2 → Toolhead bundle
- T14 Extruder stepper A1 → Toolhead bundle
- T15 Extruder stepper A2 → Toolhead bundle
- T16 Hotend thermistor + → Toolhead bundle
- T17 Hotend thermistor - → Toolhead bundle
- T18 Hotend heater + → Toolhead bundle
- T19 Hotend heater - → Toolhead bundle
- T20 Thermistor slab edge PT1000 + → Bed drag chain
- T21 Thermistor slab edge PT1000 - → Bed drag chain
- T22 Thermistor mat safety NTC + → Bed drag chain
- T23 Thermistor mat safety NTC - → Bed drag chain
- T24 RTD_Chamber wire 1 → Bed drag chain
- T25 RTD_Chamber wire 2 → Bed drag chain
- T26 RTD_Chamber wire 3 → Bed drag chain
- T27 RTD_Chamber wire 4 → Bed drag chain
- T28 Bed heater L → Bed drag chain
- T29 Bed heater N → Bed drag chain
+ T1  Y endstop 5V        → Chamber harness → Duet 5V (io3 supply)
+ T2  Y endstop Signal    → Chamber harness → Duet IO5
+ T3  Y endstop GND       → Chamber harness → Duet GND (io3)
+ T4  RTD_Top wire 1      → Chamber harness → PLC SM1231 Ch1
+ T5  RTD_Top wire 2      → Chamber harness → PLC SM1231 Ch1
+ T6  RTD_Top wire 3      → Chamber harness → PLC SM1231 Ch1
+ T7  X endstop 5V        → Toolhead bundle → Duet 5V (io2 supply)
+ T8  X endstop Signal    → Toolhead bundle → Duet IO2
+ T9  X endstop GND       → Toolhead bundle → Duet GND (io2)
+ T10 Z probe Signal      → Toolhead bundle → Duet IO6
+ T11 Z probe GND         → Toolhead bundle → Duet GND (io6)
+ T12 Extruder stepper B1 → Toolhead bundle → Duet driver E0
+ T13 Extruder stepper B2 → Toolhead bundle → Duet driver E0
+ T14 Extruder stepper A1 → Toolhead bundle → Duet driver E0
+ T15 Extruder stepper A2 → Toolhead bundle → Duet driver E0
+ T16 Hotend thermistor + → Toolhead bundle → Duet TEMP0
+ T17 Hotend thermistor - → Toolhead bundle → Duet TEMP0
+ T18 Hotend heater +     → Toolhead bundle → Duet OUT0
+ T19 Hotend heater -     → Toolhead bundle → Duet OUT0
+ T20 Thermistor slab edge PT1000 + → Bed drag chain → Duet TEMP1
+ T21 Thermistor slab edge PT1000 - → Bed drag chain → Duet TEMP1
+ T22 Thermistor mat safety NTC +   → Bed drag chain → Duet TEMP2
+ T23 Thermistor mat safety NTC -   → Bed drag chain → Duet TEMP2
+ T24 RTD_Chamber wire 1  → Bed drag chain → PLC SM1231 Ch2
+ T25 RTD_Chamber wire 2  → Bed drag chain → PLC SM1231 Ch2
+ T26 RTD_Chamber wire 3  → Bed drag chain → PLC SM1231 Ch2
+ T27 RTD_Chamber wire 4  → Bed drag chain → PLC SM1231 Ch2
+ T28 Bed heater L        → Bed drag chain → Duet OUT7 (SSR1 gate)
+ T29 Bed heater N        → Bed drag chain → Duet OUT7 (SSR1 gate)
 
 LOW Block (21 terminals) — ALL LANDED:
- T1 Z brake + → Duet OUT1 signal
- T2 Z brake GND → Duet OUT1 GND
- T3 Z0 B1 (red) → Duet driver 0.0
- T4 Z0 B2 (blue) → Duet driver 0.0
- T5 Z0 A1 (green) → Duet driver 0.0
- T6 Z0 A2 (black) → Duet driver 0.0
- T7 Z1 B1 (red) → Duet driver 0.1
- T8 Z1 B2 (blue) → Duet driver 0.1
- T9 Z1 A1 (green) → Duet driver 0.1
- T10 Z1 A2 (black) → Duet driver 0.1
- T11 Z2 B1 (red) → Duet driver 0.2
- T12 Z2 B2 (blue) → Duet driver 0.2
- T13 Z2 A1 (green) → Duet driver 0.2
- T14 Z2 A2 (black) → Duet driver 0.2
- T15 RTD_Bottom wire 1 → PLC SM1231 Ch5
- T16 RTD_Bottom wire 2 → PLC SM1231 Ch5
- T17 RTD_Bottom wire 3 → PLC SM1231 Ch5
- T18 RTD_AirOff wire 1 → PLC SM1231 Ch4
- T19 RTD_AirOff wire 2 → PLC SM1231 Ch4
- T20 RTD_AirOff wire 3 → PLC SM1231 Ch4
- T21 RTD_AirOff wire 4 → PLC SM1231 Ch4
+ T1  Z brake +           → Duet OUT1 signal
+ T2  Z brake GND         → Duet OUT1 GND
+ T3  Z0 B1 (red)         → Duet driver 0.0
+ T4  Z0 B2 (blue)        → Duet driver 0.0
+ T5  Z0 A1 (green)       → Duet driver 0.0
+ T6  Z0 A2 (black)       → Duet driver 0.0
+ T7  Z1 B1 (red)         → Duet driver 0.1
+ T8  Z1 B2 (blue)        → Duet driver 0.1
+ T9  Z1 A1 (green)       → Duet driver 0.1
+ T10 Z1 A2 (black)       → Duet driver 0.1
+ T11 Z2 B1 (red)         → Duet driver 0.2
+ T12 Z2 B2 (blue)        → Duet driver 0.2
+ T13 Z2 A1 (green)       → Duet driver 0.2
+ T14 Z2 A2 (black)       → Duet driver 0.2
+ T15 RTD_Bottom wire 1   → PLC SM1231 Ch5
+ T16 RTD_Bottom wire 2   → PLC SM1231 Ch5
+ T17 RTD_Bottom wire 3   → PLC SM1231 Ch5
+ T18 RTD_AirOff wire 1   → PLC SM1231 Ch4
+ T19 RTD_AirOff wire 2   → PLC SM1231 Ch4
+ T20 RTD_AirOff wire 3   → PLC SM1231 Ch4
+ T21 RTD_AirOff wire 4   → PLC SM1231 Ch4
 
 Toolhead bundle (T7-T19) Duet-side mapping:
  T7-T9   X endstop          -> IO2
- T10-T11 Z probe            -> IO4
+ T10-T11 Z probe            -> IO6
  T12-T15 Extruder stepper   -> E0
  T16-T17 Hotend PT1000      -> TEMP0
  T18-T19 Hotend heater      -> OUT0
