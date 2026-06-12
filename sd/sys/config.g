@@ -66,11 +66,11 @@ M569.7 P0.0 C"out1" S200                                ; Z brakes on OUT1 (comm
 ; =================== Endstops & Probes ================
 ; X homes to max (right), Y homes to min (front)
 M574 X2 P"io2.in" S1                                    ; X endstop (max, right) - Omron EE-SX67x
-M574 Y1 P"io3.in" S1                                    ; Y endstop (min, front) - Omron EE-SX67x
+M574 Y1 P"io5.in" S1                                    ; Y endstop (min, front) - Omron EE-SX67x
 M574 Z1 S2                                              ; Z endstop via probe
 
 ; Z Probe
-M558 K0 P5 C"io4.in" H5 F120 T6000                     ; Digital probe on io4
+M558 K0 P5 C"io6.in" H5 F120 T6000                      ; Digital probe on io6
 G31 P500 X0 Y0 Z0.7                                     ; Probe trigger value, offset, trigger height (PLACEHOLDER)
 
 ; =================== Thermal Sensors ==================
@@ -122,12 +122,12 @@ M568 P0 R0 S0                                           ; Standby/Active temps t
 T0                                                      ; Select Tool 0
 
 ; ======================= Inputs =======================
-; Flow switch on IO5 (NC - closed = flow present)
-M950 J0 C"io5.in"                                       ; Input 0: flow switch
+; Flow switch on IO4 (NC - closed = flow present)
+M950 J0 C"io4.in"                                       ; Input 0: flow switch
 M581 T0 P0 S0 R0                                        ; Trigger 0 on flow switch open (loss of flow)
 
-; Filament sensor on IO6 (TBD - placeholder)
-; M950 J1 C"io6.in"                                     ; Input 1: filament sensor (uncomment when fitted)
+; Filament sensor on IO3 (TBD - placeholder)
+; M950 J1 C"io3.in"                                     ; Input 1: filament sensor (uncomment when fitted)
 
 ; Pause button on IO7 (NO - make to pause)
 M950 J2 C"io7.in"                                       ; Input 2: pause button
