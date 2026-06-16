@@ -40,7 +40,7 @@ M569.1 P73.0 T3                                         ; Y2: magnetic encoder
 ; --- Axis Mapping ---
 M584 X70.0:71.0 Y72.0:73.0 Z0.0:0.1:0.2 E0.5          ; X (AWD), Y (AWD), Z (triple), E
 M350 X16 Y16 Z16 E16 I1                                 ; 16x microstepping with interpolation
-M92 X80 Y80 Z400 E420                                   ; Steps per mm
+M92 X80 Y80 Z800 E420                                   ; Steps per mm
 
 ; --- Motor Currents ---
 M906 X2600 Y2600 Z1400 E1000                            ; Motor current (mA)
@@ -49,7 +49,7 @@ M906 I30                                                ; Idle current factor 30
 M84 S30                                                 ; Motor idle timeout (30s)
 
 ; --- Axis Limits (PLACEHOLDER - update after homing verified) ---
-M208 X0:415 Y0:415 Z0:440                               ; Axis limits
+M208 X0:415 Y0:415 Z0:415                               ; Axis limits
 
 ; --- Speeds and Accelerations (conservative - tune after input shaper) ---
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
