@@ -87,15 +87,15 @@ M308 S11 Y"drivers" A"Driver Temp"                      ; Driver temperature (0/
 ; Hotend Heater (H1) on OUT0 (highest rated output, 15A)
 M950 H1 C"out0" T0                                      ; Hotend heater on out0, sensor S0
 M143 H1 P0 T0 S350 A0                                   ; Hotend safety limit 350C (no secondary sensor)
-M307 H1 R2.43 D5.5 E1.35 K0.56 B0                      ; Hotend PID model (PLACEHOLDER - autotune required)
+M307 H1 R2.43 D5.5 E1.35 K0.56 B0                       ; Hotend PID model (PLACEHOLDER - autotune required)
 
 ; Bed Heater (H0) SSR control on OUT7
 ; PID controlled from bed interior sensor S1 (temp1)
 ; Independent over-temp cutout on mat surface sensor S2 (temp2), limit 125C
 M950 H0 C"out7" T1                                      ; Bed heater SSR on out7, PID from S1
-M143 H0 P0 T1 S200 A0                                  ; Bed primary limit 200C on sensor S1
-M143 H0 P1 T2 S125 A0                                  ; Bed mat safety cutout 125C on sensor S2
-M307 H0 R0.18 D25 K0.005 B0                            ; Bed PID model (calculatede for 10mm granite slab)
+M143 H0 P0 T1 S200 A0                                   ; Bed primary limit 200C on sensor S1
+M143 H0 P1 T2 S125 A0                                   ; Bed mat safety cutout 125C on sensor S2
+M307 H1 A100.0 C200.0 D5.0 B0                           ; Bed PID model (calculatede for 20mm granite slab)
 
 ; Map bed heater
 M140 P0 H0                                              ; Map to bed slot
@@ -103,7 +103,7 @@ M140 P0 H0                                              ; Map to bed slot
 ; ======================== Fans ========================
 ; Fan 0: Duet enclosure fan (Noctua NF-A4x10 24V PWM) on OUT4
 ; Thermostatic: off below 40C, 100% at 60C, driven by MCU and driver temps
-M950 F0 C"!out4" Q500                                    ; Fan 0: enclosure fan, 500Hz PWM
+M950 F0 C"!out4" Q500                                   ; Fan 0: enclosure fan, 500Hz PWM
 M106 P0 H10:11 T40:60                                   ; Off below 40C, full at 60C, thermostatic control
 
 ; Fan 1: WS7040 CPAP (part cooling) on OUT5 with tach
