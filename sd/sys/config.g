@@ -76,7 +76,7 @@ G31 P500 X0 Y0 Z0.7                                     ; Probe trigger value, o
 ; =================== Thermal Sensors ==================
 M912 P0 S-5.2                                           ; Set MCU calibration offset BEFORE defining the sensor
 M308 S0 P"temp0" Y"pt1000" A"Hotend"                    ; Hotend PT1000
-M308 S1 P"temp1" Y"thermistor" A"Bed" T10000 B3950     ; Bed interior thermistor 10K B3950 - PID source
+M308 S1 P"temp1" Y"thermistor" A"Bed" T100000 B3950     ; Bed interior thermistor 10K B3950 - PID source
 M308 S2 P"temp2" Y"thermistor" A"BedMat" T10000 B3950  ; Bed heater mat surface 10K B3950 - safety limit only
 M308 S3 P"temp3" Y"thermistor" A"Coolant" T10000 B3950  ; Coolant NTC 10K B3950 (Alphacool Eiszapfen)
 M308 S10 Y"mcu-temp" A"MCU Temp"                        ; MCU temperature sensor
@@ -94,8 +94,8 @@ M307 H1 R2.43 D5.5 E1.35 K0.56 B0                       ; Hotend PID model (PLAC
 ; Independent over-temp cutout on mat surface sensor S2 (temp2), limit 125C
 M950 H0 C"out7" T1                                      ; Bed heater SSR on out7, PID from S1
 M143 H0 P0 T1 S200 A0                                   ; Bed primary limit 200C on sensor S1
-M143 H0 P1 T2 S125 A0                                   ; Bed mat safety cutout 125C on sensor S2
-M307 H1 A100.0 C200.0 D5.0 B0                           ; Bed PID model (calculatede for 20mm granite slab)
+;M143 H0 P1 T2 S125 A0                                   ; Bed mat safety cutout 125C on sensor S2
+M307 H1 B1;A100.0 C200.0 D5.0 B0                           ; Bed PID model (calculatede for 20mm granite slab)
 
 ; Map bed heater
 M140 P0 H0                                              ; Map to bed slot
