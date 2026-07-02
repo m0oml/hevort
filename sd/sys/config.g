@@ -92,10 +92,11 @@ M307 H1 R2.43 D5.5 E1.35 K0.56 B0                       ; Hotend PID model (PLAC
 ; Bed Heater (H0) SSR control on OUT7
 ; PID controlled from bed interior sensor S1 (temp1)
 ; Independent over-temp cutout on mat surface sensor S2 (temp2), limit 125C
-M950 H0 C"out7" T1                                      ; Bed heater SSR on out7, PID from S1
+M950 H0 C"out7" T1 Q1                                     ; Bed heater SSR on out7, PID from S1
 M143 H0 P0 T1 S200 A0                                   ; Bed primary limit 200C on sensor S1
 ;M143 H0 P1 T2 S125 A0                                   ; Bed mat safety cutout 125C on sensor S2
-M307 H1 B1;A100.0 C200.0 D5.0 B0                           ; Bed PID model (calculatede for 20mm granite slab)
+;M307 H1 B1 A100.0 C200.0 D5.0 B0                           ; Bed PID model (calculatede for 20mm granite slab)
+M307 H0 R1.0 K0.5 D10 E1.5 S0.35 ; for bere mat heating 
 
 ; Map bed heater
 M140 P0 H0                                              ; Map to bed slot
