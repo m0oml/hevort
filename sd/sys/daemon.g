@@ -27,13 +27,7 @@ while true
     ; --- 2. Printer Active Bit ---
     ; Set Bit 0 when printing, simulating, or paused
     ; Paused counts as active - hotend stays hot and needs cooling
-    if { state.status == "processing" }
-        if { mod(global.duetControl, 2) == 0 }
-            set global.duetControl = { global.duetControl + 1 }
-    elif { state.status == "simulating" }
-        if { mod(global.duetControl, 2) == 0 }
-            set global.duetControl = { global.duetControl + 1 }
-    elif { state.status == "paused" }
+    if { state.status == "processing" || state.status == "simulating" || state.status == "paused" }
         if { mod(global.duetControl, 2) == 0 }
             set global.duetControl = { global.duetControl + 1 }
     else
@@ -45,7 +39,13 @@ while true
     M260.1 P2 A1 F16 R0 B{global.chamberSP, global.chamberHeartbeat, global.duetControl, 0, 0}
 
     ; --- 4. Read from PLC ---
-    M98 P"/sys/plc_read.g"
+    ; Inlined from plc_read.g: DSF 3.7.0-beta.1 fails to declare a new local var
+    ; ("Cannot add local variable because there is no open code block") when it
+    ; happens inside a file invoked via M98 from within an active while loop.
+    M261.1 P2 A1 F3 R0 B5 V"plcRegs"
+    if { var.plcRegs != null }
+        set global.chamberPV = { var.plcRegs[3] }
+        set global.chamberStatus = { var.plcRegs[4] }
 
     ; --- 5. Water Pump Gate ---
     ; Pump runs only when hotend is above 50C
