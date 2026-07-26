@@ -45,21 +45,29 @@ M92 X80 Y80 Z800 E420                                   ; Steps per mm
 ; --- Motor Currents ---
 M906 X2600 Y2600 Z1050 E1000                            ; Motor current (mA)
 M917 X0 Y0                                              ; AWD holding current zero (closed-loop corrects drift)
-M906 I30                                                ; Idle current factor 30% (Z and E)
-M84 S30                                                 ; Motor idle timeout (30s)
+; I is a GLOBAL idle factor (applies to all axes, cannot be set per-axis in RRF).
+; Set to 100% because Z is backdriveable at reduced current (confirmed on hardware) -
+; the physical brakes only engage on a full driver disable (M18/M84), NOT on idle
+; current reduction alone. Until Z is fully disabled, idle current IS what's holding
+; the bed up, for as long as the machine sits idle - not just a brief transition.
+; Costs X/Y/E slightly more idle heat; accepted trade-off against dropping the bed.
+M906 I100 T30                                            ; Idle current 100%, idle timeout 30s (T replaces deprecated M84 S in RRF 3.6+)
 
 ; --- Axis Limits (PLACEHOLDER - update after homing verified) ---
 M208 X0:415 Y0:415 Z0:415                               ; Axis limits
 
 ; --- Speeds and Accelerations (conservative - tune after input shaper) ---
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
-M203 X6000 Y6000 Z180 E3600                             ; Max speeds (mm/min)
+M203 X6000 Y6000 Z500 E3600                             ; Max speeds (mm/min)
 M201 X500 Y500 Z20 E250                                 ; Accelerations (mm/s^2) - placeholder
 
 ; --- Z Brake Control ---
 ; Brakes are power-to-release (24V releases, de-energised engages)
 ; OUT1 switches to GND (low-side): output HIGH = 24V to coil = released
-; Brakes auto-engage on motor disable via M569.7
+; Brakes auto-engage on motor DISABLE via M569.7 - this is NOT triggered by the
+; M906 idle current timeout above. Confirm pause.g/sleep.g/idle.g (or manual practice)
+; actually issue M18/M84 after idle, otherwise brakes never engage and the machine
+; relies on idle current alone indefinitely.
 ; S200 = 200ms delay before driver disables after brake engages (placeholder - tune on hardware)
 M569.7 P0.0 C"out1" S200                                ; Z brakes on OUT1 (commoned across Z0/Z1/Z2 — single brake config covers all three via shared output)
 
