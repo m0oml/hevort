@@ -43,7 +43,7 @@ M350 X16 Y16 Z16 E16 I1                                 ; 16x microstepping with
 M92 X80 Y80 Z800 E420                                   ; Steps per mm
 
 ; --- Motor Currents ---
-M906 X2600 Y2600 Z1400 E1000                            ; Motor current (mA)
+M906 X2600 Y2600 Z1050 E1000                            ; Motor current (mA)
 M917 X0 Y0                                              ; AWD holding current zero (closed-loop corrects drift)
 M906 I30                                                ; Idle current factor 30% (Z and E)
 M84 S30                                                 ; Motor idle timeout (30s)
