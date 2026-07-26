@@ -16,9 +16,9 @@ G4 S2                                                   ; Wait 2s for CAN expans
 
 ; --- Onboard Drivers ---
 ; Z axis: conventional steppers on onboard drivers
-M569 P0.0 S1 D2                                         ; Drive 0.0: Z0
-M569 P0.1 S1 D2                                         ; Drive 0.1: Z1
-M569 P0.2 S1 D2                                         ; Drive 0.2: Z2
+M569 P0.0 S0 D2                                         ; Drive 0.0: Z0
+M569 P0.1 S0 D2                                         ; Drive 0.1: Z1
+M569 P0.2 S0 D2                                         ; Drive 0.2: Z2
 ; Extruder: onboard driver 0.5 (closest to edge)
 M569 P0.5 S1 D2                                         ; Drive 0.5: Extruder
 
@@ -38,7 +38,7 @@ M569.1 P72.0 T3                                         ; Y1: magnetic encoder
 M569.1 P73.0 T3                                         ; Y2: magnetic encoder
 
 ; --- Axis Mapping ---
-M584 X70.0:71.0 Y72.0:73.0 Z0.0:0.1:0.2 E0.5          ; X (AWD), Y (AWD), Z (triple), E
+M584 X70.0:71.0 Y72.0:73.0 Z0.0:0.1:0.2 E0.5            ; X (AWD), Y (AWD), Z (triple), E
 M350 X16 Y16 Z16 E16 I1                                 ; 16x microstepping with interpolation
 M92 X80 Y80 Z800 E420                                   ; Steps per mm
 
@@ -155,7 +155,7 @@ else
 ; ======================= Modbus =======================
 ; RS485 to Siemens S7-1200 PLC for chamber heating control
 ; IO1 dedicated to RS485 - RS485_EN jumper fitted on board
-M575 P3 B9600 S7                                        ; Serial 2: RS485, 9600 baud, Modbus RTU
+M575 P2 B9600 S7                                        ; Serial 2: RS485, 9600 baud, Modbus RTU
 
 ; ===================== Finalization ===================
 M98 P"vars.g"  
