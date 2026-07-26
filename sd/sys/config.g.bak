@@ -43,7 +43,7 @@ M350 X16 Y16 Z16 E16 I1                                 ; 16x microstepping with
 M92 X80 Y80 Z800 E420                                   ; Steps per mm
 
 ; --- Motor Currents ---
-M906 X2600 Y2600 Z1400 E1000                            ; Motor current (mA)
+M906 X2600 Y2600 Z1050 E1000                            ; Motor current (mA)
 M917 X0 Y0                                              ; AWD holding current zero (closed-loop corrects drift)
 M906 I30                                                ; Idle current factor 30% (Z and E)
 M84 S30                                                 ; Motor idle timeout (30s)
@@ -92,10 +92,11 @@ M307 H1 R2.43 D5.5 E1.35 K0.56 B0                       ; Hotend PID model (PLAC
 ; Bed Heater (H0) SSR control on OUT7
 ; PID controlled from bed interior sensor S1 (temp1)
 ; Independent over-temp cutout on mat surface sensor S2 (temp2), limit 125C
-M950 H0 C"out7" T1                                      ; Bed heater SSR on out7, PID from S1
+M950 H0 C"out7" T1 Q1                                     ; Bed heater SSR on out7, PID from S1
 M143 H0 P0 T1 S200 A0                                   ; Bed primary limit 200C on sensor S1
 ;M143 H0 P1 T2 S125 A0                                   ; Bed mat safety cutout 125C on sensor S2
-M307 H1 B1;A100.0 C200.0 D5.0 B0                           ; Bed PID model (calculatede for 20mm granite slab)
+;M307 H1 B1 A100.0 C200.0 D5.0 B0                           ; Bed PID model (calculatede for 20mm granite slab)
+M307 H0 R1.0 K0.5 D10 E1.5 S0.35 ; for bere mat heating 
 
 ; Map bed heater
 M140 P0 H0                                              ; Map to bed slot
@@ -154,7 +155,7 @@ else
 ; ======================= Modbus =======================
 ; RS485 to Siemens S7-1200 PLC for chamber heating control
 ; IO1 dedicated to RS485 - RS485_EN jumper fitted on board
-M575 P2 B9600 S7                                        ; Serial 2: RS485, 9600 baud, Modbus RTU
+M575 P3 B9600 S7                                        ; Serial 2: RS485, 9600 baud, Modbus RTU
 
 ; ===================== Finalization ===================
 M98 P"vars.g"  
