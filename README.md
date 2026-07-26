@@ -1,9 +1,9 @@
 # Last backup was:
-## 06 Jul 2026 at 09:11 Local Time (TZ = -1.0 hrs)  
-## 06 Jul 2026 at 08:11 UTC 
+## 26 Jul 2026 at 10:42 Local Time (TZ = -1.0 hrs)  
+## 26 Jul 2026 at 09:42 UTC 
 
-### No files were added.
-
+### The following files were added:
+sd/sys/duetBackup/duetBackup.config.example<br>
 ### The following files were updated:
-
+sd/sys/duetBackup/duetBackup.config.example<br>
 ### No files were deleted 
