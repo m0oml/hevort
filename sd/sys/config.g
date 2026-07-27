@@ -53,7 +53,7 @@ M208 X0:415 Y0:415 Z0:415                               ; Axis limits
 
 ; --- Speeds and Accelerations (conservative - tune after input shaper) ---
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
-M203 X6000 Y6000 Z500 E3600                             ; Max speeds (mm/min)
+M203 X6000 Y6000 Z1500 E3600                             ; Max speeds (mm/min)
 M201 X500 Y500 Z20 E250                                 ; Accelerations (mm/s^2) - placeholder
 
 ; --- Z Brake Control ---
