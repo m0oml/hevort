@@ -16,9 +16,9 @@ G4 S2                                                   ; Wait 2s for CAN expans
 
 ; --- Onboard Drivers ---
 ; Z axis: conventional steppers on onboard drivers
-M569 P0.0 S0 D2                                         ; Drive 0.0: Z0
-M569 P0.1 S0 D2                                         ; Drive 0.1: Z1
-M569 P0.2 S0 D2                                         ; Drive 0.2: Z2
+M569 P0.0 S0 D3                                         ; Drive 0.0: Z0
+M569 P0.1 S0 D3                                         ; Drive 0.1: Z1
+M569 P0.2 S0 D3                                         ; Drive 0.2: Z2
 ; Extruder: onboard driver 0.5 (closest to edge)
 M569 P0.5 S1 D2                                         ; Drive 0.5: Extruder
 
