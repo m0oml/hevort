@@ -45,7 +45,7 @@ M92 X80 Y80 Z800 E420                                   ; Steps per mm
 ; --- Motor Currents ---
 M906 X2600 Y2600 Z1050 E1000                            ; Motor current (mA)
 M917 X0 Y0                                              ; AWD holding current zero (closed-loop corrects drift)
-M906 I30                                                ; Idle current factor 30% (Z and E)
+M906 I100 T30                                           ; Idle current factor 30% (Z and E)
 M84 S30                                                 ; Motor idle timeout (30s)
 
 ; --- Axis Limits (PLACEHOLDER - update after homing verified) ---
