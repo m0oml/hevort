@@ -26,10 +26,10 @@ M569 P0.5 S1 D2                                         ; Drive 0.5: Extruder
 ; Layout (top-down, front of printer at bottom):
 ;   Back-left:  73.0 Y2  |  Back-right:  70.0 X1
 ;   Front-left: 71.0 X2  |  Front-right: 72.0 Y1
-M569 P70.0 S1 D3                                        ; Drive 70.0: X1 (back-right)
-M569 P71.0 S1 D3                                        ; Drive 71.0: X2 (front-left)
-M569 P72.0 S1 D3                                        ; Drive 72.0: Y1 (front-right)
-M569 P73.0 S1 D3                                        ; Drive 73.0: Y2 (back-left)
+M569 P70.0 S1 D0                                        ; Drive 70.0: X1 (back-right)
+M569 P71.0 S1 D0                                        ; Drive 71.0: X2 (front-left)
+M569 P72.0 S1 D0                                        ; Drive 72.0: Y1 (front-right)
+M569 P73.0 S1 D0                                        ; Drive 73.0: Y2 (back-left)
 
 ; --- Closed-Loop Encoders (AWD) ---
 M569.1 P70.0 T3                                         ; X1: magnetic encoder
@@ -77,8 +77,9 @@ G31 P500 X0 Y0 Z0.7                                     ; Probe trigger value, o
 M912 P0 S-5.2                                           ; Set MCU calibration offset BEFORE defining the sensor
 M308 S0 P"temp0" Y"pt1000" A"Hotend"                    ; Hotend PT1000
 M308 S1 P"temp1" Y"thermistor" A"Bed" T100000 B3950     ; Bed interior thermistor 10K B3950 - PID source
-M308 S2 P"temp2" Y"thermistor" A"BedMat" T10000 B3950  ; Bed heater mat surface 10K B3950 - safety limit only
+M308 S2 P"temp2" Y"thermistor" A"BedMat" T10000 B3950   ; Bed heater mat surface 10K B3950 - safety limit only
 M308 S3 P"temp3" Y"thermistor" A"Coolant" T10000 B3950  ; Coolant NTC 10K B3950 (Alphacool Eiszapfen)
+M308 S4 P"spi.cs0" Y"rtd-max31865" A"ElecBay"           ; Elec bay RTD Pt100 4-wire, SPI daughterboard ch0
 M308 S10 Y"mcu-temp" A"MCU Temp"                        ; MCU temperature sensor
 M308 S11 Y"drivers" A"Driver Temp"                      ; Driver temperature (0/100/130C states
 
@@ -116,6 +117,10 @@ M106 P1 S0 L0 X1 H-1                                   ; Manual/slicer control, 
 ; Below 50C hotend: pump off. Above 50C: pump runs at 40% min, 100% at 40C coolant temp
 M950 F2 C"out5" Q500                                    ; Fan 2: water pump, 500Hz PWM
 M106 P2 S0 L0.4 X1 H3 T25:40 B0.1                      ; 40% min, 100% at 40C coolant temp - overridden by daemon.g
+
+; Fan 3: Electronics bay fan (24V 4-pin) on OUT6, inverted PWM
+M950 F3 C"!out6" Q500                                         ; Fan 3: elec bay fan, 500Hz PWM, inverted
+M106 P3 S0 L0 X1 H4 T30:45                                    ; Thermostatic 30-45C on ElecBay RTD (S4)
 
 ; ======================== Tools =======================
 M563 P0 D0 H1 F1                                        ; Tool 0: Extruder 0, Heater 1 (hotend), Fan 1 (CPAP)
