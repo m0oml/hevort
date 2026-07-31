@@ -111,10 +111,10 @@ M106 P0 H10:11 T25:45                                   ; Off below 40C, full at
 M950 F1 C"out9+out5.tach" Q500 K1                      ; Fan 1: CPAP, 500Hz PWM, tach on out9 (0-5v out5.tach) with 1pprpm
 M106 P1 S0 L0 X1 H-1                                   ; Manual/slicer control, no thermostatic
 
-; Fan 2: Water pump PWM on OUT6
+; Fan 2: Water pump PWM on OUT5
 ; Overridden by daemon.g which gates pump on hotend temp (>50C)
 ; Below 50C hotend: pump off. Above 50C: pump runs at 40% min, 100% at 40C coolant temp
-M950 F2 C"out6" Q500                                    ; Fan 2: water pump, 500Hz PWM
+M950 F2 C"out5" Q500                                    ; Fan 2: water pump, 500Hz PWM
 M106 P2 S0 L0.4 X1 H3 T25:40 B0.1                      ; 40% min, 100% at 40C coolant temp - overridden by daemon.g
 
 ; ======================== Tools =======================
