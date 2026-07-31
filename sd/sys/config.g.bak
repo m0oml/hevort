@@ -16,9 +16,9 @@ G4 S2                                                   ; Wait 2s for CAN expans
 
 ; --- Onboard Drivers ---
 ; Z axis: conventional steppers on onboard drivers
-M569 P0.0 S0 D3                                         ; Drive 0.0: Z0
-M569 P0.1 S0 D3                                         ; Drive 0.1: Z1
-M569 P0.2 S0 D3                                         ; Drive 0.2: Z2
+M569 P0.0 S0 D2                                         ; Drive 0.0: Z0
+M569 P0.1 S0 D2                                         ; Drive 0.1: Z1
+M569 P0.2 S0 D2                                         ; Drive 0.2: Z2
 ; Extruder: onboard driver 0.5 (closest to edge)
 M569 P0.5 S1 D2                                         ; Drive 0.5: Extruder
 
@@ -53,7 +53,7 @@ M208 X0:415 Y0:415 Z0:415                               ; Axis limits
 
 ; --- Speeds and Accelerations (conservative - tune after input shaper) ---
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
-M203 X6000 Y6000 Z1500 E3600                             ; Max speeds (mm/min)
+M203 X6000 Y6000 Z1000 E3600                             ; Max speeds (mm/min)
 M201 X500 Y500 Z20 E250                                 ; Accelerations (mm/s^2) - placeholder
 
 ; --- Z Brake Control ---
