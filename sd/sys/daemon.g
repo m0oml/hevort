@@ -24,21 +24,11 @@ while true
     if { global.chamberHeartbeat > 32767 }
         set global.chamberHeartbeat = 0
 
-    ; --- 2. Printer Active Bit ---
-    ; Set Bit 0 when printing, simulating, or paused
-    ; Paused counts as active - hotend stays hot and needs cooling
-    if { state.status == "processing" || state.status == "simulating" || state.status == "paused" }
-        if { mod(global.duetControl, 2) == 0 }
-            set global.duetControl = { global.duetControl + 1 }
-    else
-        if { mod(global.duetControl, 2) == 1 }
-            set global.duetControl = { global.duetControl - 1 }
-
-    ; --- 3. Write to PLC ---
+    ; --- 2. Write to PLC ---
     ; Write all 5 registers in one transaction (partial writes may zero remainder)
     M260.1 P2 A1 F16 R0 B{global.chamberSP, global.chamberHeartbeat, global.duetControl, 0, 0}
 
-    ; --- 4. Read from PLC ---
+    ; --- 3. Read from PLC ---
     ; Inlined from plc_read.g: DSF 3.7.0-beta.1 fails to declare a new local var
     ; ("Cannot add local variable because there is no open code block") when it
     ; happens inside a file invoked via M98 from within an active while loop.
@@ -47,13 +37,20 @@ while true
         set global.chamberPV = { var.plcRegs[3] }
         set global.chamberStatus = { var.plcRegs[4] }
 
-    ; --- 5. Water Pump Gate ---
+    ; --- 4. Water Pump Gate ---
     ; Pump runs only when hotend is above 50C
     ; Below 50C hotend: pump forced off regardless of coolant temp
     if { heat.heaters[1].current > 50 }
         M106 P2 H3 T25:40                               ; Hand control to coolant temp sensor S3
     else
         M106 P2 S0                                      ; Hotend cold - pump off
+
+    ; --- 5. Electronics Bay Fan Override ---
+    ; Fan 3 thermostatic on ElecBay RTD (S4) 30-45C; forced full when hotend (S0) >50C
+    if { heat.heaters[1].current > 50 }
+        M106 P3 S1                                            ; Hotend hot - force elec bay fan full
+    else
+        M106 P3 H4 T30:45                                     ; Hand back to thermostatic ElecBay control
 
     ; --- 6. Poll Interval ---
     G4 S5                                               ; 5 second poll cycle
