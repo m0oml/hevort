@@ -1,9 +1,10 @@
 # Last backup was:
-## 02 Aug 2026 at 16:44 Local Time (TZ = -1.0 hrs)  
-## 02 Aug 2026 at 15:44 UTC 
+## 02 Aug 2026 at 22:45 Local Time (TZ = -1.0 hrs)  
+## 02 Aug 2026 at 21:45 UTC 
 
-### No files were added.
-
+### The following files were added:
+sd/sys/printend.g<br>sd/sys/printstart.g<br>sd/macros/Speed/_st_measure.g<br>sd/macros/Speed/speedtest.g<br>
 ### The following files were updated:
-
-### No files were deleted 
+sd/sys/printend.g<br>sd/sys/printstart.g<br>sd/macros/Speed/_st_measure.g<br>sd/macros/Speed/speedtest.g<br>
+### The following files were deleted:
+sd/macros/printend.g<br>sd/macros/printstart.g<br>
