@@ -1,13 +1,13 @@
 ================================================================================================
 HevORT Build — Project Brief
-Last updated: 31/07/2026
+Last updated: 03/08/2026
 ================================================================================================
 
 ABOUT THIS PROJECT
 Large-format HevORT 3D printer build. 415x415x440mm print volume. 50-core
 umbilical terminal landing complete (HIGH 29 + LOW 21). Currently in
-procurement phase for water cooling, display, bed hardware, and door/TDB
-build-out ahead of continuity testing / commissioning.
+procurement phase for granite bed and FR4 sheet — last two outstanding
+orders — ahead of continuity testing / commissioning.
 
 SESSION BOOTSTRAP
 At the start of each session:
@@ -36,11 +36,11 @@ copies the output and uploads manually.
 PRINTER HARDWARE SPECIFICATION
 ================================================================================================
 
-Build volume : 415 x 415 x 440 mm
-Gantry : HD12 SPAWD AWD
-Belts : 12mm 2GT Gates EPDM
-Pulleys : 20T GT2
-X beam : 2020 aluminium extrusion
+Build volume  : 415 x 415 x 440 mm
+Gantry        : HD12 SPAWD AWD
+Belts         : 12mm 2GT Gates EPDM
+Pulleys       : 20T GT2
+X beam        : 2020 aluminium extrusion
   DECISION (04/07/2026): CF tube ruled out — rotor inertia of
   M23CL-76-2804 AWD motors dominates system dynamics, so CF's mass
   advantage over aluminium is no longer significant. Dual MGN9 rail
@@ -48,28 +48,29 @@ X beam : 2020 aluminium extrusion
   against target ~35k mm/s^2 accel envelope, carries co-planarity risk.
   Revisit only if test prints show diagonal twist artifacts traceable to
   beam torsion.
-X/Y rails : MGN12H 550mm (already in hand, x2)
+X/Y rails     : MGN12H 550mm (already in hand, x2)
   Toolhead carriage rail: MGN9, sourced AliExpress this session
-Z axis : ZR V2.6, SFU1204 ball screws, WobbleX WS12 isolators
-Z motors : 42HSB47A41505 brake steppers (79mm, 60 Ncm, 24V brake, 1.5A) —
+Z axis        : ZR V2.6, SFU1204 ball screws, WobbleX WS12 isolators
+Z motors      : 42HSB47A41505 brake steppers (79mm, 60 Ncm, 24V brake, 1.5A) —
   power to release. ORIGINAL SET FAILED (see Z BRAKE INCIDENT below).
   Replacement set of 3 ordered this session.
-XY/AWD motors: M23CL-76-2804 (18.9 kg/cm, 0.48 kg/cm² rotor inertia) on
+XY/AWD motors : M23CL-76-2804 (18.9 kg/cm, 0.48 kg/cm² rotor inertia) on
   CAN-FD, assisted open-loop (D3). M8 connectors confirmed MALE on motor
-  housing (3-pin power, 4-pin CAN) — cables ordered are FEMALE to mate,
-  all wired star topology back to TDB (not daisy-chained).
+  housing (3-pin power, 4-pin CAN) — cables supplied WITH the motors,
+  FEMALE to mate, all wired star topology back to TDB (not daisy-chained).
+  Separate AliExpress connector order CANCELLED — duplicate.
 Motion controller: Duet 3 6HC v1.02c SBC mode, RRF 3.6.3
-Toolhead : Mellow CNC Vz-HextrudORT water-cooled, Goliath hotend
+Toolhead      : Mellow CNC Vz-HextrudORT water-cooled, Goliath hotend
   (water-cooled variant). Goliath swivel fittings confirmed PLASTIC
   (no metal, no wetted-metal action needed).
   Z PROBE (RESOLVED 04/07/2026): Mellow ALPS Pressure Sensor Module
   (SKU 5030721022) bolts directly onto the water-cooled Goliath coldside.
-Extruder : NEMA14, Vz-Hextrudort-Low/WC Plus (air-cooled extruder body,
+Extruder      : NEMA14, Vz-Hextrudort-Low/WC Plus (air-cooled extruder body,
   separate from Goliath hotend cooling) + Moons 10T motor/gear set
-Endstops : Omron EE-SX67x optical (physical, not sensorless) — ordered
+Endstops      : Omron EE-SX67x optical (physical, not sensorless) — ordered
   this session
-SBC : Raspberry Pi 4
-Display : RESOLVED — Waveshare 10.1inch DSI LCD (C), 1280x800, IPS,
+SBC           : Raspberry Pi 4
+Display       : RESOLVED — Waveshare 10.1inch DSI LCD (C), 1280x800, IPS,
   10-point capacitive touch. Ordered via Pi Hut (£76.80) — cheaper than
   Amazon UK sponsored listing (£93.99). Mounts via 15PIN FPC cable;
   Pi can mount directly to display back (pogo-pin powered, no separate
@@ -91,34 +92,35 @@ titanium screw — not coolant-wetted. Loop is all-aluminium wetted metal.
 CHAMBER HEATING SYSTEM
 ================================================================================================
 
-Heater : 1400W PTC with shaded-pole motor — bed heater mat CONFIRMED IN HAND
+Heater      : 1400W PTC with shaded-pole motor — bed heater mat CONFIRMED IN HAND
   (400x400mm, 1400W, 220V)
-SSR1 : ENMG SDR25A2032 25A — bed heater, gate from Duet OUT7
-SSR2 : ENMG SDR25A2032 25A — chamber heater, gate from PLC Q13.2
-K1 : Two-pole contactor — mains gate to SSR2, coil driven by R2
-K2 : Contactor — shaded-pole fan, coil driven by R3
-R1 : Pilot relay — coil from Duet OUT8 (24V), NO contact -> PLC %I0.0
-R2 : Pilot relay — coil from PLC Q13.0, contact drives K1 coil
-R3 : Pilot relay — coil from PLC Q13.1, contact drives K2 coil
-R4 : Pilot relay — coil from PLC Q13.3, contact = spare switched 24V (F6).
+SSR1        : ENMG SDR25A2032 25A — bed heater, gate from Duet OUT7
+SSR2        : ENMG SDR25A2032 25A — chamber heater, gate from PLC Q13.2
+K1          : Two-pole contactor — mains gate to SSR2, coil driven by R2
+K2          : Contactor — shaded-pole fan, coil driven by R3
+R1          : Pilot relay — coil from Duet OUT8 (24V), NO contact -> PLC %I0.0
+R2          : Pilot relay — coil from PLC Q13.0, contact drives K1 coil
+R3          : Pilot relay — coil from PLC Q13.1, contact drives K2 coil
+R4          : Pilot relay — coil from PLC Q13.3, contact = spare switched 24V (F6).
   Formerly drove elec bay fans; that function moved to Duet OUT6 / Fan 3.
   Relay and fuse left fitted as a spare PLC-controlled 24V circuit.
-PLC : Siemens S7-1200 CPU 1212C DC/DC/Rly, FW V4.3.1, TIA Portal V15.1 Update 8
-RTD module : SM1231 8-channel — Slot 2, addresses IW96-IW110.
+PLC         : Siemens S7-1200 CPU 1212C DC/DC/Rly, FW V4.3.1, TIA Portal V15.1 Update 8
+RTD module  : SM1231 8-channel — Slot 2, addresses IW96-IW110.
   Ch0 (IW96) DEACTIVATED — was RTD_ElecBay, function moved to Duet SPI
-  daughterboard. Channel deactivated in HW config to suppress broken-wire /
-  overflow / underflow diagnostics with the sensor removed.
-RS485 module : CB1241 RS485, hardware ID 269, MODE=4 in DB2
-HMI : Siemens KTP700 Basic PN, single screen, status indicators only
+  daughterboard (already in hand, no purchase required). Channel
+  deactivated in HW config to suppress broken-wire / overflow / underflow
+  diagnostics with the sensor removed.
+RS485 module: CB1241 RS485, hardware ID 269, MODE=4 in DB2
+HMI         : Siemens KTP700 Basic PN, single screen, status indicators only
 PROFINET switch: Helmholz 700-850-4PS01 managed switch
 
 PROFINET Network: 192.168.32.0/24, no router
-  Pi 4 (DWC)         : 192.168.32.70
-  PLC_1 (S7-1212C)   : 192.168.32.71
-  KTP700 HMI         : 192.168.32.72
-  Helmholz PN Switch : 192.168.32.73 (Port 1=PLC, Port 2=HMI, Port 3=Pi, Port 4=uplink)
+  Pi 4 (DWC)        : 192.168.32.70
+  PLC_1 (S7-1212C)  : 192.168.32.71
+  KTP700 HMI        : 192.168.32.72
+  Helmholz PN Switch: 192.168.32.73 (Port 1=PLC, Port 2=HMI, Port 3=Pi, Port 4=uplink)
 
-AIR-OFF RTD (outstanding):
+AIR-OFF RTD (outstanding — hardware in hand, not yet fitted):
 Labfacility DM-514-D (Farnell part 2081259) — Pt100 thin film, 1.0x3mm,
 500C rated. Mount axially between copper wire stubs in airflow, 4-wire to
 SM1231 Ch4 (IW104). PID_Compact_2 retune required after fitting.
@@ -127,29 +129,83 @@ SM1231 Ch4 (IW104). PID_Compact_2 retune required after fitting.
 CHAMBER INSULATION
 ================================================================================================
 
-Material : 25 mm PIR foam board (lambda 0.023 W/m·K)
-Application : Bonded to outer face of aluminium panels
-Insulated faces : Left side, right side, rear, bottom
-Uninsulated faces: Front doors, top lid (polycarbonate — clear)
+Material     : 25 mm PIR foam board (lambda 0.023 W/m·K), foil-faced
+Application  : Bonded to INNER face of aluminium panels (chamber-facing).
+  Foil facer faces chamber air directly. Dot-and-dab with Dowsil 799.
+  Joints taped with standard acrylic HVAC-grade foil tape (Bond It
+  75mm x 45m) — standard grade confirmed adequate, chamber runs cooler
+  than a boiler flue.
+Insulated    : Left side, right side, rear, top, bottom, and the PIR
+  portion of the front door
+Glazed       : Front door vision panel only
 
-Panel stack (insulated): 6 mm aluminium + 25 mm PIR = 31 mm total
-Panel stack (doors)     : 3 mm polycarbonate (single skin)
+Panel stack:
+  Sides / elec bay   5 mm aluminium + 25 mm PIR
+  Rear / top         3 mm aluminium + 25 mm PIR
+  Bottom             2 mm steel + 25 mm PIR
+  Door (PIR area)    PIR infill in 3030 frame, external cladding TBC
+  Door (glazed)      6 mm toughened glass, single pane, 469 x 606 mm
+
+GLAZING (RESOLVED 03/08/2026):
+  6mm toughened glass, 469 x 606mm, captive on all four sides in the 3030
+  slot (8mm wide x 9mm deep). 6mm engagement per edge; 3mm of sealant at
+  slot bottom so glass never bottoms hard on aluminium; ~1mm per face in
+  the 8mm slot width also filled.
+  Sealant: Dowsil 799 CLEAR, IN HAND. Neutral cure — acetoxy would trap
+  acetic acid in a gas-tight 1mm gap against bare aluminium with no
+  airflow. -40C to +149C, low modulus, primerless to glass and aluminium.
+  Clean slot and glass edge with IPA — TDS states detergent/water NOT
+  acceptable.
+  ASSEMBLY: pane is captive all round, so the door frame must be built
+  AROUND the glass — three sides bolted, glass slid in, fourth member
+  last. Replacement means dismantling the frame.
+
+  Sealed double-glazed unit REJECTED: supplier confirmed units are not
+  pressure-filled and the edge is simply taped — seal fails at sustained
+  chamber temperature. Failure mode is gas migration then permanent
+  internal condensation, which blinds the window and defeats the purpose.
+  Polycarbonate REJECTED as primary pane: 6mm solid PC (~4.0 W/m²K vs
+  glass ~5.7) saves only ~30W at the cost of permanent scratching,
+  crazing from chamber outgassing, 7x thermal expansion, and creep at
+  temperature. Twin-wall PC insulates better but is translucent.
+
+  UPGRADE PATH (not ordered): if commissioning shows glazing loss matters,
+  add a PC sheet to the door's OUTER face on 10-15mm standoffs, cavity
+  VENTED top and bottom (not sealed). Outer face only — stays cooler, not
+  exposed to outgassing, trivially removable. Keep the door frame's outer
+  face clean and unobstructed to allow this.
 
 Sealing
-  Fixed panels  : Silicone RTV applied during installation
-  Front doors   : 10x3 mm silicone foam tape on door frame face
-  Top lid       : 10x3 mm silicone foam tape on lid perimeter
-  Panel joints  : 10x3 mm silicone foam tape between panels
-  Note: All seals silicone-based — handles 60C+ chamber temp
+  Fixed panels : Silicone RTV applied during installation
+  Front door   : 10x3 mm silicone foam tape on door frame face
+  Panel joints : 10x3 mm silicone foam tape between panels
+  Note: all seals silicone-based — handles 60C+ chamber temp
 
 Thermal estimate (60C chamber, 20C ambient, dT = 40C):
-  Insulated area ~0.93 m² — loss ~29 W
-  Clear PC area  ~0.48 m² — loss ~103 W
-  Total estimated chamber heat loss ~132 W
+  Insulated area ~1.4 m²   — loss ~43 W
+  Glazed area    ~0.284 m² — loss ~65 W
+  Total estimated chamber heat loss ~108 W
+  (Supersedes the earlier 132W figure, which assumed a polycarbonate top
+  lid and all-PC doors. Both superseded — top is now clad aluminium+PIR,
+  door glazing is glass at 0.284 m², not PC at 0.48 m². Insulated area
+  is an estimate from the panel schedule — replace with FrameCalculator
+  figures if/when reconciled.)
 
-DOOR HARDWARE / EXTRUSIONS (outstanding):
-Door insulation extrusions and door hardware — sourcing from Oozenest,
-pending. Spec not yet finalised.
+DOOR HARDWARE / EXTRUSIONS (RESOLVED 03/08/2026 — Ooznest order
+SO-236447 rev 6, PAID):
+  AH-30-S       30/30 Series Aluminium Hinge            x3
+  FS-044        Fastener Set (4 per hinge)               x12
+  AHND-30       30 Series Aluminium Handle               x1
+  FS-038        Fastener Set (2 per handle)               x2
+  ML-304045     30/40 & 30/45 T-Slot Mechanical Latch     x2
+  SCO-30-G-1000 Slot Cover 30 Series Grey 1000mm          x10
+  Hinge count 3, not 2 or 4: 6.5mm leaf thickness gives ample static
+  capacity, so 4 would buy no load margin — but 3 fixing points are
+  self-tolerant of extrusion/cut tolerance stack-up where 4 can bind or
+  load unevenly if not coplanar, and resists sag/racking from the glass
+  mass better than 2 over repeated cycles.
+  Same order includes the door/elec-bay 3030 extrusion cut list — see
+  OUTSTANDING PROCUREMENT.
 
 ================================================================================================
 SAFETY CIRCUIT — Duet -> PLC (R1)
@@ -170,36 +226,36 @@ MODBUS RTU — Duet <-> PLC
 
 Physical layer : Duet 3 6HC onboard RS485 transceiver. RS485_EN jumper fitted.
   IO1 dedicated — do not use IO1 for anything else.
-Cable : OSP1 1x2x24AWG overall screened, drain grounded at PLC end only,
+Cable       : OSP1 1x2x24AWG overall screened, drain grounded at PLC end only,
   260mm run — no termination resistor needed
 Duet config : M575 P2 B9600 S7
-Protocol : 9600 8N1, Duet = master, PLC CB1241 = slave address 1
-Polling : daemon.g reads all 5 registers every 5s via M261.1 F3 R0 B5
+Protocol    : 9600 8N1, Duet = master, PLC CB1241 = slave address 1
+Polling     : daemon.g reads all 5 registers every 5s via M261.1 F3 R0 B5
   Read implemented via sub-macro sys/plc_read.g (var scope workaround
   for RRF 3.6.x M261.1 — V parameter creates new var only, never
   overwrites. Sub-macro scope destroys var on return.)
-Note : RRF 3.6.x has NO bitwise operators — use mod arithmetic for bit extraction
-WARNING : RRF 3.7.0 changes M575 port numbering — P2 becomes P3 for first
+Note        : RRF 3.6.x has NO bitwise operators — use mod arithmetic for bit extraction
+WARNING     : RRF 3.7.0 changes M575 port numbering — P2 becomes P3 for first
   serial port. Do not upgrade to 3.7.x without updating M575 in config.g.
 
 Register Map (DB1, HR40001 base):
-  R0  Chamber_SP         Duet->PLC  Int, tenths degC
-  R1  Duet_Heartbeat     Duet->PLC  Int, 0-32767
-  R2  Duet_Control_Bits  Duet->PLC  UNUSED (was Bit0 = Printer_Active; elec bay
+  R0  Chamber_SP        Duet->PLC  Int, tenths degC
+  R1  Duet_Heartbeat    Duet->PLC  Int, 0-32767
+  R2  Duet_Control_Bits Duet->PLC  UNUSED (was Bit0 = Printer_Active; elec bay
       cooling moved to Duet, bit no longer written or read. DB member retained —
       removing it would shift R3/R4 and break the Modbus map.)
-  R3  Chamber_PV         PLC->Duet  Int, tenths degC
-  R4  Status_Bits        PLC->Duet  See below
+  R3  Chamber_PV        PLC->Duet  Int, tenths degC
+  R4  Status_Bits       PLC->Duet  See below
 
 Status_Bits (R4):
-  Bit 0 Chamber sensor fault
-  Bit 1 Top sensor fault
-  Bit 2 Bottom sensor fault
-  Bit 3 Heater fault
-  Bit 4 PLC heartbeat toggle
-  Bit 5 PLC running
-  Bit 6 Duet comms OK
-  Bit 7 Duet comms fault
+  Bit 0  Chamber sensor fault
+  Bit 1  Top sensor fault
+  Bit 2  Bottom sensor fault
+  Bit 3  Heater fault
+  Bit 4  PLC heartbeat toggle
+  Bit 5  PLC running
+  Bit 6  Duet comms OK
+  Bit 7  Duet comms fault
 
 ================================================================================================
 PLC PROGRAM STRUCTURE
@@ -235,24 +291,24 @@ SM1222 Output Map (Slot 3, DQ 8x24VDC, base %QB13):
   Q13.4-7 Spare
 
 Key PLC Tags:
-  Temp_Chamber_PV            %MD30  Weighted chamber average (Real, degC)
-  Temp_Sensor_Fault          %MW44  Sensor fault word
-  Temp_AirOff_PV             %MD36  Air-off temperature (Real, degC)
-  Chamber_SP_Real            %MD50  Chamber setpoint (Real, degC)
-  Outer_PID_Output           %MD54
-  Inner_SP_Real              %MD58
-  Inner_PID_Output           %MD62
-  Heater_Output              %MW42  0-100 Int
-  Heater_Cycle_Count         %MW46  FC7 PWM cycle counter
-  PID_Clamp                  %M22.3
-  Duet_Comms_OK              %M22.4
-  AirOff_SafetyCut           %M22.5
-  AirOff_Valid               %M22.0
-  Chamber_HeaterFault        %M20.1  Live (no latch)
-  Chamber_Active             %M20.3
-  Chamber_Estop              %M20.0  NOT %I0.0
-  Chamber_Heater_Fault_Trig  %M20.4  Live fault trigger
-  DI_EStop_PLC               %I0.0   Duet OUT8 -> R1 NO contact -> PLC input
+  Temp_Chamber_PV          %MD30  Weighted chamber average (Real, degC)
+  Temp_Sensor_Fault        %MW44  Sensor fault word
+  Temp_AirOff_PV           %MD36  Air-off temperature (Real, degC)
+  Chamber_SP_Real          %MD50  Chamber setpoint (Real, degC)
+  Outer_PID_Output         %MD54
+  Inner_SP_Real            %MD58
+  Inner_PID_Output         %MD62
+  Heater_Output            %MW42  0-100 Int
+  Heater_Cycle_Count       %MW46  FC7 PWM cycle counter
+  PID_Clamp                %M22.3
+  Duet_Comms_OK            %M22.4
+  AirOff_SafetyCut         %M22.5
+  AirOff_Valid             %M22.0
+  Chamber_HeaterFault      %M20.1 Live (no latch)
+  Chamber_Active           %M20.3
+  Chamber_Estop            %M20.0 NOT %I0.0
+  Chamber_Heater_Fault_Trig %M20.4 Live fault trigger
+  DI_EStop_PLC             %I0.0  Duet OUT8 -> R1 NO contact -> PLC input
 
 Tags deleted 31/07/2026: RTD_ElecBay (%IW96), Bay_Fans (%Q13.3),
   Cooling_PrinterOn (%M21.1), Fan_Cycle_Count (%MW48).
@@ -272,7 +328,10 @@ Output Ports:
   OUT5 Water pump PWM — gated by hotend >50C in daemon.g, 40% min 25C,
        100% at 40C coolant
   OUT6 Electronics bay fan (24V 4-pin PWM, inverted "!out6") — thermostatic
-       30-45C on ElecBay RTD S4, forced 100% when hotend >50C via daemon.g
+       30-45C on ElecBay RTD S4, forced 100% when hotend >50C via daemon.g.
+       Single Noctua fan (see WATER COOLING LOOP — no fan pair exists or
+       ever existed in hardware; the 2x120mm reference in earlier revisions
+       was for an abandoned larger-radiator spec, never purchased).
   OUT7 Bed heater SSR1 gate — low-side switched
   OUT8 R1 pilot relay coil — HIGH=healthy, drops on stop/estop only
   OUT9 WS7040 CPAP PWM signal (Laser/VFD header, buffered 5V) — tach on out5.tach
@@ -285,26 +344,27 @@ IO Ports:
   IO4 Flow switch — NC, closed=flow present, trigger0
   IO5 Y endstop — Omron EE-SX67x, homes to min (front)
   IO6 Z probe — digital probe (ALPS module, SKU 5030721022 — mounts
-    direct to water-cooled Goliath coldside)
-  IO7 Pause button — NO, make to pause/abort chamber heat
-  IO8 Stop button — NC, break to stop
+       direct to water-cooled Goliath coldside)
+  IO7 Pause button — NO, momentary, make to pause/abort chamber heat
+  IO8 Stop button — NC, break to stop. IN HAND (separate from the momentary
+       ordered for IO7 — latching/break-to-stop behaviour, not momentary).
 
 Temperature Inputs:
   TEMP0 Hotend PT1000
   TEMP1 Bed slab edge PT1000 — PID source for H0
   TEMP2 Bed mat surface 100K NTC B3950 — safety limit 125C on H0
   TEMP3 Coolant — M6 thread 304 stainless 10K B3950 NTC probe (see WATER
-    COOLING LOOP for full sensor mounting spec)
-  S4 ElecBay RTD Pt100 4-wire — SPI daughterboard, drives Fan 3 thermostatic
-    curve (30-45C). Replaces PLC SM1231 Ch0.
-  S10 MCU temp — cold-start calibration done (M912)
-  S11 Driver temp — binary states: 0/100/130C
+        COOLING LOOP for full sensor mounting spec)
+  S4    ElecBay RTD Pt100 4-wire — SPI daughterboard, drives Fan 3 thermostatic
+        curve (30-45C). Replaces PLC SM1231 Ch0.
+  S10   MCU temp — cold-start calibration done (M912)
+  S11   Driver temp — binary states: 0/100/130C
 
 Fan Map:
-  F0 Enclosure fan  OUT4 (!out4)         thermostatic on S10/S11
-  F1 CPAP           OUT9 + out5.tach     manual/slicer, K1 tach correction
-  F2 Water pump     OUT5                 daemon.g gated on hotend >50C
-  F3 Elec bay fan   OUT6 (!out6)         thermostatic S4, daemon.g override
+  F0 Enclosure fan OUT4 (!out4) thermostatic on S10/S11
+  F1 CPAP OUT9 + out5.tach manual/slicer, K1 tach correction
+  F2 Water pump OUT5 daemon.g gated on hotend >50C
+  F3 Elec bay fan OUT6 (!out6) thermostatic S4, daemon.g override
 
 Stepper Drivers:
   0.0 Z0        0.3 Available
@@ -319,8 +379,8 @@ Stepper Drivers:
 DUET FILES
 ================================================================================================
 
-  config.g               Full machine config
-  vars.g                 Globals: chamberSP, chamberPV, chamberHeartbeat,
+  config.g              Full machine config
+  vars.g                Globals: chamberSP, chamberPV, chamberHeartbeat,
                          chamberStatus, duetControl, plcRegs=null, chamberAbort=0
                          All declarations guarded with exists() check — safe to
                          call multiple times
@@ -350,14 +410,14 @@ rear arm perpendicular to back).
 POWER SUPPLIES
 ================================================================================================
 
-  T1 Meanwell LRS-450-24  450W +24V printer rail
-  T2 Meanwell LRS-450-48  450W +48V motors only — no other loads
-  T3 Meanwell MDR-60-5    60W/12A    +5V always-on (Duet, Pi, display) — IN HAND
-  T4 Meanwell MDR-60-24   60W/2.5A   +24V control always-on (PLC, KTP700) — IN HAND
+  T1 Meanwell LRS-450-24 450W +24V printer rail
+  T2 Meanwell LRS-450-48 450W +48V motors only — no other loads
+  T3 Meanwell MDR-60-5  60W/12A  +5V  always-on (Duet, Pi, display) — IN HAND
+  T4 Meanwell MDR-60-24 60W/2.5A +24V control always-on (PLC, KTP700) — IN HAND
 
-  T1/T2 (LRS-450 pair): ORDERED. SUPERSEDES the LRS-350 pair noted in the
-  prior revision — LRS-350 would have been adequate on paper but LRS-450
-  chosen for headroom/peace of mind.
+  T1/T2 (LRS-450 pair): ORDERED, awaiting delivery. SUPERSEDES the LRS-350
+  pair noted in a prior revision — LRS-350 would have been adequate on
+  paper but LRS-450 chosen for headroom/peace of mind.
 
   T1 (24V budget) loads: Duet 3 6HC, Z steppers x3
   (42HSB47A41505, 1.5A holding + brake coils), fans, water pump,
@@ -390,21 +450,21 @@ AC Protection (MCBs, all C-curve):
 DC Fuse Block (8-position, mixed supply inputs):
   F1 3.15A 5V  MDR Pi 4, Duet logic (5V select jumper), DSI display
   F2 500mA 24V MDR R2, R3, R4 pilot relay coil commons (RXG21D24 x3)
-  F3 1A 24V    MDR PLC CPU S7-1212C + SM1231 RTD module
+  F3 1A    24V MDR PLC CPU S7-1212C + SM1231 RTD module
   F4 500mA 24V MDR SM1222 transistor module L+ (SSR2 signal + 3x RXG21D24 coils)
-  F5 1A 24V    MDR KTP700 HMI + Helmholz PROFINET switch
-  F6 1A 24V    LRS R4 switched 24V common (spare circuit — was elec bay fans,
-               fans relocated to Duet OUT6)
-  F7 2A 24V    LRS Water pump Lowara D5 PWM
-  F8 5A 24V    LRS WS7040 CPAP blower
+  F5 1A    24V MDR KTP700 HMI + Helmholz PROFINET switch
+  F6 1A    24V LRS R4 switched 24V common (spare circuit — was elec bay fans,
+                    fans relocated to Duet OUT6)
+  F7 2A    24V LRS Water pump Lowara D5 PWM
+  F8 5A    24V LRS WS7040 CPAP blower
 
 48V Rail — TDB only, no upstream DC fuse (MCB2 covers AC primary):
   TDB1 3A M23CL-76-2804 X1 (back-right, CAN 70.0)
   TDB2 3A M23CL-76-2804 X2 (front-left, CAN 71.0)
   TDB3 3A M23CL-76-2804 Y1 (front-right, CAN 72.0)
   TDB4 3A M23CL-76-2804 Y2 (back-left, CAN 73.0)
-  TDB unit itself: sourcing from Oozenest alongside door extrusions/hardware,
-  pending — see OUTSTANDING PROCUREMENT.
+  TDB unit itself: ordered direct from Duet3D (Ooznest only stock v0.5,
+  would not supply v1). Arriving separately from the Ooznest door order.
 
 24V Printer Rail — no external DC fuses:
   Duet 3 6HC board fuse (15A) covers all OUT port loads, Z brakes, R1 coil,
@@ -422,30 +482,41 @@ IO Signal Wiring Colour Standard (panel to terminal blocks):
 CABLE GLANDS
 ================================================================================================
 
-All glands: nickel-plated brass. Panel hole = thread size (M12=12mm, M20=20mm, M32=32mm).
-STATUS UNCLEAR — confirm whether bought as a set or individually sourced.
+All glands: nickel-plated brass. Panel hole = thread size (M20=20mm, M32=32mm).
+Collecting tomorrow from Power Electrical Factors: 1x M32, 3x M20, plus a
+20mm momentary push button (IO7 pause — IO8 stop is a separate, already
+in-hand, break-to-stop NC device).
 
   G1 M32 CPAP hose — WS7040 15mm ID hose, ~19-20mm OD, face panel Zone D
   G2 M20 Toolhead bundle — 13 cores (11x0.5mm², 2x1.0mm²) + WIKA TF45 4mm sub-cable, ~10-11mm OD
   G3 M20 Bed drag chain bundle — 6 cores (4x0.5mm², 2x1.0mm²) + RTD_Chamber 4mm sub-cable, ~9-10mm OD
-  G4 M12 Chamber bundle — RTD_Top 3-core 0.5mm² cable, ~2mm OD
-  G5 M12 Water cooling in
-  G6 M12 Water cooling out
+  G4 —   RTD_Top (3-core 0.5mm², ~2mm OD) — NO gland. Penetration handled
+         via a printed part already resolved; too small a bore for a
+         sensible stock gland.
+  G5 M20 Water cooling in + out — 2x 4mm PU tube through one gland. Not a
+         pressure boundary (coolant loop is sealed tube throughout); this
+         is a thermal penetration only, negligible against ~108W total
+         chamber loss. If a draught is felt at operating temp, seal the
+         gland throat with Dowsil 736 — no second gland needed.
+  G6 —   DELETED. Merged into G5.
+
+10mm OD PU tube (rad return -> reservoir) does not cross any panel — stays
+inside the enclosure, no gland required.
 
 ================================================================================================
 TERMINAL SCHEDULE
 ================================================================================================
 
 HIGH Block (29 terminals) — ALL LANDED:
-  T1 Y endstop 5V -> Chamber harness -> Duet 5V (io3 supply)
-  T2 Y endstop Signal -> Chamber harness -> Duet IO5
-  T3 Y endstop GND -> Chamber harness -> Duet GND (io3)
-  T4 RTD_Top wire 1 -> Chamber harness -> PLC SM1231 Ch1
-  T5 RTD_Top wire 2 -> Chamber harness -> PLC SM1231 Ch1
-  T6 RTD_Top wire 3 -> Chamber harness -> PLC SM1231 Ch1
-  T7 X endstop 5V -> Toolhead bundle -> Duet 5V (io2 supply)
-  T8 X endstop Signal -> Toolhead bundle -> Duet IO2
-  T9 X endstop GND -> Toolhead bundle -> Duet GND (io2)
+  T1  Y endstop 5V -> Chamber harness -> Duet 5V (io3 supply)
+  T2  Y endstop Signal -> Chamber harness -> Duet IO5
+  T3  Y endstop GND -> Chamber harness -> Duet GND (io3)
+  T4  RTD_Top wire 1 -> Chamber harness -> PLC SM1231 Ch1
+  T5  RTD_Top wire 2 -> Chamber harness -> PLC SM1231 Ch1
+  T6  RTD_Top wire 3 -> Chamber harness -> PLC SM1231 Ch1
+  T7  X endstop 5V -> Toolhead bundle -> Duet 5V (io2 supply)
+  T8  X endstop Signal -> Toolhead bundle -> Duet IO2
+  T9  X endstop GND -> Toolhead bundle -> Duet GND (io2)
   T10 Z probe Signal -> Toolhead bundle -> Duet IO6
   T11 Z probe GND -> Toolhead bundle -> Duet GND (io6)
   T12 Extruder stepper B1 -> Toolhead bundle -> Duet driver E0
@@ -468,15 +539,15 @@ HIGH Block (29 terminals) — ALL LANDED:
   T29 Bed heater N -> Bed drag chain -> Duet OUT7 (SSR1 gate)
 
 LOW Block (21 terminals) — ALL LANDED:
-  T1 Z brake + -> Duet OUT1 signal
-  T2 Z brake GND -> Duet OUT1 GND
-  T3 Z0 B1 (red) -> Duet driver 0.0
-  T4 Z0 B2 (blue) -> Duet driver 0.0
-  T5 Z0 A1 (green) -> Duet driver 0.0
-  T6 Z0 A2 (black) -> Duet driver 0.0
-  T7 Z1 B1 (red) -> Duet driver 0.1
-  T8 Z1 B2 (blue) -> Duet driver 0.1
-  T9 Z1 A1 (green) -> Duet driver 0.1
+  T1  Z brake + -> Duet OUT1 signal
+  T2  Z brake GND -> Duet OUT1 GND
+  T3  Z0 B1 (red) -> Duet driver 0.0
+  T4  Z0 B2 (blue) -> Duet driver 0.0
+  T5  Z0 A1 (green) -> Duet driver 0.0
+  T6  Z0 A2 (black) -> Duet driver 0.0
+  T7  Z1 B1 (red) -> Duet driver 0.1
+  T8  Z1 B2 (blue) -> Duet driver 0.1
+  T9  Z1 A1 (green) -> Duet driver 0.1
   T10 Z1 A2 (black) -> Duet driver 0.1
   T11 Z2 B1 (red) -> Duet driver 0.2
   T12 Z2 B2 (blue) -> Duet driver 0.2
@@ -502,14 +573,14 @@ Bed thermistors (T20-T23) Duet-side mapping:
   T22-T23 Mat NTC -> TEMP2
 
 ================================================================================================
-WATER COOLING LOOP  (MAJOR REVISION — 29/07/2026, supersedes 04/07/2026 spec)
+WATER COOLING LOOP (MAJOR REVISION — 29/07/2026, supersedes 04/07/2026 spec)
 ================================================================================================
 
 Water block : Mellow CNC Vz-HextrudORT WC (motor, heatbreak, Goliath cold zone)
-Loop order : Pump outlet -> Goliath block -> NEMA14 motor plate ->
+Loop order  : Pump outlet -> Goliath block -> NEMA14 motor plate ->
   rad top in -> rad bottom out -> reservoir -> pump
 
-Pump/Reservoir : IceManCooler DX5-240 combo, Lowara D5 pump
+Pump/Reservoir: IceManCooler DX5-240 combo, Lowara D5 pump
   (glass + aviation aluminium alloy + POM construction, 750ml reservoir
   volume, 4x G1/4 ports: 2 top + 2 bottom). Pump specs: 8-24V input,
   max lift 3.7m. SUPERSEDES Alphacool Eisbecher Lite 250mm.
@@ -519,13 +590,16 @@ Pump/Reservoir : IceManCooler DX5-240 combo, Lowara D5 pump
   manufacturer; PLAN: print own G1/4-threaded plug in PETG, drill/tap
   for M6 sensor, rather than trust/modify stock plug material.
 
-Radiator : Syscooling/generic all-aluminium 120mm x 27mm thickness,
+Radiator    : Syscooling/generic all-aluminium 120mm x 27mm thickness,
   standard 2-port G1/4. WALKED BACK from multiport variant — standard
   2-port confirmed sufficient, sensor relocated to a spare reservoir
   port instead (see below). SUPERSEDES Alphacool ES Aluminium 120mm
   (discontinued/EOL, confirmed unavailable to non-OEM builders).
-  Fan: Noctua NF-F12 iPPC 24V 3000RPM (non-PWM, direct to 24V LRS) —
-  ORDERED this session.
+  Fan: single Noctua NF-F12 iPPC 24V 3000RPM (non-PWM, direct to 24V
+  LRS) — ordered, RECEIVED. This has always been a single-radiator,
+  single-fan spec; the 2x120mm fan pair referenced in earlier revisions
+  belonged to an abandoned larger multiport/240mm radiator variant that
+  was never purchased. No fan pair exists or ever existed in hardware.
 
 Coolant sensor: M6 thread 304 stainless steel probe, 10K B3950 NTC.
   SUPERSEDES Alphacool Eiszapfen flat G1/4 NTC 10K (brass body,
@@ -537,29 +611,30 @@ Coolant sensor: M6 thread 304 stainless steel probe, 10K B3950 NTC.
   — this is NOT equivalent to the brass/copper exclusion elsewhere in
   the loop.
 
-Fittings : Generic 304 stainless steel push-fit G1/4, 4mm and 10mm OD.
+Fittings    : Generic 304 stainless steel push-fit G1/4, 4mm and 10mm OD.
   SUPERSEDES John Guest PM010821E (4mm) / PM011421E (10mm) acetal —
   those remain hard to source outside specialist distributors; stainless
   confirmed an acceptable wetted-metal pairing alongside the aluminium
   loop (see galvanic note above).
 
-Tubing : PU (polyurethane) flexible clear, 4mm OD (toolhead) + 10mm OD
-  (static rad-to-reservoir). SUPERSEDES silicone tubing — silicone does
-  not retain reliably in push-fit collet fittings (too soft, collet
+Tubing      : PU (polyurethane) flexible clear, 4mm OD (toolhead + water
+  cooling gland pair) + 10mm OD (static rad-to-reservoir, stays inside
+  enclosure, no panel penetration). SUPERSEDES silicone tubing — silicone
+  does not retain reliably in push-fit collet fittings (too soft, collet
   teeth don't bite); PU is semi-rigid and is the correct tubing family
   for push-fit systems.
 
-Toolhead : Goliath ships with its own PLASTIC swivel fittings at the
+Toolhead    : Goliath ships with its own PLASTIC swivel fittings at the
   M5 block ports — no separate SMC KQ2VS04-M5A purchase needed, and no
   wetted-metal concern at this connection.
 
-Coolant : Mayhems X1 Clear Premix — aluminium-safe ONLY. NO copper/brass
+Coolant     : Mayhems X1 Clear Premix — aluminium-safe ONLY. NO copper/brass
   in wetted path (stainless is the confirmed exception, not silent
   exclusion — see fittings/sensor notes above). Contains its own biocide
   and corrosion-inhibitor package — do NOT add separate biocide.
-  ~1L sufficient for this loop; ORDERED this session.
+  ~1L sufficient for this loop; ORDERED, IN HAND.
 
-Pump control : PWM via Duet OUT5 (moved from OUT6 31/07/2026), gated by
+Pump control: PWM via Duet OUT5 (moved from OUT6 31/07/2026), gated by
   hotend >50C in daemon.g. Pump 24V power feed is separate and fused at
   F7 (2A) — OUT5 carries the control signal only.
 
@@ -573,8 +648,11 @@ GRANITE BED
 
 Supplier: Just Granite Ltd (01785 711096), The Stone Works, Pillaton Hall
   Farm, Cannock Rd, Pillaton, Penkridge, Stafford ST19 5RZ.
-Spec: £40 offcut, unsealed, no edge prep. Top surface 440x440x20mm.
-STATUS: agreed verbally, order/confirmation still outstanding — see
+
+Spec (REVISED 31/07/2026, supersedes original £40 unsealed offcut): £180.
+  Top surface 440x440x20mm, top-face holes water-jet cut, top and sides
+  polished.
+STATUS: order/confirmation with Just Granite still outstanding — see
   OUTSTANDING PROCUREMENT.
 
 Mounting: M4 SHCS bolts fully tightened into T-nuts in 2020 aluminium
@@ -586,37 +664,35 @@ Mounting: M4 SHCS bolts fully tightened into T-nuts in 2020 aluminium
   expansion differential across ~200mm mount span confirmed <0.5mm even
   at aggressive chamber temps.
 
-Top-face drilling (DXF produced this session, see
-  granite_bed_440x440x20.dxf): 8x holes, Ø5.5mm (clearance for M3
-  Flow-Sert insert, 4.7mm OD x 7.3mm deep — confirm final clearance
-  figure with Just Granite), positioned 6.25mm in from nearest edge —
-  4 corners + 4 edge midpoints. Printable area 415x415mm centred on the
-  440x440 sheet (12.5mm margin all round). Hole depth is a machining
-  note only, not shown in the 2D DXF — state explicitly on the
-  fabricator quote.
+Top-face drilling (DXF produced, see granite_bed_440x440x20.dxf): 8x
+  holes, THROUGH-holes (only way to water-jet cut close enough to the
+  edge — confirmed 01/08/2026, supersedes earlier blind-hole assumption),
+  5mm, positioned 6.25mm in from nearest edge — 4 corners + 4 edge
+  midpoints. Holes sit well within kinematic bracket footprints, so being
+  through-holes does not interfere with the RTV bracket bonding on the
+  underside — they get filled with JB Weld before bonding. Printable area
+  415x415mm centred on the 440x440 sheet (12.5mm margin all round).
 
 Thread inserts: M3-UHBRFLSF (TR Fastenings Flow-Sert, brass, unheaded,
   7.3mm x 4.7mm, Farnell order code 2474931) — chosen over Heat-Sert for
-  longer knurl length (more epoxy keying surface) and blind bottom
-  (contains bonding agent, prevents through-hole seepage). Brass
-  confirmed acceptable here: dry, fully epoxy-potted application, no
-  wetted-metal/galvanic concern (unlike the water loop).
+  longer knurl length (more epoxy keying surface). Brass confirmed
+  acceptable here: dry, fully epoxy-potted application, no wetted-metal/
+  galvanic concern (unlike the water loop).
 
-Insert bonding adhesive: NOT YET CONFIRMED. JB Weld 37901 ExtremeHeat
-  metallic paste (amazon.co.uk/dp/B01IBOBY74, £6.99) was the working
-  candidate but is formulated primarily for metal-to-metal repair, not
-  masonry/stone bonding — DEFERRED pending Just Granite's direct
-  recommendation for what bonds reliably to their material. Also ask
-  Just Granite about FR4 retention plate mounting in the same
-  conversation, since it's part of the same top-face drilling job.
+Insert bonding adhesive: RESOLVED 03/08/2026 — JB Weld High Heat 37901
+  (450C rated), ordered via Amazon. Just Granite confirmed the slab is
+  volcanic rock and adhesive choice makes no practical difference to
+  bond reliability, so this is no longer a fallback candidate.
 
 Heater mat bonding: Dowsil 736 Red 300ml RTV (Farnell order code
-  2289638) will be used to bond the silicone heater mat to the granite
-  full-face — NOT mechanically retained (unsafe for a live heating
-  element under load). Apply as a bead/dot grid rather than full skim
-  coat to avoid trapped air voids (hot spots). 300ml cartridge chosen
-  over 90ml tube specifically because coverage now includes both the
-  full heater mat bond AND the kinematic bracket bonds in one order.
+  2289638), IN HAND, will be used to bond the silicone heater mat to the
+  granite full-face — NOT mechanically retained (unsafe for a live
+  heating element under load). Apply as a bead/dot grid rather than full
+  skim coat to avoid trapped air voids (hot spots). Same cartridge also
+  covers the kinematic bracket bonds.
+
+Kinematic brackets to granite underside: Dowsil 736 RTV — flexible,
+  compliant bond, correct for differential thermal expansion. IN HAND.
 
 FR4 retention plate: sheet stock STILL TO ORDER — Farnell does not
   stock unclad FR4 (their catalogue is PCB-fabrication-oriented,
@@ -625,7 +701,8 @@ FR4 retention plate: sheet stock STILL TO ORDER — Farnell does not
   Specialists (preset panel sizes from 30x15cm up, £8.03-£106.94).
   Final size pending granite drilling dimensions being locked.
   Retention hardware: M3 bolt + spring washer + M4 washer through
-  sheet, allows thermal expansion.
+  sheet, allows thermal expansion. 8x stainless thread inserts in
+  granite top face (4 corners + 1 mid-edge per side, 7.5-10mm from edge).
 
 Bed frame geometry: three-arm 2020 extrusion arrangement — two 280mm
   front arms at 40 deg (fixed by already-fabricated aluminium gusset
@@ -633,69 +710,71 @@ Bed frame geometry: three-arm 2020 extrusion arrangement — two 280mm
   coordinates pending finalisation of kinematic pivot point positions.
 
 ================================================================================================
-OUTSTANDING PROCUREMENT — 31/07/2026
+OUTSTANDING PROCUREMENT — 03/08/2026
 ================================================================================================
 
 STILL TO ORDER:
-  - Granite bed slab — confirm/place order with Just Granite
-  - FR4 sheet stock (unclad) — Ai Plastics or IT-TECH, size pending
-    granite drilling dims
-  - Insert-bonding adhesive for granite — pending Just Granite
-    recommendation (JB Weld 37901 is the fallback candidate, unconfirmed)
-  - TDB (tool distribution board), door insulation extrusions, door
-    hardware — all sourcing from Oozenest, spec/order pending
-  - Insulation PIR 25mm foil faced
+  - Granite bed slab — confirm/place order with Just Granite. £180 (REVISED
+    from £40 offcut): top-face holes water-jet cut, top and sides polished.
+    Holes are THROUGH-holes, 5mm, within bracket footprints, filled with
+    JB Weld before bonding.
+  - FR4 sheet stock (unclad) — Ai Plastics or IT-TECH, size pending granite
+    drilling dims
 
-STATUS UNCLEAR — confirm before marking resolved:
-  - Cable glands G1-G6 — bought as a set, individually, or already in hand?
-  - Elec bay fan on OUT6 — confirm whether the old 2x 120mm series pair
-    was physically removed from the panel or left disconnected
-  - SPI daughterboard CS pin for ElecBay RTD (S4) — config currently
-    assumes spi.cs0, verify against physical connector
+AWAITING DELIVERY:
+  - Water cooling set: radiator, DX5-240 pump/res combo, M6 NTC sensor,
+    stainless push-fit fittings (4mm+10mm), PU tubing (4mm+10mm) — AliExpress
+  - T1/T2 LRS-450-24 / LRS-450-48 pair
+  - MGN9 X rail + Omron opto endstops — AliExpress
+  - Large Mellow toolhead/gantry order (Goliath heatbreak + heater kit,
+    extruder Set2 + Set12 x2, SPAWD brackets, BRG gear kit, heatshield socks,
+    GT2 belt, CPAP pipe) — possible heatbreak duplication vs bundled kit and
+    Set12 qty2 intent still unresolved
+  - Ooznest door / elec-bay 3030 extrusion cut list + door hardware (PLACED,
+    SO-236447 rev 6, PAID 03/08/2026)
+    Cut list: 3x1000mm front verticals, 3x520mm front horizontals,
+    2x250mm elec bay depth extension, 2x654mm door verticals,
+    2x457mm door horizontals (~6.28m total 3030)
+  - TDB — ordered DIRECT FROM DUET3D (Ooznest only stock v0.5, would not
+    supply v1). Arriving separately from the Ooznest order.
 
-RESOLVED THIS SESSION (31/07/2026):
-  - Water pump moved OUT6 -> OUT5 (frees OUT6; OUT5 tach pin already in
-    use by CPAP, PWM pin was free)
-  - Elec bay fan added on OUT6 as Fan 3, inverted (!out6) — polarity
-    confirmed on bench
-  - ElecBay RTD added as S4 on SPI daughterboard
-  - daemon.g: printer-active bit write removed, elec bay fan hotend
-    override added
-  - PLC: FC2 deleted, OB1 N5 removed, FC4 Fans_MinSpeed output removed,
-    4 tags deleted, SM1231 Ch0 deactivated
-  - HMI: bay fan status indicator and tag removed
-  - R4 + F6 retained as spare PLC-switched 24V circuit
+TO COLLECT (tomorrow, Power Electrical Factors):
+  - Cable glands: 1x M32, 3x M20
+  - 20mm momentary push button (IO7 pause)
 
-RESOLVED 29/07/2026:
-  - Waveshare 10.1" DSI LCD (C) display — Pi Hut, £76.80
-  - Dowsil 736 Red 300ml RTV, Farnell order code 2289638, £21.14
-  - Labfacility DM-514-D air-off RTD, Farnell order code 2081259, £9.27
-  - M3 Flow-Sert brass insert (pack 100), Farnell order code 2474931, £13.50
-    (Farnell order total £43.91, one shipment, arriving 03/08/26)
-  - Full water cooling set: radiator, reservoir/pump combo, M6 NTC
-    sensor, stainless push-fit fittings (4mm+10mm), PU tubing (4mm+10mm)
-    — all AliExpress
-  - MGN9 X rail, Omron opto endstops — AliExpress
-  - M23CL-76-2804 M8 connectors (3-pin power + 4-pin CAN, female,
-    star topology to TDB) — AliExpress
-  - Large Mellow toolhead/gantry parts order: Goliath heatbreak + heater
-    kit, extruder Set2 + Set12 x2, SPAWD-related brackets, BRG gear kit,
-    heatshield socks, GT2 belt, CPAP pipe — flagged possible Goliath
-    heatbreak duplication vs bundled kit, and Set12 qty2 intent unclear,
-    not resolved
-  - 3x replacement Z brake steppers (42HSB47A41505) — ordered
-  - Bed heater mat (400x400mm, 1400W, 220V) — in hand
-  - T3/T4 always-on MDR PSUs (5V, 24V) — in hand
-  - T1/T2 LRS-450 pair (upgraded from LRS-350) — ordered
-  - Noctua NF-F12 iPPC 24V fan — ordered
-  - Mayhems X1 Clear Premix coolant — ordered
-  - Radiator walked back to standard 2-port (from multiport); sensor
-    relocated to spare reservoir port
+IN HAND (received):
+  - Duet 3 6HC, WS7040 CPAP blower, MGN12H 550mm rails x2, GT2 pulleys/idlers
+  - T3/T4 always-on MDR PSUs (5V, 24V)
+  - Bed heater mat 400x400mm 1400W 220V
+  - Noctua NF-F12 iPPC 24V radiator fan (single — see WATER COOLING LOOP)
+  - 3x replacement Z brake steppers (42HSB47A41505)
+  - M23CL-76-2804 motors — M8 connectors supplied with motors, separate
+    AliExpress connector order CANCELLED
+  - Waveshare 10.1" DSI LCD (C)
+  - Farnell order: Dowsil 736 Red 300ml RTV, Labfacility DM-514-D air-off
+    RTD, M3 Flow-Sert brass inserts (pack 100)
+  - Mayhems X1 Clear Premix coolant
+  - PIR 25mm foil-faced insulation (Xtratherm Thin-R XT/PR) + foil joint tape
+  - Bond It Top Gun silicone (PIR dot-and-dab to aluminium panels)
+  - Dowsil 799 clear (glass glazing sealant)
+  - JB Weld High Heat 37901 (granite insert bonding)
+  - SPI daughterboard (ElecBay RTD S4)
+  - Stop button (IO8, NC break-to-stop, latching type — separate from the
+    IO7 momentary being collected tomorrow)
 
-ALREADY IN HAND (confirmed owned, no cost, prior sessions):
-  - Duet 3 6HC
-  - WS7040 CPAP blower unit
-  - MGN12H 550mm rails x2 (Y rails)
-  - GT2 pulleys + idlers (20T)
+RESOLVED 03/08/2026:
+  - Insert-bonding adhesive CONFIRMED: JB Weld High Heat 37901.
+  - TDB source resolved: Duet3D direct, not Ooznest.
+  - SPI daughterboard was already in hand — no purchase required.
+  - Elec bay / radiator fan: confirmed single Noctua only, no fan pair
+    ever existed in hardware.
+  - PIR insulation position confirmed: INSIDE the aluminium cladding,
+    chamber-facing. Standard foil tape and standard silicone confirmed
+    adequate (boiler flue comparison).
+  - Door glazing resolved: 6mm toughened glass 469x606mm (not
+    polycarbonate). Ooznest door hardware order placed and paid.
+  - Cable gland schedule resolved: G4 needs no gland (printed part), G5
+    carries both water cooling tubes through one M20, G6 deleted. Only
+    1x M32 + 3x M20 required — collecting tomorrow.
 
 ================================================================================================
