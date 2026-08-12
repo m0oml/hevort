@@ -26,10 +26,10 @@ M569 P0.5 S1 D2                                         ; Drive 0.5: Extruder
 ; Layout (top-down, front of printer at bottom):
 ;   Back-left:  73.0 Y2  |  Back-right:  70.0 X1
 ;   Front-left: 71.0 X2  |  Front-right: 72.0 Y1
-M569 P70.0 S1 D0                                        ; Drive 70.0: X1 (back-right)
-M569 P71.0 S1 D0                                        ; Drive 71.0: X2 (front-left)
-M569 P72.0 S1 D0                                        ; Drive 72.0: Y1 (front-right)
-M569 P73.0 S1 D0                                        ; Drive 73.0: Y2 (back-left)
+M569 P70.0 S1 D3                                        ; Drive 70.0: X1 (back-right)
+M569 P71.0 S1 D3                                        ; Drive 71.0: X2 (front-left)
+M569 P72.0 S1 D3                                        ; Drive 72.0: Y1 (front-right)
+M569 P73.0 S1 D3                                        ; Drive 73.0: Y2 (back-left)
 
 ; --- Closed-Loop Encoders (AWD) ---
 M569.1 P70.0 T3                                         ; X1: magnetic encoder
