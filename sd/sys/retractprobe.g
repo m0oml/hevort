@@ -1,0 +1,1 @@
+M42 P1 S0                                               ; De-assert ALPS enable
