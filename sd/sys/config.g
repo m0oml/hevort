@@ -22,20 +22,21 @@ M569 P0.2 S0 D2                                         ; Drive 0.2: Z2
 ; Extruder: onboard driver 0.5 (closest to edge)
 M569 P0.5 S1 D2                                         ; Drive 0.5: Extruder
 
+; --- Closed-Loop Encoders (AWD) ---
+; Must be configured BEFORE setting drive mode
+M569.1 P70.0 T3 E2:4 R100 I0 D0                         ; X1: magnetic encoder
+M569.1 P71.0 T3 E2:4 R100 I0 D0                         ; X2: magnetic encoder
+M569.1 P72.0 T3 E2:4 R100 I0 D0                         ; Y1: magnetic encoder
+M569.1 P73.0 T3 E2:4 R100 I0 D0                         ; Y2: magnetic encoder
+
 ; --- CAN AWD Drivers (assisted open-loop) ---
 ; Layout (top-down, front of printer at bottom):
 ;   Back-left:  73.0 Y2  |  Back-right:  70.0 X1
 ;   Front-left: 71.0 X2  |  Front-right: 72.0 Y1
-M569 P70.0 S1 D3                                        ; Drive 70.0: X1 (back-right)
-M569 P71.0 S1 D3                                        ; Drive 71.0: X2 (front-left)
-M569 P72.0 S1 D3                                        ; Drive 72.0: Y1 (front-right)
-M569 P73.0 S1 D3                                        ; Drive 73.0: Y2 (back-left)
-
-; --- Closed-Loop Encoders (AWD) ---
-M569.1 P70.0 T3                                         ; X1: magnetic encoder
-M569.1 P71.0 T3                                         ; X2: magnetic encoder
-M569.1 P72.0 T3                                         ; Y1: magnetic encoder
-M569.1 P73.0 T3                                         ; Y2: magnetic encoder
+M569 P70.0 S1 D5                                        ; Drive 70.0: X1 (back-right)
+M569 P71.0 S1 D5                                        ; Drive 71.0: X2 (front-left)
+M569 P72.0 S1 D5                                        ; Drive 72.0: Y1 (front-right)
+M569 P73.0 S1 D5                                        ; Drive 73.0: Y2 (back-left)
 
 ; --- Axis Mapping ---
 M584 X70.0:71.0 Y72.0:73.0 Z0.0:0.1:0.2 E0.5            ; X (AWD), Y (AWD), Z (triple), E
@@ -53,9 +54,8 @@ M208 X0:415 Y0:415 Z0:415                               ; Axis limits
 
 ; --- Speeds and Accelerations (conservative - tune after input shaper) ---
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
-M203 X6000 Y6000 Z1000 E3600                             ; Max speeds (mm/min)
+M203 X6000 Y6000 Z1000 E3600                            ; Max speeds (mm/min)
 M201 X500 Y500 Z20 E250                                 ; Accelerations (mm/s^2) - placeholder
-
 ; --- Z Brake Control ---
 ; Brakes are power-to-release (24V releases, de-energised engages)
 ; OUT1 switches to GND (low-side): output HIGH = 24V to coil = released
@@ -64,73 +64,69 @@ M201 X500 Y500 Z20 E250                                 ; Accelerations (mm/s^2)
 M569.7 P0.0 C"out1" S200                                ; Z brakes on OUT1 (commoned across Z0/Z1/Z2 — single brake config covers all three via shared output)
 
 ; =================== Endstops & Probes ================
-; X homes to max (right), Y homes to min (front)
-M574 X2 P"io2.in" S1                                    ; X endstop (max, right) - Omron EE-SX67x
+M574 X1 P"io2.in" S1                                    ; X endstop (min, left) - Omron EE-SX67x
 M574 Y1 P"io5.in" S1                                    ; Y endstop (min, front) - Omron EE-SX67x
 M574 Z1 S2                                              ; Z endstop via probe
 
 ; Z Probe
+M950 P1 C"io6.out"                                      ; GPIO 1: ALPS probe enable (deploy/retract macros)
 M558 K0 P5 C"io6.in" H5 F120 T6000                      ; Digital probe on io6
 G31 P500 X0 Y0 Z0.7                                     ; Probe trigger value, offset, trigger height (PLACEHOLDER)
 
-; =================== Thermal Sensors ==================
+; =================== Thermal Sensors ===================
 M912 P0 S-5.2                                           ; Set MCU calibration offset BEFORE defining the sensor
 M308 S0 P"temp0" Y"pt1000" A"Hotend"                    ; Hotend PT1000
-M308 S1 P"temp1" Y"thermistor" A"Bed" T100000 B3950     ; Bed interior thermistor 10K B3950 - PID source
+M308 S1 P"temp1" Y"thermistor" A"Coolant" T10000 B3950  ; Coolant NTC 10K B3950 (Barrow G1/4 stop fitting) - was bed slab
 M308 S2 P"temp2" Y"thermistor" A"BedMat" T10000 B3950   ; Bed heater mat surface 10K B3950 - safety limit only
-M308 S3 P"temp3" Y"thermistor" A"Coolant" T10000 B3950  ; Coolant NTC 10K B3950 (Alphacool Eiszapfen)
 M308 S4 P"spi.cs0" Y"rtd-max31865" A"ElecBay"           ; Elec bay RTD Pt100 4-wire, SPI daughterboard ch0
+M308 S5 P"spi.cs1" Y"rtd-max31865" A"Bed"               ; Bed slab RTD Pt100 4-wire, SPI daughterboard ch1 - PID source
 M308 S10 Y"mcu-temp" A"MCU Temp"                        ; MCU temperature sensor
-M308 S11 Y"drivers" A"Driver Temp"                      ; Driver temperature (0/100/130C states
+M308 S11 Y"drivers" A"Driver Temp"                      ; Driver temperature (0/100/130C states)
 
-
-; =================== Heaters ==========================
+; =================== Heaters ===========================
 ; Hotend Heater (H1) on OUT0 (highest rated output, 15A)
 M950 H1 C"out0" T0                                      ; Hotend heater on out0, sensor S0
 M143 H1 P0 T0 S350 A0                                   ; Hotend safety limit 350C (no secondary sensor)
 M307 H1 R2.43 D5.5 E1.35 K0.56 B0                       ; Hotend PID model (PLACEHOLDER - autotune required)
 
 ; Bed Heater (H0) SSR control on OUT7
-; PID controlled from bed interior sensor S1 (temp1)
+; PID controlled from bed slab RTD S5 (spi.cs1)
 ; Independent over-temp cutout on mat surface sensor S2 (temp2), limit 125C
-M950 H0 C"out7" T1 Q1                                     ; Bed heater SSR on out7, PID from S1
-M143 H0 P0 T1 S200 A0                                   ; Bed primary limit 200C on sensor S1
-;M143 H0 P1 T2 S125 A0                                   ; Bed mat safety cutout 125C on sensor S2
-;M307 H1 B1 A100.0 C200.0 D5.0 B0                           ; Bed PID model (calculatede for 20mm granite slab)
-M307 H0 R1.0 K0.5 D10 E1.5 S0.35 ; for bere mat heating 
+M950 H0 C"out7" T5 Q1                                   ; Bed heater SSR on out7, PID from S5
+M143 H0 P0 T5 S200 A0                                   ; Bed primary limit 200C on sensor S5
+M143 H0 P1 T2 S125 A0                                   ; Bed mat safety cutout 125C on sensor S2
+M307 H0 A100.0 C200.0 D5.0 B0                           ; Bed PID model (calculated for 20mm granite slab)
 
 ; Map bed heater
 M140 P0 H0                                              ; Map to bed slot
 
-; ======================== Fans ========================
+; ========================= Fans ========================
 ; Fan 0: Duet enclosure fan (Noctua NF-A4x10 24V PWM) on OUT4
-; Thermostatic: off below 40C, 100% at 60C, driven by MCU and driver temps
+; Thermostatic on MCU and driver temps
 M950 F0 C"!out4" Q500                                   ; Fan 0: enclosure fan, 500Hz PWM
-M106 P0 H10:11 T25:45                                   ; Off below 40C, full at 60C, thermostatic control
+M106 P0 H10:11 T25:45                                   ; Thermostatic control on MCU/driver temps
 
-; Fan 1: WS7040 CPAP (part cooling) on OUT5 with tach
-M950 F1 C"out9+out5.tach" Q500 K1                      ; Fan 1: CPAP, 500Hz PWM, tach on out9 (0-5v out5.tach) with 1pprpm
-M106 P1 S0 L0 X1 H-1                                   ; Manual/slicer control, no thermostatic
+; Fan 1: WS7040 CPAP (part cooling) on OUT9 with tach
+M950 F1 C"out9+out5.tach" Q500 K1                       ; Fan 1: CPAP, 500Hz PWM, tach on out5.tach, 1 pulse/rev
+M106 P1 S0 L0 X1 H-1                                    ; Manual/slicer control, no thermostatic
 
-; Fan 2: Water pump PWM on OUT5
-; Overridden by daemon.g which gates pump on hotend temp (>50C)
-; Below 50C hotend: pump off. Above 50C: pump runs at 40% min, 100% at 40C coolant temp
-M950 F2 C"out5" Q500                                    ; Fan 2: water pump, 500Hz PWM
-M106 P2 S0 L0.4 X1 H3 T25:40 B0.1                      ; 40% min, 100% at 40C coolant temp - overridden by daemon.g
+; Fan 2: Water pump on OUT2 (Lowara D5 Vario - manual speed dial, no PWM input)
+; Thermostatic on/off from hotend sensor S0: on above 40C, off below
+M950 F2 C"out2" Q500                                    ; Fan 2: water pump, on/off gate
+M106 P2 S0 L0 X1 H0 T40:41                              ; On above 40C hotend, off below
 
-; Fan 3: Electronics bay fan (24V 4-pin) on OUT6, inverted PWM
-M950 F3 C"!out6" Q500                                         ; Fan 3: elec bay fan, 500Hz PWM, inverted
-M106 P3 S0 L0 X1 H4 T30:45                                    ; Thermostatic 30-45C on ElecBay RTD (S4)
+; Fan 3: Electronics bay / radiator fan (24V 4-pin PWM) on OUT6, inverted PWM
+; Single fan pulls bay exhaust through the radiator - highest of the two sensors wins
+M950 F3 C"!out6" Q500                                   ; Fan 3: bay/rad fan, 500Hz PWM, inverted
+M106 P3 S0 L0 X1 H4:1 T30:50                            ; Thermostatic 30-50C on ElecBay RTD (S4) + Coolant (S1)
 
 ; ======================== Tools =======================
 M563 P0 D0 H1 F1                                        ; Tool 0: Extruder 0, Heater 1 (hotend), Fan 1 (CPAP)
 M568 P0 R0 S0                                           ; Standby/Active temps to 0C
 T0                                                      ; Select Tool 0
 
-; ======================= Inputs =======================
-; Flow switch on IO4 (NC - closed = flow present)
-M950 J0 C"io4.in"                                       ; Input 0: flow switch
-M581 T0 P0 S0 R0                                        ; Trigger 0 on flow switch open (loss of flow)
+; ======================= Inputs ========================
+; IO4 free (was flow switch - removed, pump has no flow sensing)
 
 ; Filament sensor on IO3 (TBD - placeholder)
 ; M950 J1 C"io3.in"                                     ; Input 1: filament sensor (uncomment when fitted)
@@ -140,7 +136,7 @@ M950 J2 C"io7.in"                                       ; Input 2: pause button
 M581 T2 P2 S1 R0                                        ; Trigger 2 on pause button make, during print only
 
 ; Stop button on IO8 (NC - break to stop)
-M950 J3 C"!io8.in"                                       ; Input 3: stop button
+M950 J3 C"!io8.in"                                      ; Input 3: stop button
 M581 T3 P3 S0 R0                                        ; Trigger 3 on stop button break
 
 ; ======================= Outputs ======================
