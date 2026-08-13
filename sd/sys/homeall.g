@@ -15,7 +15,7 @@ G90                                              ; Absolute positioning
 var xTravel = move.axes[0].max - move.axes[0].min + 5
 G91                                              ; Relative positioning
 G1 H1 X{-var.xTravel} F600                       ; Coarse home X
-G1 H2 X5 F6000                                   ; Back off 5mm
+G1 X5 F6000                                      ; Back off 5mm (no H2 - CoreXY H2 is single-motor move, drives wrong way)
 G1 H1 X{-var.xTravel} F300                       ; Fine home X
 G90                                              ; Absolute positioning
 
@@ -23,7 +23,7 @@ G90                                              ; Absolute positioning
 var yTravel = move.axes[1].max - move.axes[1].min + 5
 G91                                              ; Relative positioning
 G1 H1 Y{-var.yTravel} F600                       ; Coarse home Y
-G1 H2 Y5 F6000                                   ; Back off 5mm
+G1 Y5 F6000                                      ; Back off 5mm (no H2 - CoreXY H2 is single-motor move, drives wrong way)
 G1 H1 Y{-var.yTravel} F300                       ; Fine home Y
 G90                                              ; Absolute positioning
 
