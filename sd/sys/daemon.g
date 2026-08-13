@@ -1,13 +1,16 @@
 ; ======================================================================================
-; Daemon Script - HevORT Chamber PLC Communication + Water Pump
+; Daemon Script - HevORT Chamber PLC Communication
 ; Polls Siemens S7-1200 every 5 seconds via Modbus RTU over RS485
 ;
 ; Register Map (Holding Registers):
 ;   R0 = Chamber_SP         (Duet->PLC, tenths degC)
 ;   R1 = Duet_Heartbeat     (Duet->PLC, 0-32767)
-;   R2 = Duet_Control_Bits  (Duet->PLC, Bit0=Printer_Active)
+;   R2 = Duet_Control_Bits  (Duet->PLC, unused - retained to preserve register map)
 ;   R3 = Chamber_PV         (PLC->Duet, tenths degC)
 ;   R4 = Status_Bits        (PLC->Duet, see vars.g for bit definitions)
+;
+; Water pump and bay/radiator fan are now thermostatic in config.g (Fan 2, Fan 3).
+; No fan or pump logic belongs in this file.
 ; ======================================================================================
 
 while true
@@ -37,22 +40,7 @@ while true
         set global.chamberPV = { var.plcRegs[3] }
         set global.chamberStatus = { var.plcRegs[4] }
 
-    ; --- 4. Water Pump Gate ---
-    ; Pump runs only when hotend is above 50C
-    ; Below 50C hotend: pump forced off regardless of coolant temp
-    if { heat.heaters[1].current > 50 }
-        M106 P2 H3 T25:40                               ; Hand control to coolant temp sensor S3
-    else
-        M106 P2 S0                                      ; Hotend cold - pump off
-
-    ; --- 5. Electronics Bay Fan Override ---
-    ; Fan 3 thermostatic on ElecBay RTD (S4) 30-45C; forced full when hotend (S0) >50C
-    if { heat.heaters[1].current > 50 }
-        M106 P3 S1                                            ; Hotend hot - force elec bay fan full
-    else
-        M106 P3 H4 T30:45                                     ; Hand back to thermostatic ElecBay control
-
-    ; --- 6. Poll Interval ---
+    ; --- 4. Poll Interval ---
     G4 S5                                               ; 5 second poll cycle
 
 ; while ends
