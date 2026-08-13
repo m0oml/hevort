@@ -64,7 +64,6 @@ M201 X500 Y500 Z20 E250                                 ; Accelerations (mm/s^2)
 M569.7 P0.0 C"out1" S200                                ; Z brakes on OUT1 (commoned across Z0/Z1/Z2 — single brake config covers all three via shared output)
 
 ; =================== Endstops & Probes ================
-; X homes to max (right), Y homes to min (front)
 M574 X1 P"io2.in" S1                                    ; X endstop (min, left) - Omron EE-SX67x
 M574 Y1 P"io5.in" S1                                    ; Y endstop (min, front) - Omron EE-SX67x
 M574 Z1 S2                                              ; Z endstop via probe
