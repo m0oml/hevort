@@ -107,13 +107,13 @@ M950 F0 C"!out4" Q500                                   ; Fan 0: enclosure fan, 
 M106 P0 H10:11 T25:45                                   ; Thermostatic control on MCU/driver temps
 
 ; Fan 1: WS7040 CPAP (part cooling) on OUT9 with tach
-M950 F1 C"out9+out5.tach" Q500 K1                       ; Fan 1: CPAP, 500Hz PWM, tach on out5.tach, 1 pulse/rev
+M950 F1 C"out9" Q500                                    ; Fan 1: CPAP, 500Hz PWM, 
 M106 P1 S0 L0 X1 H-1                                    ; Manual/slicer control, no thermostatic
 
 ; Fan 2: Water pump on OUT2 (Lowara D5 Vario - manual speed dial, no PWM input)
 ; Thermostatic on/off from hotend sensor S0: on above 40C, off below
-M950 F2 C"out2" Q500                                    ; Fan 2: water pump, on/off gate
-M106 P2 S0 L0 X1 H0 T40:41                              ; On above 40C hotend, off below
+M950 F2 C"out2+out5.tach" Q500                          ; Fan 2: water pump, on/off gate
+M106 P2 C"Pump" S0 L0 X1 H0 T40:41                              ; On above 40C hotend, off below
 
 ; Fan 3: Electronics bay / radiator fan (24V 4-pin PWM) on OUT6, inverted PWM
 ; Single fan pulls bay exhaust through the radiator - highest of the two sensors wins
