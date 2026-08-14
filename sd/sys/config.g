@@ -50,7 +50,7 @@ M906 I100 T30                                           ; Idle current factor 30
 M84 S30                                                 ; Motor idle timeout (30s)
 
 ; --- Axis Limits (PLACEHOLDER - update after homing verified) ---
-M208 X0:415 Y0:415 Z0:415                               ; Axis limits
+M208 X0:415 Y0:415 Z0:400                               ; Axis limits
 
 ; --- Speeds and Accelerations (conservative - tune after input shaper) ---
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
