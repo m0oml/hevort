@@ -24,10 +24,10 @@ M569 P0.5 S1 D2                                         ; Drive 0.5: Extruder
 
 ; --- Closed-Loop Encoders (AWD) ---
 ; Must be configured BEFORE setting drive mode
-M569.1 P70.0 T3 E2:4 R100 I0 D0                         ; X1: magnetic encoder
-M569.1 P71.0 T3 E2:4 R100 I0 D0                         ; X2: magnetic encoder
-M569.1 P72.0 T3 E2:4 R100 I0 D0                         ; Y1: magnetic encoder
-M569.1 P73.0 T3 E2:4 R100 I0 D0                         ; Y2: magnetic encoder
+M569.1 P70.0 T3 E2:4 R200 I0 D0                         ; X1: magnetic encoder
+M569.1 P71.0 T3 E2:4 R200 I0 D0                         ; X2: magnetic encoder
+M569.1 P72.0 T3 E2:4 R200 I0 D0                         ; Y1: magnetic encoder
+M569.1 P73.0 T3 E2:4 R200 I0 D0                         ; Y2: magnetic encoder
 
 ; --- CAN AWD Drivers (assisted open-loop) ---
 ; Layout (top-down, front of printer at bottom):
@@ -44,7 +44,7 @@ M350 X16 Y16 Z16 E16 I1                                 ; 16x microstepping with
 M92 X80 Y80 Z800 E420                                   ; Steps per mm
 
 ; --- Motor Currents ---
-M906 X2600 Y2600 Z1050 E1000                            ; Motor current (mA)
+M906 X2000 Y2000 Z1050 E1000                            ; Motor current (mA)
 M917 X0 Y0                                              ; AWD holding current zero (closed-loop corrects drift)
 M906 I100 T30                                           ; Idle current factor 30% (Z and E)
 M84 S30                                                 ; Motor idle timeout (30s)
