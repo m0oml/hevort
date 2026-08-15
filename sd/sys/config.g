@@ -55,7 +55,7 @@ M917 X100 Y100                                          ; AWD holding current 10
 M906 I100 T1800                                         ; Idle current factor 100% (Z and E), 30 min idle timeout
 
 ; --- Axis Limits (PLACEHOLDER - update after homing verified) ---
-M208 X0:400 Y0:390 Z0:300                               ; Axis limits
+M208 X0:400 Y0:390 Z-10:300                             ; Axis limits - negative Z min allows probing an out-of-tram bed below the Z0 datum
 
 ; --- Speeds and Accelerations (conservative - tune after input shaper) ---
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
@@ -75,8 +75,9 @@ M574 Z1 S2                                              ; Z endstop via probe
 
 ; Z Probe
 M950 P1 C"io6.out"                                      ; GPIO 1: ALPS probe enable (deploy/retract macros)
-M558 K0 P5 C"io6.in" H5 F120 T6000                      ; Digital probe on io6
+M558 K0 P5 C"io6.in" H5 F600 T6000                      ; Digital probe on io6
 G31 P500 X0 Y0 Z0.7                                     ; Probe trigger value, offset, trigger height (PLACEHOLDER)
+M671 X424.75:-22.75:201 Y-8.75:-8.75:415 S10            ; Z pivot points (POS8 bearing / MGN12 rail junction): Z0 front-right, Z1 front-left, Z2 rear
 
 ; =================== Thermal Sensors ===================
 M912 P0 S-5.2                                           ; Set MCU calibration offset BEFORE defining the sensor
