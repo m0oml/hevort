@@ -50,7 +50,7 @@ M906 I100 T30                                           ; Idle current factor 30
 M84 S30                                                 ; Motor idle timeout (30s)
 
 ; --- Axis Limits (PLACEHOLDER - update after homing verified) ---
-M208 X0:415 Y0:415 Z0:400                               ; Axis limits
+M208 X0:300 Y0:300 Z0:300                               ; Axis limits
 
 ; --- Speeds and Accelerations (conservative - tune after input shaper) ---
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
@@ -87,7 +87,7 @@ M308 S11 Y"drivers" A"Driver Temp"                      ; Driver temperature (0/
 ; Hotend Heater (H1) on OUT0 (highest rated output, 15A)
 M950 H1 C"out0" T0                                      ; Hotend heater on out0, sensor S0
 M143 H1 P0 T0 S350 A0                                   ; Hotend safety limit 350C (no secondary sensor)
-M307 H1 R2.43 D5.5 E1.35 K0.56 B0                       ; Hotend PID model (PLACEHOLDER - autotune required)
+M307 H1 R3.394 K0.346:0.369 D4.88 E1.35 S1.00 B0 V24.0  ; Hotend PID model
 
 ; Bed Heater (H0) SSR control on OUT7
 ; PID controlled from bed slab RTD S5 (spi.cs1)
