@@ -1,10 +1,9 @@
 # Last backup was:
-## 15 Aug 2026 at 08:55 Local Time (TZ = -1.0 hrs)  
-## 15 Aug 2026 at 07:55 UTC 
+## 15 Aug 2026 at 08:56 Local Time (TZ = -1.0 hrs)  
+## 15 Aug 2026 at 07:56 UTC 
 
-### The following files were added:
-sd/macros/_st_measure.g<br>sd/macros/speedtest.g<br>
+### No files were added.
+
 ### The following files were updated:
-sd/macros/_st_measure.g<br>sd/macros/speedtest.g<br>
-### The following files were deleted:
-sd/macros/Speed/_st_measure.g<br>sd/macros/Speed/speedtest.g<br>sd/macros/Speed/square.g<br>sd/sys/closed-loop/70_2026-07-31_19.07.34.csv<br>sd/sys/closed-loop/70_2026-07-31_19.07.40.csv<br>sd/sys/closed-loop/70_2026-07-31_19.07.45.csv<br>sd/sys/closed-loop/70_2026-07-31_19.07.51.csv<br>sd/sys/closed-loop/70_2026-07-31_19.07.57.csv<br>sd/sys/closed-loop/70_2026-07-31_19.08.02.csv<br>sd/sys/closed-loop/70_2026-07-31_19.08.08.csv<br>sd/sys/closed-loop/70_2026-07-31_19.08.14.csv<br>sd/sys/closed-loop/70_2026-07-31_19.08.20.csv<br>sd/sys/closed-loop/70_2026-07-31_19.08.26.csv<br>sd/sys/closed-loop/70_2026-07-31_19.08.31.csv<br>sd/sys/closed-loop/70_2026-07-31_19.08.37.csv<br>sd/sys/closed-loop/70_2026-07-31_19.08.43.csv<br>sd/sys/closed-loop/70_2026-07-31_19.08.49.csv<br>sd/sys/closed-loop/70_2026-07-31_19.08.54.csv<br>sd/sys/closed-loop/70_2026-07-31_19.09.00.csv<br>sd/sys/closed-loop/70_2026-07-31_19.09.06.csv<br>sd/sys/closed-loop/70_2026-07-31_19.09.12.csv<br>sd/sys/closed-loop/70_2026-07-31_19.09.18.csv<br>sd/sys/closed-loop/70_2026-07-31_19.09.23.csv<br>sd/sys/closed-loop/70_2026-07-31_19.09.29.csv<br>sd/sys/closed-loop/70_2026-07-31_19.09.35.csv<br>sd/sys/closed-loop/70_2026-07-31_19.09.41.csv<br>sd/sys/closed-loop/70_2026-07-31_19.09.47.csv<br>sd/sys/closed-loop/70_2026-07-31_19.09.52.csv<br>sd/sys/closed-loop/70_2026-07-31_19.09.58.csv<br>sd/sys/closed-loop/70_2026-07-31_19.10.04.csv<br>sd/sys/closed-loop/70_2026-07-31_19.10.10.csv<br>sd/sys/closed-loop/70_2026-07-31_19.10.16.csv<br>sd/sys/closed-loop/70_2026-07-31_19.10.21.csv<br>sd/sys/closed-loop/70_2026-07-31_19.10.27.csv<br>sd/sys/closed-loop/70_2026-07-31_19.10.33.csv<br>sd/sys/closed-loop/70_2026-07-31_19.10.39.csv<br>sd/sys/closed-loop/70_2026-07-31_19.10.45.csv<br>sd/sys/closed-loop/70_2026-07-31_19.10.50.csv<br>sd/sys/closed-loop/70_2026-07-31_19.11.40.csv<br>
+
+### No files were deleted 
