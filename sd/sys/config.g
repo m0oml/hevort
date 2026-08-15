@@ -16,27 +16,33 @@ G4 S2                                                   ; Wait 2s for CAN expans
 
 ; --- Onboard Drivers ---
 ; Z axis: conventional steppers on onboard drivers
-M569 P0.0 S0 D2                                         ; Drive 0.0: Z0
-M569 P0.1 S0 D2                                         ; Drive 0.1: Z1
-M569 P0.2 S0 D2                                         ; Drive 0.2: Z2
+; Layout confirmed 15/08/2026 by isolating each driver via M584 single-driver
+; remap and forcing individual moves:
+;   Z0: front-right   Z1: rear   Z2: front-left (by elimination, unconfirmed)
+M569 P0.0 S0 D2                                         ; Drive 0.0: Z0 (front-right)
+M569 P0.1 S0 D2                                         ; Drive 0.1: Z1 (rear)
+M569 P0.2 S0 D2                                         ; Drive 0.2: Z2 (front-left)
 ; Extruder: onboard driver 0.5 (closest to edge)
 M569 P0.5 S1 D2                                         ; Drive 0.5: Extruder
 
 ; --- Closed-Loop Encoders (AWD) ---
 ; Must be configured BEFORE setting drive mode
-M569.1 P70.0 T3 E2:4 R200 I0 D0                         ; X1: magnetic encoder
-M569.1 P71.0 T3 E2:4 R200 I0 D0                         ; X2: magnetic encoder
-M569.1 P72.0 T3 E2:4 R200 I0 D0                         ; Y1: magnetic encoder
-M569.1 P73.0 T3 E2:4 R200 I0 D0                         ; Y2: magnetic encoder
+; Tuned 15/08/2026 per Duet 1HCL procedure (P -> A -> V -> D -> I)
+; E6:10 set from measured worst residual 4.71 full steps across verified envelope
+M569.1 P70.0 T3 E6:10 R30 I1000 D0.05 V500 A100000      ; X1: magnetic encoder
+M569.1 P71.0 T3 E6:10 R30 I1000 D0.05 V500 A100000      ; X2: magnetic encoder
+M569.1 P72.0 T3 E6:10 R30 I1000 D0.05 V500 A100000      ; Y1: magnetic encoder
+M569.1 P73.0 T3 E6:10 R30 I1000 D0.05 V500 A100000      ; Y2: magnetic encoder
 
-; --- CAN AWD Drivers (assisted open-loop) ---
+; --- CAN AWD Drivers (closed loop) ---
+; Homing files drop to D2 and restore D4 per Duet 1HCL documentation
 ; Layout (top-down, front of printer at bottom):
 ;   Back-left:  73.0 Y2  |  Back-right:  70.0 X1
 ;   Front-left: 71.0 X2  |  Front-right: 72.0 Y1
-M569 P70.0 S1 D5                                        ; Drive 70.0: X1 (back-right)
-M569 P71.0 S1 D5                                        ; Drive 71.0: X2 (front-left)
-M569 P72.0 S1 D5                                        ; Drive 72.0: Y1 (front-right)
-M569 P73.0 S1 D5                                        ; Drive 73.0: Y2 (back-left)
+M569 P70.0 S1 D4                                        ; Drive 70.0: X1 (back-right)
+M569 P71.0 S1 D4                                        ; Drive 71.0: X2 (front-left)
+M569 P72.0 S1 D4                                        ; Drive 72.0: Y1 (front-left)
+M569 P73.0 S1 D4                                        ; Drive 73.0: Y2 (back-left)
 
 ; --- Axis Mapping ---
 M584 X70.0:71.0 Y72.0:73.0 Z0.0:0.1:0.2 E0.5            ; X (AWD), Y (AWD), Z (triple), E
@@ -45,17 +51,16 @@ M92 X80 Y80 Z800 E420                                   ; Steps per mm
 
 ; --- Motor Currents ---
 M906 X2000 Y2000 Z1050 E1000                            ; Motor current (mA)
-M917 X0 Y0                                              ; AWD holding current zero (closed-loop corrects drift)
-M906 I100 T30                                           ; Idle current factor 30% (Z and E)
-M84 S30                                                 ; Motor idle timeout (30s)
+M917 X100 Y100                                          ; AWD holding current 100% - required for closed loop (Duet 1HCL doc)
+M906 I100 T1800                                         ; Idle current factor 100% (Z and E), 30 min idle timeout
 
 ; --- Axis Limits (PLACEHOLDER - update after homing verified) ---
-M208 X0:300 Y0:300 Z0:300                               ; Axis limits
+M208 X0:400 Y0:390 Z0:300                               ; Axis limits
 
 ; --- Speeds and Accelerations (conservative - tune after input shaper) ---
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
-M203 X6000 Y6000 Z1000 E3600                            ; Max speeds (mm/min)
-M201 X500 Y500 Z20 E250                                 ; Accelerations (mm/s^2) - placeholder
+M203 X30000 Y30000 Z1000 E3600                          ; Max speeds (mm/min) - X/Y 500mm/s verified, saturates 600-700
+M201 X35000 Y35000 Z20 E250                             ; Accelerations (mm/s^2) - 35000 verified, headroom to ~48000
 ; --- Z Brake Control ---
 ; Brakes are power-to-release (24V releases, de-energised engages)
 ; OUT1 switches to GND (low-side): output HIGH = 24V to coil = released
