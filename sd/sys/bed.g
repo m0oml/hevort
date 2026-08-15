@@ -1,11 +1,7 @@
 ; ================================================================================
 ; Bed Compensation Macro (G32) - Triple Z-Screw Tilt Correction
 ; Iterative 3-point tramming using ALPS probe (K0) and M671 pivot geometry.
-; Repeats G30 passes until deviation converges or 15 iterations are reached
-; (Duet-documented pattern: docs.duet3d.com bed levelling using multiple
-; independent Z motors).
-; Pivot points (M671, in config.g) are the POS8 bearing / short MGN12 rail
-; junctions, NOT the probe points below and NOT the leadscrew shaft positions.
+; Requires M671 in config.g defining the POS8 bearing / MGN12 rail junctions.
 ; Probe point layout:
 ;   P0 - front-right (near Z0)   P1 - front-left (near Z1)   P2 - rear (near Z2)
 ; This does NOT run a mesh (G29) - that is a separate step once G32 converges.
@@ -16,7 +12,23 @@ M561                                                             ; Clear any act
 if !move.axes[0].homed || !move.axes[1].homed || !move.axes[2].homed
     M98 P"homeall.g"                                             ; Ensure axes are homed before probing
 
-; --- 2. Iterative alignment loop ---
+; --- 2. Probe setup ---
+; config.g's M558 H5 is tuned for normal operation once the bed is close to
+; level. An untrammed bed can be further out than that, so widen the search
+; window for tramming and restore it at the end.
+M558 K0 H40                                                      ; Temporary dive height for tramming
+
+; Single clearance move before the first travel. Homing leaves the nozzle at
+; trigger height, which is not safe to traverse an untrammed bed at. After each
+; G30 completes RRF retracts to dive height automatically, so subsequent
+; travels within the loop need no further Z handling.
+; M569.7 fires the brake port at the same time as driver enable, but RRF gives
+; no automatic delay in this direction - force enable and wait before moving Z.
+M17 Z                                                            ; Enable Z, releasing brakes
+G4 P800                                                          ; Wait for brake solenoids to fully release
+G1 Z40 F1000                                                     ; Lower bed to dive height before first travel
+
+; --- 3. Iterative alignment loop ---
 while true
     ; Point 0: front-right, near Z0
     G0 X400 Y16 F9000                                            ; Travel to front-right probe point
@@ -44,8 +56,9 @@ while true
     if abs(move.calibration.initial.deviation) < 0.02 || iterations > 15
         break
 
-; --- 3. Z-datum re-establishment ---
+; --- 4. Z-datum re-establishment ---
 ; Levelling adjustments move the bed plane; Z must be re-homed at centre
+M558 K0 H5                                                       ; Restore normal dive height
 G4 P500                                                          ; Final settle time after corrections
 var xCenter = move.axes[0].min + (move.axes[0].max - move.axes[0].min) / 2 - sensors.probes[0].offsets[0]
 var yCenter = move.axes[1].min + (move.axes[1].max - move.axes[1].min) / 2 - sensors.probes[0].offsets[1]
