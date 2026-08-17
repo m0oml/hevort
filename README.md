@@ -6,5 +6,4 @@
 
 ### The following files were updated:
 
-### The following files were deleted:
-sd/macros/closed_loop.g<br>
+### No files were deleted 
