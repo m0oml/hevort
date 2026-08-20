@@ -483,7 +483,7 @@ Physical layer : Duet 3 6HC onboard RS485. RS485_EN jumper fitted. IO1
  dedicated — do not use IO1 for anything else.  
 Cable : OSP1 1x2x24AWG overall screened, drain grounded at PLC end  
  only, 260mm run — no termination resistor needed  
-Duet config : M575 P2 B9600 S7  
+Duet config : M575 P3 B9600 S7  (P2 on RRF 3.6.x)  
 Protocol : 9600 8N1, Duet = master, PLC CB1241 = slave address 1  
 Polling : daemon.g every 5s. M260.1 write of all 5 registers in one  
  transaction, then M261.1 read. The M261.1 call is INLINED in  
@@ -492,8 +492,9 @@ Polling : daemon.g every 5s. M260.1 write of all 5 registers in one
  within an active while loop.  
 Note : RRF 3.6.x has NO bitwise operators — use mod arithmetic for  
  bit extraction  
-WARNING : RRF 3.7.0 changes M575 port numbering — P2 becomes P3. Do not  
- upgrade without updating config.g.  
+NOTE : RRF 3.7.0 changed M575 port numbering — P2 became P3. Applied on  
+ 20/08/2026 when upgrading to 3.7.0-beta.3: config.g and daemon.g  
+ now use P3. Channel 3 reports as Aux 1 with Tx/!Rx port rs485.tx.  
 
 Register Map (DB1, HR40001 base):  
  R0 Chamber_SP Duet->PLC Int, tenths degC  
@@ -1053,8 +1054,8 @@ FIRMWARE
  splitting them.  
 - vars.g requires exists() guards on all global declarations.  
 - RRF 3.6.x has no bitwise operators — use mod arithmetic.  
-- RRF 3.7.0: M575 P2 becomes P3. Do not upgrade without updating config.g,  
- daemon.g and plc_read.g.  
+- RRF 3.7.0: M575 P2 becomes P3. Done 20/08/2026 in config.g and daemon.g;  
+ plc_read.g was already P3 (superseded, inlined in daemon.g).  
 - daemon.g must be renamed to be edited while RRF is running.  
 - G1 moves without an H parameter default to H0, which applies axis limits and  
  refuses unhomed axes. Homing back-off moves need H2.  
