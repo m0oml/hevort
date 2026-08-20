@@ -170,7 +170,7 @@ else
 ; ======================= Modbus =======================
 ; RS485 to Siemens S7-1200 PLC for chamber heating control
 ; IO1 dedicated to RS485 - RS485_EN jumper fitted on board
-M575 P2 B9600 S7                                        ; Serial 2: RS485, 9600 baud, Modbus RTU
+M575 P3 B9600 S7                                        ; Serial 3: RS485, 9600 baud, Modbus RTU (P2 in RRF 3.6.x)
 
 ; ===================== Finalization ===================
 M98 P"vars.g"  
