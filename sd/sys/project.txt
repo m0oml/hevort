@@ -495,6 +495,20 @@ Note : RRF 3.6.x has NO bitwise operators — use mod arithmetic for
 NOTE : RRF 3.7.0 changed M575 port numbering — P2 became P3. Applied on  
  20/08/2026 when upgrading to 3.7.0-beta.3: config.g and daemon.g  
  now use P3. Channel 3 reports as Aux 1 with Tx/!Rx port rs485.tx.  
+NOTE : RRF 3.7.0-beta.3 — a FAILED M261.1 still declares its V variable  
+ (as null) and does not clean it up on the error path. Every  
+ later iteration of the while loop then fails with "variable  
+ 'plcRegs' already exists" and the read NEVER recovers, even once  
+ the PLC answers again. Nesting the read in its own code block  
+ does NOT help — only a fresh run of the file clears the scope.  
+ Fix: guard before the read in daemon.g —  
+   if { exists(var.plcRegs) }  
+       break  
+ which ends the file and lets RRF relaunch it with a clean scope.  
+ Cost during an outage: read retried every ~16s instead of 5s  
+ (5s G4 + ~10s relaunch delay). Verified 20/08/2026 by pulling  
+ the RS485 cable — zero 'already exists', reads resumed on  
+ reconnect with no restart.  
 
 Register Map (DB1, HR40001 base):  
  R0 Chamber_SP Duet->PLC Int, tenths degC  
@@ -1002,6 +1016,18 @@ COMMISSIONING:
  - Probe trigger height and offsets  
  - Air-off RTD fitting and PID_Compact_2 retune — DONE 13/08/2026 (see  
  AIR-OFF RTD in CHAMBER HEATING SYSTEM)  
+ CHAMBER PID_Compact_1 (OUTER LOOP) — TUNED 20/08/2026:
+Pretuning (SUT) in TIA Portal wizard rejected the run despite a genuine 38°C
+gap (ambient 22, SP 60) — recurring TIA quirk with slow thermal loads, not
+specific to this rig. Ran Fine tuning instead, against the already-closed
+air-off inner loop as plant. Result (TIA Portal fine-tune): Kp 23.2822,
+Ti 65.35211s, Td 16.54922s, PWeighting 0.2560298, DWeighting 0.0,
+TdFiltRatio 0.1, Cycle 1.399945s, PID structure. Uploaded to DB5, program
+saved and downloaded to CPU. Verified on a second heat-up from partial
+cooldown: overshoot only ~0.4°C past 60°C SP, settled cleanly. Weighted PV
+at steady state 60.1°C (chamber 60.0, top 63.3, bottom 57.2 — ~6°C
+stratification, expected with top panel insulation not yet fitted). Both
+cascade loops (air-off inner, chamber outer) now tuned and validated.
  - Input shaping, then raise M201/M203 from placeholders  
  - Re-check belt tension after the first hours of running  
  - Display mount design in Onshape (Waveshare STEP from the Waveshare wiki)  
@@ -1056,6 +1082,9 @@ FIRMWARE
 - RRF 3.6.x has no bitwise operators — use mod arithmetic.  
 - RRF 3.7.0: M575 P2 becomes P3. Done 20/08/2026 in config.g and daemon.g;  
  plc_read.g was already P3 (superseded, inlined in daemon.g).  
+- RRF 3.7.0: a failed M261.1 leaks its V variable, poisoning every later  
+ iteration of a while loop permanently. daemon.g carries an  
+ exists()/break guard to recover. Do not remove it.  
 - daemon.g must be renamed to be edited while RRF is running.  
 - G1 moves without an H parameter default to H0, which applies axis limits and  
  refuses unhomed axes. Homing back-off moves need H2.  
