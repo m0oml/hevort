@@ -29,13 +29,13 @@ while true
 
     ; --- 2. Write to PLC ---
     ; Write all 5 registers in one transaction (partial writes may zero remainder)
-    M260.1 P2 A1 F16 R0 B{global.chamberSP, global.chamberHeartbeat, global.duetControl, 0, 0}
+    M260.1 P3 A1 F16 R0 B{global.chamberSP, global.chamberHeartbeat, global.duetControl, 0, 0}
 
     ; --- 3. Read from PLC ---
     ; Inlined from plc_read.g: DSF 3.7.0-beta.1 fails to declare a new local var
     ; ("Cannot add local variable because there is no open code block") when it
     ; happens inside a file invoked via M98 from within an active while loop.
-    M261.1 P2 A1 F3 R0 B5 V"plcRegs"
+    M261.1 P3 A1 F3 R0 B5 V"plcRegs"
     if { var.plcRegs != null }
         set global.chamberPV = { var.plcRegs[3] }
         set global.chamberStatus = { var.plcRegs[4] }
