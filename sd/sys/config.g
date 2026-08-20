@@ -61,6 +61,14 @@ M208 X0:400 Y0:390 Z-10:300                             ; Axis limits - negative
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
 M203 X30000 Y30000 Z1000 E3600                          ; Max speeds (mm/min) - X/Y 500mm/s verified, saturates 600-700
 M201 X35000 Y35000 Z20 E250                             ; Accelerations (mm/s^2) - 35000 verified, headroom to ~48000
+
+; --- Input Shaping ---
+; Ring-down 121-147Hz, both axes, 8 unshaped captures across D2/D4 and I500/I1000 - structural.
+; ZVD over MZV: same 1/F duration (7.9ms), +-20% band vs +-10%.
+; Verified 19/08/2026: X ring-down rms 0.12 -> 0.08, 121Hz peak 0.14 -> 0.03, accel clipping eliminated.
+M593 P"zvd" F127                                                        ; Cancel ~127Hz gantry ringing
+;M955 P0 C"spi.cs3+spi.cs2" I65
+
 ; --- Z Brake Control ---
 ; Brakes are power-to-release (24V releases, de-energised engages)
 ; OUT1 switches to GND (low-side): output HIGH = 24V to coil = released
@@ -130,7 +138,6 @@ M106 P3 S0 L0 X1 H4:1 T30:50                            ; Thermostatic 30-50C on
 ; ======================== Tools =======================
 M563 P0 D0 H1 F1                                        ; Tool 0: Extruder 0, Heater 1 (hotend), Fan 1 (CPAP)
 M568 P0 R0 S0                                           ; Standby/Active temps to 0C
-T0                                                      ; Select Tool 0
 
 ; ======================= Inputs ========================
 ; IO4 free (was flow switch - removed, pump has no flow sensing)
