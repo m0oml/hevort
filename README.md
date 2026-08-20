@@ -1,9 +1,9 @@
 # Last backup was:
-## 20 Aug 2026 at 07:17 Local Time (TZ = -1.0 hrs)  
-## 20 Aug 2026 at 06:17 UTC 
+## 20 Aug 2026 at 16:59 Local Time (TZ = -1.0 hrs)  
+## 20 Aug 2026 at 15:59 UTC 
 
-### No files were added.
-
+### The following files were added:
+sd/sys/configtool.json.bak-3.6.3<br>sd/sys/duetBackup/duetBackup.force.log<br>
 ### The following files were updated:
-
+sd/sys/configtool.json.bak-3.6.3<br>sd/sys/duetBackup/duetBackup.force.log<br>
 ### No files were deleted 
