@@ -67,7 +67,7 @@ M201 X35000 Y35000 Z20 E250                             ; Accelerations (mm/s^2)
 ; ZVD over MZV: same 1/F duration (7.9ms), +-20% band vs +-10%.
 ; Verified 19/08/2026: X ring-down rms 0.12 -> 0.08, 121Hz peak 0.14 -> 0.03, accel clipping eliminated.
 M593 P"zvd" F127                                                        ; Cancel ~127Hz gantry ringing
-;M955 P0 C"spi.cs3+spi.cs2" I65
+M955 P0 C"spi.cs3+spi.cs2" I65
 
 ; --- Z Brake Control ---
 ; Brakes are power-to-release (24V releases, de-energised engages)
