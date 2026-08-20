@@ -35,6 +35,15 @@ while true
     ; Inlined from plc_read.g: DSF 3.7.0-beta.1 fails to declare a new local var
     ; ("Cannot add local variable because there is no open code block") when it
     ; happens inside a file invoked via M98 from within an active while loop.
+    ; A failed M261.1 still declares plcRegs (as null) and the declaration is NOT
+    ; cleaned up on the error path, so every later iteration fails with
+    ; "variable 'plcRegs' already exists" and the read never recovers - even once
+    ; the PLC is answering again. Nesting the read in its own block does not help;
+    ; only a fresh run of the file clears the scope. So bail out and let RRF
+    ; restart daemon.g. Verified on RRF/DSF 3.7.0-beta.3, 20/08/2026.
+    if { exists(var.plcRegs) }
+        break
+
     M261.1 P3 A1 F3 R0 B5 V"plcRegs"
     if { var.plcRegs != null }
         set global.chamberPV = { var.plcRegs[3] }
