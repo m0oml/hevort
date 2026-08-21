@@ -1,6 +1,6 @@
 =======================================================================================================  
 HevORT Build — PROJECT INDEX / WORKING FILE  
-Last updated: 20/08/2026  
+Last updated: 21/08/2026  
 =======================================================================================================  
 
 This file carries everything needed for day-to-day work: current state, live  
@@ -56,7 +56,8 @@ Motion   : 4x M23CL-76-2804 CAN-FD on 48V via TDB v1.0. D4 closed loop, tuned.
            12mm 2GT Gates EPDM belts, Mellow CNC EvoHevORT towers.  
            X beam 20x20x3mm aluminium, single MGN9 rail.  
 Z        : 3x 42HSB47A41505 brake steppers, drivers 0.0/0.1/0.2, brakes OUT1.  
-           Z0=front-left arm, Z1=rear arm, Z2=front-right arm (M671 order).  
+           Z0=front-right arm, Z1=rear arm, Z2=front-left arm (M671 order).  
+           Confirmed physically 21/08/2026 by M584 single-driver jog.  
 Toolhead : Goliath water-cooled + VZ-HextrudORT Low Plus (12mm bore).  
            Mellow ALPS strain-gauge Z probe on IO6. WS7040 CPAP part cooling.  
 Bed      : 440x440x20mm granite + 4mm FR4, 400x400mm 1400W polyimide mat.  
