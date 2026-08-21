@@ -55,3 +55,7 @@ var xCenter = move.axes[0].min + (move.axes[0].max - move.axes[0].min) / 2 - sen
 var yCenter = move.axes[1].min + (move.axes[1].max - move.axes[1].min) / 2 - sensors.probes[0].offsets[1]
 G1 X{var.xCenter} Y{var.yCenter} F6000                          ; Move to bed centre
 G30                                                             ; Probe Z datum
+
+
+
+
