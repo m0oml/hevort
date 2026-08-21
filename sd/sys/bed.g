@@ -3,7 +3,12 @@
 ; Iterative 3-point tramming using ALPS probe (K0) and M671 pivot geometry.
 ; Requires M671 in config.g defining the POS8 bearing / MGN12 rail junctions.
 ; Probe point layout:
-;   P0 - front-right (near Z0)   P1 - front-left (near Z1)   P2 - rear (near Z2)
+;   P0 - front-right (Z0, driver 0.0)   P1 - rear (Z1, 0.1)   P2 - front-left (Z2, 0.2)
+; This order MUST match the M671 coordinate order in config.g - RRF pairs G30 P<n>
+; to the n-th M671 entry, so a mismatch silently corrects the WRONG motor. It is
+; invisible on a near-level bed (all three corrections come out equal) and only
+; shows up as failure to converge once the bed is genuinely out of tram.
+; Corner-to-driver mapping confirmed physically 21/08/2026 by M584 single-driver.
 ; This does NOT run a mesh (G29) - that is a separate step once G32 converges.
 ; ================================================================================
 
@@ -16,7 +21,10 @@ if !move.axes[0].homed || !move.axes[1].homed || !move.axes[2].homed
 ; config.g's M558 H5 is tuned for normal operation once the bed is close to
 ; level. An untrammed bed can be further out than that, so widen the search
 ; window for tramming and restore it at the end.
-M558 K0 H40                                                      ; Temporary dive height for tramming
+; Two-value H (RRF 3.5+): the 40mm dive applies only to the first probe at each
+; point - i.e. on arrival after a travel across a potentially untrammed bed.
+; The A8 repeat probes at the same XY retract just 2mm, so averaging stays fast.
+M558 K0 H40:2                                                    ; Dive: 40mm on arrival, 2mm between repeats
 
 ; Single clearance move before the first travel. Homing leaves the nozzle at
 ; trigger height, which is not safe to traverse an untrammed bed at. After each
@@ -37,18 +45,18 @@ while true
     G30 P0 X400 Y16 Z-99999                                       ; Probe and store as point 0
     G4 P250
 
-    ; Point 1: front-left, near Z1
-    G0 X2 Y16 F9000                                              ; Travel to front-left probe point
-    M400                                                          ; Wait for move to finish
-    G4 P250
-    G30 P1 X2 Y16 Z-99999                                         ; Probe and store as point 1
-    G4 P250
-
-    ; Point 2: rear, near Z2
+    ; Point 1: rear, near Z1 (driver 0.1)
     G0 X201 Y380 F9000                                           ; Travel to rear probe point
     M400                                                          ; Wait for move to finish
     G4 P250
-    G30 P2 X201 Y380 Z-99999 S3                                   ; Probe point 2, calculate 3-motor correction
+    G30 P1 X201 Y380 Z-99999                                      ; Probe and store as point 1
+    G4 P250
+
+    ; Point 2: front-left, near Z2 (driver 0.2)
+    G0 X2 Y16 F9000                                              ; Travel to front-left probe point
+    M400                                                          ; Wait for move to finish
+    G4 P250
+    G30 P2 X2 Y16 Z-99999 S3                                      ; Probe point 2, calculate 3-motor correction
     M400                                                          ; Sync moves before loop evaluation
     G4 P250
 
@@ -58,7 +66,7 @@ while true
 
 ; --- 4. Z-datum re-establishment ---
 ; Levelling adjustments move the bed plane; Z must be re-homed at centre
-M558 K0 H5                                                       ; Restore normal dive height
+M558 K0 H5:2                                                     ; Restore normal dive height
 G4 P500                                                          ; Final settle time after corrections
 var xCenter = move.axes[0].min + (move.axes[0].max - move.axes[0].min) / 2 - sensors.probes[0].offsets[0]
 var yCenter = move.axes[1].min + (move.axes[1].max - move.axes[1].min) / 2 - sensors.probes[0].offsets[1]
