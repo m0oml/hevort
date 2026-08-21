@@ -84,9 +84,9 @@ M574 Z1 S2                                              ; Z endstop via probe
 ; Z Probe
 M950 P1 C"io6.out"                                      ; GPIO 1: ALPS probe enable (deploy/retract macros)
 M42 P1 S0                                               ; Force enable LOW at boot - don't rely on GPIO default state
-M558 K0 P5 C"io6.in" H5 F600 T6000                      ; Digital probe on io6
+M558 K0 P9 C"io6.in" H5 F300:100 T6000 A8 S0.02
 G31 P500 X0 Y0 Z0.7                                     ; Probe trigger value, offset, trigger height (PLACEHOLDER)
-M671 X424.75:-22.75:201 Y-8.75:-8.75:415 S10            ; Z pivot points (POS8 bearing / MGN12 rail junction): Z0 front-right, Z1 front-left, Z2 rear
+M671 X424.75:201:-22.75 Y-8.75:415:-8.75 S10            ; Z0 front-right, Z1 rear, Z2 front-left
 
 ; =================== Thermal Sensors ===================
 M912 P0 S-5.2                                           ; Set MCU calibration offset BEFORE defining the sensor
