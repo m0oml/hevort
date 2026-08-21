@@ -68,7 +68,19 @@ while true
 ; Levelling adjustments move the bed plane; Z must be re-homed at centre
 M558 K0 H5:2                                                     ; Restore normal dive height
 G4 P500                                                          ; Final settle time after corrections
+G1 Z5 F1000                                                      ; Return to dive height - the loop leaves the nozzle
+                                                                 ; only 2mm off the bed, too close to start a G30 from
 var xCenter = move.axes[0].min + (move.axes[0].max - move.axes[0].min) / 2 - sensors.probes[0].offsets[0]
 var yCenter = move.axes[1].min + (move.axes[1].max - move.axes[1].min) / 2 - sensors.probes[0].offsets[1]
 G1 X{var.xCenter} Y{var.yCenter} F9000                           ; Move to bed centre
+M400
+G4 P1000                                                         ; Let the ALPS strain gauge fully release before the
+                                                                 ; datum probe. 21/08/2026: this G30 failed with "probe
+                                                                 ; already triggered before probing move started" after
+                                                                 ; a converged loop - and because nothing checked the
+                                                                 ; result, the Z datum was silently left unset and the
+                                                                 ; whole following heightmap came out 0.25mm displaced.
 G30                                                              ; Set Z0 datum at bed centre
+if result != 0
+    abort "bed.g: centre G30 FAILED - Z datum not set. Any mesh taken now is invalid."
+
