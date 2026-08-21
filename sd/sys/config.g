@@ -84,9 +84,12 @@ M574 Z1 S2                                              ; Z endstop via probe
 ; Z Probe
 M950 P1 C"io6.out"                                      ; GPIO 1: ALPS probe enable (deploy/retract macros)
 M42 P1 S0                                               ; Force enable LOW at boot - don't rely on GPIO default state
-M558 K0 P9 C"io6.in" H5 F300 T3000 A8 S0.02
-G31 P500 X0 Y0 Z0.7                                     ; Probe trigger value, offset, trigger height (PLACEHOLDER)
-M671 X424.75:201:-22.75 Y-8.75:415:-8.75 S10            ; Z0 front-right, Z1 rear, Z2 front-left
+M558 K0 P9 C"io6.in" H5:2 F600:300 T3000 A8 S0.02
+G31 P500 X0 Y0 Z-0.025                                  ; Trigger height measured COLD 21/08/2026, paper feeler 0.10mm (micrometer)
+                                                        ; NEGATIVE by design: ALPS is a strain gauge, the nozzle presses ~0.025mm
+                                                        ; into the bed before the trigger threshold is crossed. Uncertainty +/-0.025.
+                                                        ; REDO at printing temperature once the hotend PT1000 is replaced.
+M671 X424.75:201:-22.75 Y-8.75:415:-8.75 S40            ; Z0 front-right, Z1 rear, Z2 front-left; max 40mm correction
 
 ; =================== Thermal Sensors ===================
 M912 P0 S-5.2                                           ; Set MCU calibration offset BEFORE defining the sensor
