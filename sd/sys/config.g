@@ -85,9 +85,16 @@ M574 Z1 S2                                              ; Z endstop via probe
 M950 P1 C"io6.out"                                      ; GPIO 1: ALPS probe enable (deploy/retract macros)
 M42 P1 S0                                               ; Force enable LOW at boot - don't rely on GPIO default state
 M558 K0 P9 C"io6.in" H5:2 F600:300 T3000 A8 S0.02
-G31 P500 X0 Y0 Z-0.025                                  ; Trigger height measured COLD 21/08/2026, paper feeler 0.10mm (micrometer)
-                                                        ; NEGATIVE by design: ALPS is a strain gauge, the nozzle presses ~0.025mm
-                                                        ; into the bed before the trigger threshold is crossed. Uncertainty +/-0.025.
+; NOTE 21/08/2026: the ALPS cannot complete a large mesh in a hot chamber - it
+; latches "probe already triggered" after ~21-25 points (~150-200 strikes) and
+; recovers between runs. KNOWN ALPS BEHAVIOUR, seen before on this machine.
+; Raising the deployprobe settle to 800ms and adding R0.4 did NOT help - both
+; reverted. Use a COARSE grid for hot meshes instead; see frame_survey file.
+G31 P500 X0 Y0 Z-0.030                                  ; Trigger height measured COLD 21/08/2026 by SLIP GAUGE at Z1.100:
+                                                        ; 1.06 free, 1.07 push fit -> contact 0.030. Uncertainty +/-0.005.
+                                                        ; Supersedes an earlier paper-feeler value of -0.025 (agreed to 5um).
+                                                        ; NEGATIVE by design: ALPS is a strain gauge, the nozzle presses in
+                                                        ; before the trigger threshold is crossed.
                                                         ; REDO at printing temperature once the hotend PT1000 is replaced.
 M671 X424.75:201:-22.75 Y-8.75:415:-8.75 S40            ; Z0 front-right, Z1 rear, Z2 front-left; max 40mm correction
 
