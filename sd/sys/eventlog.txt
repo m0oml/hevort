@@ -1,0 +1,6 @@
+﻿2026-08-22 13:49:00 Event logging started
+2026-08-22 13:49:04 Warning: M307: Heater 1 predicted maximum temperature at full power is 567°C
+2026-08-22 13:49:04 Warning: M307: Heater 1 predicted maximum temperature at full power is 567°C
+2026-08-22 15:51:32 Warning: Lost connection to Duet (Transfer timeout while waiting for TfrRdy pin in phase HeaderChecksum (waited 504ms, 0 glitches during wait))
+2026-08-22 15:51:32 Warning: Connection to controller has been reset
+2026-08-22 16:10:59 Event logging stopped
