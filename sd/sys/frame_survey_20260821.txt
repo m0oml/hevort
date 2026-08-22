@@ -21,12 +21,12 @@ a) RIGHT Y RAIL LOW AT REAR - the shimmable fault.
    The drop grows progressively rear-ward and grows further with temperature.
    SHIM TO THE HOT FIGURE - section 6.
 
-b) X BEAM CURVATURE INVERTS WITH TEMPERATURE - NOT shimmable.
-      cold  +0.042 -0.010 -0.049 +0.018   (dips mid-span)
-      hot   -0.079 +0.108 +0.068 -0.097   (crowns mid-span)
-   ~0.2mm swing. Consistent with a vertical thermal gradient across the
-   20x20x3 section - hot air above, cold granite below - bending the beam.
-   It does not exist cold and cannot be corrected mechanically. Mesh only.
+b) X BEAM INVERTS WITH TEMPERATURE - NOT shimmable. Full numbers in section 5b.
+      cold  beam CROWNS UP  0.089mm at mid-span (gantry rides high)
+      hot   beam SAGS DOWN  0.186mm at mid-span (gantry rides low)
+      swing 0.275mm over dT 26K  =  10.6 microns/K
+   Cannot be corrected mechanically. Mesh only.
+   DECISION 22/08/2026 (Trev): leave the X beam, shim the Y rail only.
    NOTE this supersedes the earlier "X beam is good, leave it alone" - that
    conclusion was cold-only and is not wrong, just incomplete.
 
@@ -161,7 +161,99 @@ Right rail drop ACCELERATES rearward - a uniform twist would be linear. This is
 a droop or mislocated support at the rear, not the assembly being cocked.
 
 Rail crown vs own chord: left +0.196, right +0.225 (common mode - ignore)
-X beam bow after removing rail tilt: +0.100mm / 380mm = 0.26 mm/m (good)
+X beam bow after removing rail tilt: SUPERSEDED by section 5b - that figure was
+cold-only and read off a single row.
+
+-------------------------------------------------------------------------------
+5b. X BEAM - ISOLATED   (added 22/08/2026)
+-------------------------------------------------------------------------------
+Method: remove the per-row linear X tilt from every row of the map (that tilt IS
+the Y rail fault), then average the residual over all Y. What is left is the
+beam's own shape.
+
+SIGN HERE IS PHYSICAL, NOT HEIGHTMAP. + = gantry rides HIGH, - = gantry rides
+LOW, referenced to a straight chord X10 -> X390. The heightmap sign is inverted
+from the beam - an earlier note in this file said "cold dips / hot crowns", which
+described the MAP. The BEAM crowns cold and sags hot.
+
+  X position        10     73    137    200    263    327    390
+  COLD (20C)      0.000 +0.046 +0.071 +0.086 +0.092 +0.083  0.000
+  HOT  (46C frm)  0.000    --   -0.178   --   -0.152   --    0.000
+
+                 peak      at X    direction
+  cold          0.089mm    ~200    beam CROWNS UP,  gantry high mid-span
+  hot           0.186mm    ~200    beam SAGS DOWN,  gantry low  mid-span
+  swing         0.275mm            = 10.6 microns/K over dT 26K
+
+End asymmetry negligible: right end 0.020mm below left cold, 0.008mm hot. Clean
+symmetric arc centred on mid-travel.
+
+IT REALLY IS THE BEAM. The detrended profile is identical at every Y - row-to-row
+scatter 5.1 microns cold, 4.5 microns hot, against a 0.089-0.186mm signal. A bed
+or rail artifact would vary with Y. This does not. Same bent member carried around.
+
+COST, HOT, first-layer variation across a centred part:
+  100mm wide  0.013mm     300mm wide  0.116mm
+  200mm wide  0.052mm     380mm full  0.186mm
+Small central parts barely see it. A full-width first layer sees the lot.
+Hot the beam is ~59% the size of the Y rail fault. Once the rail is shimmed the
+beam becomes the DOMINANT remaining error and the mesh carries all 0.186mm of it.
+
+*** CORRECTION - THE MECHANISM FIRST WRITTEN HERE WAS WRONG ***
+Originally written up as a vertical thermal gradient across the section. That
+does not survive arithmetic: 0.22mm of bow needs 6.1 K top-to-bottom across 20mm
+of aluminium, and holding that takes 366 W per metre of beam through the wall
+conduction path (k=200, two 3mm side walls, 20mm path). Free convection supplies
+about 1% of that. Dead theory.
+
+LIKELY MECHANISM: BIMETALLIC STRIP. Steel MGN9 rail (alpha 11.5) bolted along an
+aluminium beam (alpha 23). Fully-bonded upper bound for a 26K rise is 0.40mm of
+bow; observed 0.275mm, consistent with a rail bolted at intervals that slips a
+little between fixings. It also explains the "inversion" cleanly - the bimetal
+term is monotonic in dT and always one sign, and the beam simply starts crowned
++0.089 and gets pushed through zero into a sag. Nothing reverses; a linear effect
+crosses an offset.
+  Direction constraint: heating SAGS it, which needs the higher-alpha aluminium
+  net BELOW the steel. CHECK where that MGN9 actually sits relative to the beam
+  neutral axis before treating this as settled.
+
+WHY THE BEAM CANNOT BE SHIMMED OR PACKED (20x20x3 6063, I = 10132 mm^4,
+EI = 6.99e8 N.mm^2, ~500mm span):
+  - 0.7kg toolhead at mid-span sags it        0.026 mm
+  - to make the observed 0.22mm you need      59 N (6 kg) at mid-span
+    or an end moment of                       4.9 N.m
+    or an axial length mismatch of            0.24 MICRONS
+A quarter of a micron. The beam's shape is set by its end constraints, not by
+where you pack it. There is no interface spanning the fault to shim against, and
+a shim is a constant while the fault reverses sign - size it hot and you double
+the error cold.
+
+NOT DONE - SLACKEN / HEAT / RETIGHTEN (considered 22/08/2026, rejected)
+Slackening the rail screws hot and retightening would move the stress-free
+temperature from 20C to 46C. Slip needed is only 0.15mm total (+/-0.075 from
+centre), well inside M3-in-3.5mm hole clearance. But it cannot reach zero: the
+beam already crowns +0.089 cold, so it is not stress-free cold either, and that
+built-in bow survives. Predicted result 0.186 sag -> 0.089 crown hot, a 52%
+reduction with a sign flip. Rejected because it risks a joint currently holding
+4.5 micron repeatability, it would disturb the rail's Y-plane straightness which
+cannot be measured and which the mesh cannot correct, and the dual MGN9 sandwich
+already on the project list cancels the couple by symmetry instead of re-datuming
+it - same job done properly, and it also treats the 215 Hz torsional mode.
+NOTE the mesh workflow is unaffected either way: the cold->hot delta IS the
+bimetal term, 0.275mm, identical before and after. The only gain would have been
+less magnitude for the mesh to carry hot.
+If it is ever done: check first whether the rail is located longitudinally (dowel
+or shoulder) or it will not slip at all; park and support the toolhead at one end
+since the carriage loads an unsupported rail; retighten from the centre outward;
+threadlock, because preload drops ~10% on cooling.
+
+STILL WORTH DOING - THE LINEARITY TEST (cheap, 32 points)
+Two 4x4 meshes at different chamber setpoints. If bimetal, mid-span sagitta is
+proportional to frame dT - at ~33C frame expect ~0.093mm. If it is linear the
+mechanism is settled and the beam is predictable at any temperature without
+measuring it. If it is NOT linear, the mechanism is end-constraint or joint
+rotation instead, and anything aimed at the rail is aimed at the wrong thing.
+Costs one heating cycle, which section 9 already requires anyway.
 
 DTI CROSS-CHECK - NOW OF LIMITED VALUE
 A Mitutoyo lever DTI clamped to an M6 bolt in the hotend was swept over the bed
@@ -216,7 +308,7 @@ RULES
 - Grade it, never step it. Every fixing gets its own thickness.
 - Fastener 1 gets nothing. All correction added going rearward.
 - Do NOT shim the left rail. Do NOT try to shim the X beam - its error is
-  thermal bending, it is not there when the machine is cold.
+  thermal bending and it reverses sign. See section 5b.
 
 CAVEATS
 - Fasteners 1 and 10 (Y-17.5, Y+407.5) are EXTRAPOLATED beyond the Y16-380 the
