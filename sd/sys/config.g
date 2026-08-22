@@ -9,6 +9,13 @@ M83                                                     ; Relative extruder move
 M550 P"Hevort"                                          ; Set printer name
 M669 K1                                                 ; CoreXY kinematics
 
+; --- Persistent event log ---
+; Added 22/08/2026. journald on this Pi is VOLATILE (/var/log/journal empty), so
+; every previous emergency stop was unrecoverable. This log lives on the SD card
+; and survives reboots. Investigating repeated unexplained M112 halts - see
+; frame_survey_20260821.txt section 16. Raise to S2 if more context is needed.
+M929 P"eventlog.txt" S1                                 ; Log warnings and errors
+
 ; ======================= Network ======================
 G4 S2                                                   ; Wait 2s for CAN expansion boards
 
