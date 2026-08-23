@@ -14,7 +14,7 @@
 ;   5mm and returns during each home. Allow lead slack and headroom.
 ;   First approach to each new X is DELIBERATELY SLOW (F6000) so the
 ;   temporary sensor lead snags as a stall, not a crash. Do not speed
-;   these up. The sweeps themselves must stay at F15000 to compare.
+;   these up. The sweeps themselves run at F15000 - restored 23/08.
 ; =====================================================================
 
 if !move.axes[0].homed || !move.axes[1].homed
@@ -22,8 +22,8 @@ if !move.axes[0].homed || !move.axes[1].homed
 
 ; --- test conditions, is.txt ---
 M593 P"none"                                 ; shaper OFF
-M201 X8000 Y8000                             ; 0.82g - avoids +-2g clipping
-M203 X15000 Y15000                           ; 250 mm/s cruise
+M201 X8000 Y8000                             ; 0.82g - ORIGINAL full-speed condition
+M203 X15000 Y15000                           ; 250 mm/s cruise - ORIGINAL
 M400
 
 ; =============== stationary control ===============
