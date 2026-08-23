@@ -352,12 +352,34 @@ the actual correct fix is still unknown: find out WHY the original torque was
 binding (bowed rail, hole misalignment) and correct that properly, and get an
 actual torque figure on this rail size/screw so re-checks aren't by feel.
 
-PLAN — 0-1Nm torque wrench on order (as of 22/08/2026). Once in hand: retorque
-both rails to a series of known values and re-run macros/is_xpos.g +
-is_diag.g at each, to find the lowest torque that (a) fully resolves the
-diagonal A/B asymmetry and (b) does not bring back the 204Hz/312Hz ringing
-seen at the original bound torque. That value becomes the permanent project
-spec (see project-long.txt IMMEDIATE NEXT STEPS item 16) — no more guessing.
+TORQUE SWEEP — 1Nm TRIED 23/08/2026, TOO TIGHT
+--------------------------------------------------------------------------------
+Wrench arrived (0-1Nm). Both rails torqued to 1Nm exactly (all screws), full
+n=3 re-run of is_xpos.g + is_diag.g at that spec:
+
+             original(bound)  fully slack   by-feel retorque(21/8)   1Nm spec
+  X=10        0.341+-0.010     0.153+-0.005   0.215+-0.003            0.318+-0.004
+  X=200       0.476+-0.031     0.175+-0.006   0.213+-0.006            0.322+-0.021
+  X=390       0.241+-0.006     0.196+-0.006   0.189+-0.011            0.221+-0.007
+  diagonal A  0.354+-0.013     0.141+-0.004   0.191+-0.016            0.317+-0.012
+  diagonal B  0.261+-0.011     0.145+-0.002   0.177+-0.003            0.247+-0.009
+
+  X10/X390 ratio    1.41x           0.78x          1.14x                1.44x
+  diagA/diagB ratio 1.36x           0.97x          1.08x                1.28x
+
+1Nm IS TOO TIGHT. It sits much closer to the original bound state than to the
+by-feel retorque that resolved the asymmetries, and on both asymmetry ratios
+it has gone BACKWARDS past the original unfixed machine (X10/X390 1.44x vs
+original 1.41x). Whatever screw/rail combination this is, correct clamping
+torque is well under 1Nm.
+
+NEXT: try a lower known value, e.g. 0.5Nm, same full n=3 sweep. The by-feel
+retorque (whatever torque that actually was) sat around rms 0.19-0.22 across
+positions with both asymmetries resolved or nearly so — that is the target to
+bracket toward, not the original or the 1Nm result. Once a value that matches
+or beats the by-feel numbers is found, THAT becomes the permanent project spec
+(see project-long.txt IMMEDIATE NEXT STEPS item 16) — no more guessing, and
+no more assuming "more torque = more correct."
 
 METHOD WARNINGS LEARNED THE HARD WAY
   - Single captures have ~15% run-to-run scatter. Three runs minimum before
