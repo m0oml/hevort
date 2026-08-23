@@ -1069,15 +1069,14 @@ IMMEDIATE NEXT STEPS
  14. Waveshare display mount — printing on the Voron V2, not yet fitted.  
  15. Pi F1 fuse replacement + pogo-pin insulation before repowering (see  
  RASPBERRY PI / DISPLAY).  
- 16. Y rail mounting screw torque spec — PENDING, torque wrench (0-1Nm) on  
- order. Both Y rails currently retorqued by feel after the 22/08/2026 ringing  
- investigation (see sys/is.txt) — snug, not slack, but no number attached to  
- it. Once the wrench is in hand: retorque to a series of known values and  
- re-run the accelerometer sweep (macros/is_xpos.g + is_diag.g) at each, to  
- find the lowest torque that (a) fully resolves the diagonal A/B asymmetry  
- and (b) does not reintroduce the 204Hz/312Hz ringing seen at the original  
- (bound) torque. Once found, record it here as the permanent spec — no more  
- by-feel retorquing.  
+ 16. Y rail mounting screw torque spec — PENDING. Wrench (0-1Nm) in hand,  
+ 23/08/2026. 1Nm TRIED AND REJECTED — full n=3 sweep showed it is far too  
+ tight, close to the original bound state and with the X10/X390 asymmetry  
+ ratio actually WORSE than the unfixed machine (1.44x vs 1.41x original).  
+ Correct torque is well under 1Nm — try 0.5Nm next (see sys/is.txt TORQUE  
+ SWEEP section for the full comparison table and target numbers to bracket  
+ toward). Once a value matches or beats the 21/08 by-feel retorque result,  
+ record it here as the permanent spec — no more guessing.  
 
  NEW — DONE 13/08/2026: base/bottom insulation panel fitted, with all  
  associated sensors (air-off, chamber bottom) sorted.  
