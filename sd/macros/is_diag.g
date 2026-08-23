@@ -20,8 +20,8 @@ if !move.axes[0].homed || !move.axes[1].homed
     abort "is_diag: home X and Y first (G92 Z250, G28 X, G28 Y)"
 
 M593 P"none"                                 ; shaper OFF
-M201 X8000 Y8000                             ; 0.82g - avoids +-2g clipping
-M203 X15000 Y15000                           ; 250 mm/s cruise
+M201 X8000 Y8000                             ; 0.82g - ORIGINAL full-speed condition
+M203 X15000 Y15000                           ; 250 mm/s cruise - ORIGINAL
 M400
 
 ; =============== DIAGONAL A  (dX=+dY, isolates X pair 70/71) ===============
