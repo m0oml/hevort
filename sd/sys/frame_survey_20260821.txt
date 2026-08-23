@@ -119,6 +119,30 @@ returns with the number input shaping settles on. Once that number is in hand:
 retorque every Y rail screw to it, cold 4x4 mesh immediately after (no other
 work in between) as the new reference twist, then shim, then re-torque/re-mesh
 to the same number again after fitting.
+
+UPDATE 23/08/2026 — THIS PLAN'S PREMISE IS WRONG. See sys/is.txt PIVOT section
+for the full data. The input-shaping torque sweep this section anticipated was
+run: original torque, 1.0 N.m, "by feel" twice, fully slack, and totally loose,
+all n=3, full Y-position and belt-diagonal accelerometer sweeps. Result is
+MONOTONIC with NO settled number - vibration falls all the way to zero clamp
+force, which gave the best result of the whole series. There is no torque that
+both locates the rail and avoids exciting it; every real clamping force
+deflects the frame member, exactly the mechanism identified above, just now
+confirmed dynamically as well as via the static bed-mesh twist.
+Practical consequence: "wait for the number input shaping settles on" cannot be
+satisfied as written, because no such settled number exists in this range.
+Options going forward: (a) accept a minimum torque that reliably LOCATES the
+rail (not zero - a rail that can slide is a separate real problem, already
+found once this session) and treat the residual ringing/twist at that torque
+as a characterised, compensated machine constant, the same way the X beam bow
+above is accepted and meshed rather than eliminated; or (b) stiffen the joint
+itself (backing plate behind the T-nut wall, or through-bolt instead of T-nut)
+so clamping no longer deflects the extrusion, which would let a normal torque
+be used without this trade-off.
+NOT YET ANSWERED: whether this compliance is RIGHT-rail-specific (matching the
+static shim fault, "do NOT shim the left rail" below) or a general property of
+the T-nut joint on both sides — every torque test so far adjusted both rails
+together. Isolate before finalising anything: adjust one rail at a time.
 BASELINE RECORDED 22/08/2026: both belts read 2.6 on Trev's tension meter, X
 homed, Y0, matched left/right. Pluck-tone check: upper belt ~120Hz, lower belt
 ~120-123Hz (by ear, hand-plucked - treat as +/-5Hz). Consistent with matched
@@ -140,6 +164,55 @@ likely a different mode, numbers don't need to agree - but both calls agree the
 belts are matched, from two dates and two methods.
 => The shim schedule is built on the CURRENT value. If the twist moves again,
    the shims are wrong. Re-measure immediately before cutting, and again after.
+
+UPDATE 23/08/2026, LATER — CONCLUSION REACHED. TORQUE WAS NEVER THE VARIABLE.
+Full input-shaping data in sys/is.txt. Summary: the torque sweep the PIVOT
+section above anticipated was run (original / 1.0 N.m / by-feel x2 / slack /
+zero clamp, n=3 each, full Y-position + belt-diagonal sweeps) and came back
+MONOTONIC with no settled number - vibration fell all the way to zero clamp
+force. No torque both locates the rail and avoids exciting it, because every
+real clamping force deflects the frame member - the same mechanism as the
+static twist above, now confirmed dynamically too. Trev's conclusion:
+clamping a straight rail against a mounting surface that isn't true TWISTS
+THE CARRIAGE, and that produced the whole day's IS data (no torque sweet
+spot, unreproducible "by feel" attempts, amplitude-dependent onset, a front
+elevation reading that appeared once and did not reproduce on retest).
+SHIMMING IS THE FIX, not a torque number.
+
+Trev fitted a 0.5mm SLIP GAUGE (temporary stand-in - real shim stock not yet
+in hand) to the rear-right rail, rails pinned front/back only. Cold 4x4 mesh
+re-run twice back-to-back to confirm:
+
+  corner-twist metric   before shim (23/08 09:10)   0.283mm
+                         after shim  (23/08 18:27)   0.011mm
+                         repeat      (23/08 18:33)   0.024mm
+
+13-micron spread between the two post-shim runs - in line with the
+established cold-to-cold noise floor (~10um), so this is a real, repeatable
+effect, not probe noise. This independently confirms the section 3 schedule
+(0.55mm at the rear fastener) by a completely different method - physical
+shim + dynamic/static re-mesh - rather than the static survey calculation
+alone. Raw maps: hevort_survey_data/mesh_4x4_cold_20260823_{0910,1827,1833}.csv.
+
+TOOL/SPEC CHANGE: 1.0 N.m was tested directly and found WAY TOO TIGHT -
+consistent with "no settled torque number" above, since 1.0 N.m is well
+inside the range that still deflects and excites the frame. The CASOMAN
+ratchet (2.0 N.m floor, bought for the now-abandoned "find a settled torque"
+plan) no longer fits what's needed. Trev has ordered a TORQUE SCREWDRIVER
+instead (finer control, lower range) to find and hold a light, "just locates
+the rail without squeezing it" spec - not a load-bearing structural torque,
+just enough to stop the rail sliding. Exact number not yet set.
+
+REVISED BLOCKER: shim stock (OLYCRAFT, section 3 schedule) has NOT arrived
+yet - that is the actual blocker on cutting/fitting now, not a torque number.
+Once stock is in hand: fit real shims in place of the slip gauge, tighten to
+whatever light spec the torque screwdriver settles on, cold 4x4 mesh to
+confirm, done.
+NOT YET CHECKED: front-right fastener is suspected loose from an earlier
+test today (a flickering front vibration reading that appeared once and
+vanished on retest - inconsistency, not a stable defect signature). Confirm
+it is properly tight before drawing any conclusion about a front shim - see
+is.txt and [[hevort-y-vibration-asymmetry-umbilical]] for full detail.
 
 -------------------------------------------------------------------------------
 3. SHIM SCHEDULE - RIGHT Y RAIL ONLY
