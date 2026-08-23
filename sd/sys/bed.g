@@ -33,7 +33,7 @@ M558 K0 H40:2                                                    ; Dive: 40mm on
 ; M569.7 fires the brake port at the same time as driver enable, but RRF gives
 ; no automatic delay in this direction - force enable and wait before moving Z.
 M17 Z                                                            ; Enable Z, releasing brakes
-G4 P800                                                          ; Wait for brake solenoids to fully release
+G4 P1500                                                         ; Wait for brake solenoids to fully release (raised from 800ms 22/08/2026 - brakes failed to release in time, forced an E-stop)
 G1 Z40 F1000                                                     ; Lower bed to dive height before first travel
 
 ; --- 3. Iterative alignment loop ---
