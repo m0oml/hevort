@@ -195,7 +195,8 @@ reroute did not disturb the sensor mount (gravity vector identical to 0.4mg:
 Z +0.9814 -> +0.9818), though hand contact raised the stationary noise floor
 1.4mg -> 24mg, negligible against a 0.3g signal.
 
-PRIME SUSPECT: THE UMBILICAL, unsupported at the time of measurement
+SUSPECT AT THE TIME — THE UMBILICAL, unsupported at the time of measurement
+(TESTED 22/08/2026 AND LARGELY EXONERATED — SEE RETEST BELOW)
 (project.txt item 11 — anchor not built, Key-Bak Sidekick not yet arrived). The
 bundle carries the CPAP cable, BOTH water lines and the PTFE tube; it drapes to
 one side and its restoring force on the toolhead necessarily varies with X.
@@ -207,11 +208,50 @@ Note the known geometry fault is on the RIGHT rail — the OPPOSITE end from the
 noisy one. No correlation, which is another reason not to treat this as a frame
 fault.
 
-RETEST WHEN THE KEY-BAK MOUNT IS BUILT: re-run macros/is_xpos.g unchanged and
-compare against 0.366 / 0.495 / 0.228. If left rms falls toward 0.23 it was the
-bundle and it is solved. If it stays near 0.35 it is structural and the left
-tower and belt path deserve a proper look. Make the bundle geometry REPEATABLE
-or run-to-run scatter will swamp the comparison.
+RETEST 22/08/2026 — KEY-BAK MOUNT FITTED, UMBILICAL SUPPORTED
+--------------------------------------------------------------------------------
+macros/is_xpos.g re-run unchanged, extended to cover all three X positions in
+one continuous run (kb-x10/x200/x390-1..3 in sys/accelerometer/, plus a
+stationary control kb-static.csv). The 21/08 captures are archived in
+/home/trev/hevort_survey_data/accel_pre_keybak/. Sensor mount verified
+undisturbed between sessions: gravity vectors agree to 3.7mg / 0.11 degrees,
+so the comparison is valid.
+
+                    X=10 LEFT       X=200 MID       X=390 RIGHT
+  Y rms     pre     0.366 +-0.005   0.495 +-0.024   0.228 +-0.017
+            post    0.341 +-0.010   0.476 +-0.031   0.241 +-0.006
+                     -6.7%           -3.8%           +5.9%
+
+  127Hz     pre     0.136 +-0.023   0.096 +-0.014   0.074 +-0.008
+            post    0.080 +-0.009   0.083 +-0.007   0.046 +-0.010
+                    -41.4%          -13.5%          -38.2%
+
+  bb>240Hz  pre     0.464 +-0.028   0.379 +-0.007   0.312 +-0.045
+            post    0.440 +-0.033   0.358 +-0.005   0.272 +-0.008
+                     -5.3%           -5.7%          -12.7%
+
+  left/right rms    pre 1.61x (gap 0.138g)     post 1.41x (gap 0.100g)
+
+THE ASYMMETRY IS STRUCTURAL. The falsifier stated in advance above was "if it
+stays near 0.35 it is structural." Left rms is 0.341.
+
+Supporting the umbilical closed 0.025g of a 0.138g gap — 18% — and even that is
+not cleanly attributable. Mid-span fell by a similar 0.019g where no umbilical
+effect was predicted, so most of it is session-level drift. For scale, the 21/08
+lead-held control at X=10 was already 0.349; the post-Key-Bak 0.341 is within
+0.008g of it. The whole change is the size of the lead-handling artefact.
+
+The 127Hz gantry band DID drop hard — but at BOTH ends, -41% left and -38%
+right, and the left/right ratio barely moved, 1.84x -> 1.75x. That is a
+machine-wide gain consistent with taking the bundle's mass and drag off the
+moving gantry. It is real and worth keeping. It is NOT the asymmetry.
+
+The band that actually carries the asymmetry, broadband above 240Hz, did not
+respond at all. Its ratio got slightly WORSE, 1.49x -> 1.62x.
+
+NEXT SUSPECTS, left end specifically: left Y carriage bearing preload, left belt
+tension and idler path, left tower-to-rail joint. The known geometry fault is on
+the RIGHT rail, so this remains a separate problem. STILL DO NOT SHIM OVER IT.
 
 ALSO WORTH RE-CHECKING AFTER THE FIX — ALL CLOSED 21/08/2026
   Wobble by hand — GONE.
@@ -229,6 +269,96 @@ CONFIRMED SEPARATELY — NOT AFFECTED BY THIS FIX
   Verified: X ring-down rms 0.12 -> 0.08, 121Hz peak 0.14 -> 0.03,
   accel clipping eliminated.
 
+BELT A/B AMPLITUDE ASYMMETRY — 22/08/2026
+--------------------------------------------------------------------------------
+Resonance-lab "Belt tension" plugin (60-180Hz sweep) flagged belts "97% similar,
+peaks 129/146Hz" but the capture was 6-36% clipped and the actual sweep rate
+(fitted ~3.2Hz/s) didn't match the requested 2Hz/s — the plugin result is not
+trustworthy. PF gauge (2.6/2.6) and Spectroid (120 / 120-123Hz) directly measure
+matched belt tension and are believed over the plugin.
+
+Replicated the plugin's excitation with plain G-code instead: on this CoreXY, a
+pure X or Y move drives BOTH belts (see homex.g), but a 45-degree diagonal move
+isolates one belt pair. dX=+dY drives only the X pair (70.0+71.0, back-right +
+front-left). dX=-dY drives only the Y pair (72.0+73.0, front-right + back-left).
+macros/is_diag.g runs 3 diagonal sweeps each way near centre at the same clean,
+non-clipping conditions as is_xpos.g. Zero clipping on all 6 captures.
+
+  Y rms   Diagonal A (X pair)   0.371 / 0.339 / 0.352  -> 0.354
+          Diagonal B (Y pair)   0.252 / 0.255 / 0.277  -> 0.261
+
+No overlap across 6 runs (A min 0.339 > B max 0.277) — a real ~35% gap, not
+scatter. Frequency itself does NOT show a real split: peaks wander 124.0-130.9Hz,
+within one 2.3Hz FFT bin of each other — same ~124-130Hz gantry mode already
+documented above, not two different modes as the plugin implied.
+
+NOT belt tension (already ruled out directly by gauge + Spectroid, and both
+diagonals excite the same mode frequency, not different ones). Reads as the two
+belt-drive load paths coupling into the gantry unevenly — a stiffness/coupling
+asymmetry between the X-pair path (back-right+front-left corners) and the Y-pair
+path (front-right+back-left corners).
+
+NOT yet linked to the left/right X-position asymmetry above. That test used a
+pure Y-sweep, which drives both belts together — a different axis of comparison,
+implicating different corners. Treat as a separate open structural finding until
+a test connects them directly.
+
+BOTH Y RAILS RETORQUED (LIGHTER) — 22/08/2026, RESOLVES MOST OF THE ABOVE
+--------------------------------------------------------------------------------
+Both Y rails backed off from original clamp torque and tested fully slack
+first (rail could slide) to confirm the direction was right — it was, see the
+diagA/diagB and X-position section above. That slack state is NOT what was
+measured below. Both rails were then RE-SECURED properly: screw-by-screw,
+with the carriage jogged up to sit right behind each screw in turn as an
+alignment reference while tightening, on both left and right rails, to stop
+the clamp-up from bowing the rail out of straight. Final state does NOT
+slide — snug and located — but by feel is nowhere near as tight as the
+original binding torque. No torque wrench used, so no number, only "snug,
+noticeably less than before" (see OPEN item below for the follow-up this
+implies).
+
+Closed-loop tracking-error telemetry (M569.5, driver Current Error, full-length
+slow Y traverse near vs far from each rail) showed NO localised bind on any of
+the four drives (70.0/71.0/72.0/73.0) at the final torque — reassuring that this
+is not just a slacker version of the original bound state.
+
+Full n=3 re-run of is_xpos.g + is_diag.g at the final (retorqued) state:
+
+             original         fully slack       final retorque      vs original
+  X=10       0.341 +-0.010    0.153 +-0.005      0.215 +-0.003        -37%
+  X=200      0.476 +-0.031    0.175 +-0.006      0.213 +-0.006        -55%
+  X=390      0.241 +-0.006    0.196 +-0.006      0.189 +-0.011        -22%
+  diagonal A 0.354 +-0.013    0.141 +-0.004      0.191 +-0.016        -46%
+  diagonal B 0.261 +-0.011    0.145 +-0.002      0.177 +-0.003        -32%
+
+DIAGONAL A/B ASYMMETRY — RESOLVED. Was a clean non-overlapping 1.36x gap
+(0.354 vs 0.261). Now 1.08x with overlapping spreads (0.169-0.204 vs
+0.173-0.179) — statistically gone. Consistent with the original hypothesis:
+the X-pair and Y-pair belt load paths were coupling into the gantry unevenly
+because one corner's joint was over-constrained, not because of a belt
+tension difference (already ruled out separately by gauge + Spectroid).
+
+LEFT/RIGHT X-POSITION ASYMMETRY — MOSTLY BUT NOT FULLY RESOLVED. Was 1.41x
+(0.341 vs 0.241), now 1.14x (0.215 vs 0.189). Real reduction, but the two
+spreads (0.212-0.219 vs 0.175-0.203) do not fully overlap, so a smaller
+residual left-end effect likely remains. Not worth shimming or chasing
+further right now — flag for a future revisit if it resurfaces.
+
+OPEN — both rails are now snug, located, and re-tightened using the carriage
+as an alignment jig, but to a torque set by feel with no torque wrench, and
+by feel it is noticeably lighter than the original. This resolved the ringing
+without reintroducing a detectable bind (closed-loop telemetry above), but
+the actual correct fix is still unknown: find out WHY the original torque was
+binding (bowed rail, hole misalignment) and correct that properly, and get an
+actual torque figure on this rail size/screw so re-checks aren't by feel.
+
+PLAN — 0-1Nm torque wrench on order (as of 22/08/2026). Once in hand: retorque
+both rails to a series of known values and re-run macros/is_xpos.g +
+is_diag.g at each, to find the lowest torque that (a) fully resolves the
+diagonal A/B asymmetry and (b) does not bring back the 204Hz/312Hz ringing
+seen at the original bound torque. That value becomes the permanent project
+spec (see project-long.txt IMMEDIATE NEXT STEPS item 16) — no more guessing.
+
 METHOD WARNINGS LEARNED THE HARD WAY
   - Single captures have ~15% run-to-run scatter. Three runs minimum before
     trusting any modest effect. An apparent I1000->I500 improvement vanished
@@ -238,4 +368,26 @@ METHOD WARNINGS LEARNED THE HARD WAY
   - Resonance-lab plugin sweep is quantisation-limited above ~100Hz: at 80
     steps/mm and its 60mm/s^2-per-Hz excitation, 135Hz = 2.2 microsteps of
     commanded motion. Cannot usefully probe 204Hz. Use decel ring-down instead.
+
+WHERE THIS LEAVES INPUT SHAPING — 22/08/2026
+--------------------------------------------------------------------------------
+M593 P"zvd" F127 S0.05 remains CORRECT. The gantry mode landed at 123-131Hz in
+every capture taken today, across every hardware state tested (Key-Bak fitted,
+both rails fully slack, both rails retorqued) — the shaped frequency has not
+moved and does not need re-tuning off the back of any of today's work.
+
+What changed is how much is left for the shaper to cancel. Comparing this
+morning's post-Key-Bak baseline against the final retorqued state, mean across
+X=10/200/390:
+
+  127Hz band (what the shaper targets)      0.070 -> 0.036   -49%
+  204Hz torsion (shaping does NOT target)   0.170 -> 0.055   -68%  (-76% at
+                                                                     centre span)
+
+Shaping was already doing real work before today (see the ALPS-fix-era
+ring-down verification above: X rms 0.12->0.08, 121Hz peak 0.14->0.03) — the
+rail work does not replace that, it reduces what shaping has to deal with in
+the first place. The 204Hz figure is a pure bonus: that mode was never being
+shaped at all, so its drop is a genuine structural improvement from today's
+mechanical work alone.
 ================================================================================
