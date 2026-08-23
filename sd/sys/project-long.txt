@@ -1069,14 +1069,25 @@ IMMEDIATE NEXT STEPS
  14. Waveshare display mount — printing on the Voron V2, not yet fitted.  
  15. Pi F1 fuse replacement + pogo-pin insulation before repowering (see  
  RASPBERRY PI / DISPLAY).  
- 16. Y rail mounting screw torque spec — PENDING. Wrench (0-1Nm) in hand,  
- 23/08/2026. 1Nm TRIED AND REJECTED — full n=3 sweep showed it is far too  
- tight, close to the original bound state and with the X10/X390 asymmetry  
- ratio actually WORSE than the unfixed machine (1.44x vs 1.41x original).  
- Correct torque is well under 1Nm — try 0.5Nm next (see sys/is.txt TORQUE  
- SWEEP section for the full comparison table and target numbers to bracket  
- toward). Once a value matches or beats the 21/08 by-feel retorque result,  
- record it here as the permanent spec — no more guessing.  
+ 16. Y rail mounting: RESOLVED (rear-right), 23/08/2026 — not a torque-spec  
+ problem, confirmed a rail/frame geometry defect. Full torque progression  
+ (original/1Nm/by-feel x2/fully-slack/totally-loose) showed a monotonic  
+ relationship with no sweet spot: clamping was twisting the carriage against  
+ an untrue mounting surface, not "needing a lighter torque". FIX: rear-right  
+ fastener shimmed 0.5mm (slip gauge, temporary - swap for real shim stock  
+ when it arrives), rails pinned front and back rather than every fastener.  
+ Confirmed by clean accelerometer retest at the rear corner (127Hz band  
+ reversed from 2.25x rear-louder to 0.63x rear-quieter) and a subsequent  
+ full-span retest showing the whole X=390 travel flat (2% spread). See  
+ sys/is.txt PIVOT and later sections for the full progression and both  
+ retests.  
+ OPEN: front-right fastener suspected loose from an earlier slacken/  
+ retighten test (not confirmed tight). Check it before assuming it needs a  
+ shim of its own - the static twist survey zeroed AT the front fastener, so  
+ it was never actually checked for an absolute height defect there either  
+ way. If loose, retighten to the same light spec as the rest and re-check;  
+ only pursue a front shim if the effect reproduces with the screw confirmed  
+ tight.
 
  NEW — DONE 13/08/2026: base/bottom insulation panel fitted, with all  
  associated sensors (air-off, chamber bottom) sorted.  
