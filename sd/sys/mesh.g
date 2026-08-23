@@ -57,7 +57,7 @@ M558 K0 H5:2 F600:300 T3000 A8 S0.02                             ; Normal dive h
 ; M569.7 fires the brake port at the same time as driver enable, but RRF gives
 ; no automatic delay in this direction - force enable and wait before moving Z.
 M17 Z                                                            ; Enable Z, releasing brakes
-G4 P800                                                          ; Wait for brake solenoids to fully release
+G4 P1500                                                         ; Wait for brake solenoids to fully release (raised from 800ms 22/08/2026 - brakes failed to release in time, forced an E-stop)
 G1 Z5 F1000                                                      ; Lift to dive height before the first travel
 
 ; --- 5. Probe the grid ---
