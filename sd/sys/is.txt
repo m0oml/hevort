@@ -930,3 +930,167 @@ torque as the rest and re-check - that may be the whole fix. Only pursue a
 front static height survey (same method as the rear, section 2-3) if the
 effect reproduces consistently with the screw confirmed tight.
 ================================================================================
+
+CORRECTION, 23/08/2026 — THE "FINAL CHECK" BELOW WAS MISLABELLED ON FIRST
+WRITE. IT IS NOT THE REAR-RIGHT-SHIMMED STATE.
+--------------------------------------------------------------------------------
+Before this test was requested, Trev removed the 0.5mm slip-gauge shim from
+the rear-right fastener and moved it to the FRONT-LEFT fastener instead. The
+rear-right corner is now UNSHIMMED (current fastening state there not
+confirmed - pinned per earlier procedure, but no correction in place). The
+result below reflects the FRONT-LEFT-shimmed state, not "rear-right shim
+holding" as originally written here - that line was wrong, corrected now.
+
+THIS DIRECTLY CONTRADICTS frame_survey_20260821.txt section 3: "SHIM
+SCHEDULE - RIGHT Y RAIL ONLY... Do NOT shim the left rail." That instruction
+was based on the static twist survey, which found no twist-correction need on
+the left. A front-left shim producing the best asymmetry result of the whole
+day (below) does not necessarily mean the static survey was wrong - it may
+mean a 0.5mm packer at that fastener is doing something to LOCAL CLAMP
+STRESS/STIFFNESS unrelated to correcting a height defect (the same general
+mechanism explored all day - pinning at extremes, reducing torque, etc. -
+rather than a genuine geometric correction like the rear-right one was).
+Flagging this tension explicitly so it isn't lost: the empirical (vibration)
+result and the static (height survey) result now disagree about the left
+rail, and that needs reconciling before treating front-left shimming as a
+permanent fix, not just noted as a good number.
+
+FULL is_xpos.g + is_diag.g, MACHINE ALREADY HOMED (real Z home/probe this
+time, not the faked datum - irrelevant to this result, neither macro touches
+Z). Zero clipping throughout, clean n=3 everywhere.
+
+              original(bound)      front-left shim   change
+  X=10          0.341              0.163+-0.010      -52%
+  X=200         0.476              0.190+-0.005      -60%
+  X=390         0.241              0.169+-0.006      -30%
+  diagonal A    0.354              0.148+-0.008      -58%
+  diagonal B    0.261              0.143+-0.007      -45%
+  X10/X390 ratio  1.41x -> 0.96x   (resolved)
+  diagA/diagB     1.36x -> 1.03x   (resolved)
+
+Both asymmetries that opened this investigation are resolved - WITH THE SHIM
+AT FRONT-LEFT, not rear-right. 127Hz band (what the shaper targets) mean
+across positions down further to ~0.025 from ~0.070 this morning - shaper
+frequency unchanged all day, still correct, just far less residual left to
+cancel.
+
+NOT YET DONE: a direct comparison test with the shim back at rear-right (its
+original, static-survey-justified position) vs at front-left, all else equal,
+to establish which corner - or possibly both - actually needs it. Right now
+front-left has the better vibration number but rear-right has the better
+static justification. Do not treat this as settled.
+================================================================================
+BELT TENSION CONFOUND FOUND — 23/08/2026 LATE. THE "FRONT-LEFT IS BETTER"
+RESULT ABOVE DOES NOT SURVIVE CONTROLLING FOR IT. SUPERSEDES THE CORRECTION
+SECTION'S CONCLUSION.
+--------------------------------------------------------------------------------
+Trev flagged that THE BELTS WERE SLACKENED WHEN THE RAILS WERE REMOVED FOR
+INSPECTION - i.e. at the "RAILS REMOVED, CLEANED, PINNED AT EXTREME ENDS ONLY"
+section above. That places a hard validity boundary in this file:
+
+  PRE-SLACKENING  (belts known good, PF gauge 2.6/2.6):
+    original, 1Nm, by-feel #1/#2, fully-slack, totally-loose - the whole torque
+    progression and the PIVOT conclusion. INTERNALLY CLEAN, unaffected.
+  POST-SLACKENING (belt tension unknown):
+    pinned-ends, all 125/180/250mm/s work, front/rear localisation, the
+    rear-right shim result, and the front-left shim result in the CORRECTION
+    section. Comparisons WITHIN this block are only valid if belt tension did
+    not drift between them - which was never checked.
+
+The big 0.341 -> ~0.16 improvement happened during the torque progression,
+entirely pre-slackening, so the headline gain is NOT a belt artefact and the
+PIVOT stands. What is compromised is the cross-state comparisons after it.
+
+WHY THE DIAGONAL TEST IS THE VULNERABLE ONE: is_xpos.g uses a pure Y sweep,
+which drives BOTH belt pairs together and is largely insensitive to a tension
+IMBALANCE. is_diag.g deliberately isolates one pair at a time, so it is
+directly exposed to it. That is exactly where the instability appeared.
+
+CAUGHT LIVE. Three n=3 runs of is_xpos.g + is_diag.g on the SAME unchanged
+hardware state (0.5mm gauge at front-left, both rails end-pinned):
+
+              run1 (22:48)   run2 (23:09)   run3 (belts evened 2.5/2.5)
+  X=10        0.163+-0.010   0.159+-0.010   0.145+-0.002
+  X=200       0.190+-0.005   0.188+-0.006   0.167+-0.006
+  X=390       0.168+-0.006   0.174+-0.004   0.174+-0.002
+  diagA       0.148+-0.008   0.143+-0.008   0.142+-0.005
+  diagB       0.143+-0.007   0.120+-0.003   0.139+-0.008
+  X10/X390    0.97x          0.91x          0.83x
+  diagA/diagB 1.03x          1.19x          1.02x
+
+Zero clipping throughout. Absolute levels reproduced within 4% on four of five
+positions, but diagB dropped 16% in run2 and recovered in run3 - and diagB is
+the Y belt pair (72.0+73.0). Its dominant peak also went [192.8, 192.8, 149.2]
+in run2, a clear outlier, against a consistent ~186-197Hz elsewhere. Two
+independent anomalies on the same belt pair. Belts were then gauged and set
+EVEN AT 2.5/2.5, and diagA/diagB returned to 1.02x. Confirmed: the diagonal
+asymmetry was belt tension, not rail geometry.
+
+CONTROLLED A/B AT LAST — SAME GAUGE, SAME TENSION, SAME END-PINNING
+--------------------------------------------------------------------------------
+The A/B this file and project-long.txt item 16 have both listed as outstanding
+all day, finally run with only ONE variable changed. Belts 2.5/2.5 verified
+even for BOTH states; same single 0.5mm slip gauge physically moved between
+positions; both rails end-pinned throughout; X/Y re-homed before each.
+
+                front-left      rear-right     127Hz FL   127Hz RR
+  X=10        0.145+-0.002    0.136+-0.003       0.036      0.032
+  X=200       0.167+-0.006    0.171+-0.004       0.037      0.048
+  X=390       0.174+-0.002    0.164+-0.003       0.077      0.047
+  diagA       0.142+-0.005    0.136+-0.011       0.029      0.034
+  diagB       0.139+-0.008    0.136+-0.007       0.033      0.034
+  X10/X390      0.83x           0.83x
+  diagA/diagB   1.02x           1.00x
+  mean of 5     0.153           0.149
+
+VERDICT: THE TWO POSITIONS ARE EQUIVALENT ON OVERALL RMS. Rear-right edges it
+on four of five, but by 2-6%, against a 12% between-run scatter measured on
+front-left alone (X=10 ran 0.163 -> 0.159 -> 0.145 across three runs of the
+identical state). That is inside the noise. Both asymmetry ratios are
+identical at 0.83x.
+
+=> THE CORRECTION SECTION'S HEADLINE IS SUPERSEDED. It recorded front-left at
+X10/X390 0.96x against rear-right 0.64x - an apparently decisive gap that
+drove "front-left has the better vibration number". Under matched belt tension
+BOTH read 0.83x. That gap was belt tension. There is now NO vibration evidence
+favouring the left rail, and frame_survey_20260821.txt section 3's "SHIM
+SCHEDULE - RIGHT Y RAIL ONLY / do NOT shim the left rail" is no longer
+contradicted by anything.
+
+ONE REAL DIFFERENCE, AND IT FAVOURS REAR-RIGHT: the 127Hz band at X=390 -
+0.077 front-left vs 0.047 rear-right, a 64% gap, far outside the tight
+within-run spreads (+-0.002-0.003). That is the band the shaper targets,
+measured at the right-hand end, and shimming rear-right quiets it there
+specifically - exactly what correcting the right rail's own documented static
+fault should do. Two independent lines now agree: the static twist survey
+(rear-right ~0.5mm low at rear) and the 127Hz band at the right end.
+
+RECOMMENDATION: PUT THE SHIM AT REAR-RIGHT. Nothing supports front-left once
+belt tension is held constant.
+
+STILL OPEN - do not treat the shim question as fully closed:
+  - Both rails are END-PINNED ONLY. The clamp-deflection mechanism only fully
+    appears when intermediate fasteners tighten and force the rail onto the
+    mounting surface. A single packer at one fastener does not predict full
+    assembly - that is what the graduated section 3 schedule is for.
+  - NO STATIC MESH for either state. All of the above is vibration only.
+    Needs the accelerometer removed, then a real G28, then a cold 4x4.
+  - X=390 barely moved across every front-left run (0.168/0.174/0.174) and
+    X10/X390 is now 0.83x - the asymmetry has INVERTED past parity rather than
+    closed. Left end is now quieter than right.
+  - Belts are at 2.5/2.5, matched but slightly under the 2.6/2.6 baseline. Any
+    future comparison must re-check tension FIRST - this whole section exists
+    because that was not done.
+  - Minor: 3 clipped samples at X=200 in the rear-right run, so that one figure
+    is fractionally understated. Everything else zero-clip.
+
+RAW DATA: /home/trev/hevort_survey_data/accel_frontleft_shim_run1/,
+accel_frontleft_shim_run2/, accel_frontleft_shim_run3_belts25/,
+accel_rearright_shim_belts25/ - 16 captures each (9 sweeps + static + 6 diag).
+NOTE is_xpos.g/is_diag.g write FIXED filenames and silently overwrite the
+previous run - archive to hevort_survey_data BEFORE re-running or the
+comparison set is destroyed.
+ALSO CORRECTED: macros/accel_setup.g does NOT exist. M955 P0 C"spi.cs3+spi.cs2"
+I65 is in config.g line 77 and survives a reset, so the "run accel_setup.g
+manually before a session" note earlier in this file is stale - nothing to run.
+================================================================================
