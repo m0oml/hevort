@@ -45,6 +45,19 @@ while true
         break
 
     M261.1 P3 A1 F3 R0 B5 V"plcRegs"
+
+    ; A failed M261.1 does not always leave plcRegs declared-as-null (the case
+    ; the guard above handles) - sometimes it is left UNDECLARED entirely, and
+    ; then reading var.plcRegs throws "unknown variable", which DSF escalates
+    ; to a full EMERGENCY STOP: machine halted, expansion boards 70-73 dropped
+    ; off CAN, M999 needed to recover. Caught live 23/08/2026 21:41 with the
+    ; machine idle and nothing running - this loop polls every 5s regardless of
+    ; what the machine is doing, so it can fire at any time, including overnight.
+    ; Check the variable exists before touching it and bail the same way as
+    ; above, so DSF restarts daemon.g with a clean scope instead of halting.
+    if { !exists(var.plcRegs) }
+        break
+
     if { var.plcRegs != null }
         set global.chamberPV = { var.plcRegs[3] }
         set global.chamberStatus = { var.plcRegs[4] }
