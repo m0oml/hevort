@@ -194,6 +194,36 @@ effect, not probe noise. This independently confirms the section 3 schedule
 shim + dynamic/static re-mesh - rather than the static survey calculation
 alone. Raw maps: hevort_survey_data/mesh_4x4_cold_20260823_{0910,1827,1833}.csv.
 
+CONFIRMED ON THE FULL 7x7 GRID, 23/08/2026 22:01 - BEST MAP THE MACHINE HAS
+EVER PRODUCED. Cold 7x7 (49 points, mesh.g as-is), machine idle beforehand:
+
+  corner twist   -0.005mm      (4x4 post-shim runs read +0.011 / +0.024)
+  deviation       0.067mm      LOWEST in the whole archive - every 22/08 map
+                               was 0.11-0.22, today's post-shim 4x4s 0.076/0.077
+  min/max        -0.177 / +0.146
+
+Deviation fell even though the 7x7 samples 3x the points of the 4x4, which
+normally catches MORE structure, not less. Least-squares decomposition of the
+map (peak-to-peak across the bed, normalised fit, script in scratchpad):
+
+  bowY    0.125    bowl along Y     ]  opposite signs = astigmatic saddle
+  bowX    0.078    arch along X     ]
+  tiltY   0.047    ]  pure plane - G32 nulls these at every print
+  tiltX   0.038    ]
+  twist   0.012    GONE (was ~0.28 before the shim)
+  residual rms 0.029
+
+The two curvature terms carry opposite signs - an astigmatic saddle, which is
+the documented granite (0.114mm astigmatic, section on the bed) plus the X
+beam bimetallic bow. BOTH ARE ALREADY CHARACTERISED AS NOT SHIMMABLE - mesh
+them, do not chase them with shims. The tilt terms are irrelevant, G32 removes
+them every print. So the shimmable fault is FIXED and what remains is exactly
+the set of terms this survey already says to live with and compensate.
+Raw map: hevort_survey_data/mesh_7x7_cold_20260823_2201.csv.
+=> USE THIS MAP AS THE BENCHMARK when the real shim stock goes in. The current
+   fix is still the temporary slip gauge; the graduated section 3 schedule
+   fitted properly should match or beat 0.067mm deviation / ~0.00mm twist.
+
 TOOL/SPEC CHANGE: 1.0 N.m was tested directly and found WAY TOO TIGHT -
 consistent with "no settled torque number" above, since 1.0 N.m is well
 inside the range that still deflects and excites the frame. The CASOMAN
