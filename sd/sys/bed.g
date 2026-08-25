@@ -21,10 +21,10 @@ if !move.axes[0].homed || !move.axes[1].homed || !move.axes[2].homed
 ; config.g's M558 H5 is tuned for normal operation once the bed is close to
 ; level. An untrammed bed can be further out than that, so widen the search
 ; window for tramming and restore it at the end.
-; Two-value H (RRF 3.5+): the 40mm dive applies only to the first probe at each
+; Two-value H (RRF 3.5+): the 20mm dive applies only to the first probe at each
 ; point - i.e. on arrival after a travel across a potentially untrammed bed.
 ; The A8 repeat probes at the same XY retract just 2mm, so averaging stays fast.
-M558 K0 H40:2                                                    ; Dive: 40mm on arrival, 2mm between repeats
+M558 K0 H20:2                                                    ; Dive: 20mm on arrival, 2mm between repeats (was 40, excessive - 25/08/2026)
 
 ; Single clearance move before the first travel. Homing leaves the nozzle at
 ; trigger height, which is not safe to traverse an untrammed bed at. After each
@@ -34,7 +34,7 @@ M558 K0 H40:2                                                    ; Dive: 40mm on
 ; no automatic delay in this direction - force enable and wait before moving Z.
 M17 Z                                                            ; Enable Z, releasing brakes
 G4 P1500                                                         ; Wait for brake solenoids to fully release (raised from 800ms 22/08/2026 - brakes failed to release in time, forced an E-stop)
-G1 Z40 F1000                                                     ; Lower bed to dive height before first travel
+G1 Z20 F1000                                                     ; Lower bed to dive height before first travel
 
 ; --- 3. Iterative alignment loop ---
 while true
