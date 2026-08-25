@@ -1069,25 +1069,62 @@ IMMEDIATE NEXT STEPS
  14. Waveshare display mount — printing on the Voron V2, not yet fitted.  
  15. Pi F1 fuse replacement + pogo-pin insulation before repowering (see  
  RASPBERRY PI / DISPLAY).  
- 16. Y rail mounting: RESOLVED (rear-right), 23/08/2026 — not a torque-spec  
- problem, confirmed a rail/frame geometry defect. Full torque progression  
- (original/1Nm/by-feel x2/fully-slack/totally-loose) showed a monotonic  
- relationship with no sweet spot: clamping was twisting the carriage against  
- an untrue mounting surface, not "needing a lighter torque". FIX: rear-right  
- fastener shimmed 0.5mm (slip gauge, temporary - swap for real shim stock  
- when it arrives), rails pinned front and back rather than every fastener.  
- Confirmed by clean accelerometer retest at the rear corner (127Hz band  
- reversed from 2.25x rear-louder to 0.63x rear-quieter) and a subsequent  
- full-span retest showing the whole X=390 travel flat (2% spread). See  
- sys/is.txt PIVOT and later sections for the full progression and both  
- retests.  
- OPEN: front-right fastener suspected loose from an earlier slacken/  
- retighten test (not confirmed tight). Check it before assuming it needs a  
- shim of its own - the static twist survey zeroed AT the front fastener, so  
- it was never actually checked for an absolute height defect there either  
- way. If loose, retighten to the same light spec as the rest and re-check;  
- only pursue a front shim if the effect reproduces with the screw confirmed  
- tight.
+ 16. Y rail mounting: NOT RESOLVED, ACTIVELY MOVING — 23/08/2026 — not a  
+ torque-spec problem, confirmed a rail/frame geometry (or clamp-stress)  
+ defect. Full torque progression (original/1Nm/by-feel x2/fully-slack/  
+ totally-loose) showed a monotonic relationship with no sweet spot: clamping  
+ was twisting the carriage against an untrue mounting surface, not "needing  
+ a lighter torque".  
+ SEQUENCE SO FAR: rear-right fastener shimmed 0.5mm (slip gauge, temporary),
+ confirmed working there specifically (127Hz band reversed from 2.25x
+ rear-louder to 0.63x rear-quieter). Then Trev REMOVED that shim and moved it
+ to the FRONT-LEFT fastener instead. A full sweep with the shim at
+ front-left appeared to give the best asymmetry result of the day (X10/X390
+ 1.41x->0.96x, diagA/diagB 1.36x->1.03x), which seemed to contradict
+ frame_survey_20260821.txt section 3, "Do NOT shim the left rail".
+
+ RESOLVED 23/08/2026 LATE — THAT CONTRADICTION WAS A BELT TENSION ARTEFACT.
+ THERE IS NO LONGER ANY EVIDENCE FAVOURING THE LEFT RAIL.
+ Trev flagged that the belts were slackened when the rails came off for
+ inspection, which puts a validity boundary partway through is.txt: the whole
+ torque progression and the PIVOT predate it and are clean, but everything
+ after (pinned-ends onward, INCLUDING both shim results) was measured at
+ unknown belt tension. is_diag.g isolates one belt pair at a time, so it is
+ directly exposed to a tension imbalance; is_xpos.g drives both pairs together
+ and is not. Caught live: three n=3 runs of the SAME unchanged front-left
+ state gave diagA/diagB 1.03x / 1.19x / 1.02x, with the Y-pair (diagB) both
+ dropping 16% and throwing a 149.2Hz peak outlier in the middle run. Belts
+ were then gauged and set EVEN AT 2.5/2.5 and the ratio returned to 1.02x.
+ THE A/B WAS THEN RUN PROPERLY - same 0.5mm gauge physically moved between
+ the two positions, belts verified even for both, both rails end-pinned,
+ X/Y re-homed before each:
+                 front-left    rear-right
+   X=10          0.145         0.136
+   X=200         0.167         0.171
+   X=390         0.174         0.164
+   diagA         0.142         0.136
+   diagB         0.139         0.136
+   X10/X390      0.83x         0.83x
+   diagA/diagB   1.02x         1.00x
+ EQUIVALENT on overall rms (2-6% apart, against 12% between-run scatter), and
+ both asymmetry ratios identical. The apparently decisive 0.96x-vs-0.64x gap
+ that drove "front-left is better" was belt tension, not geometry.
+ ONE REAL DIFFERENCE AND IT FAVOURS REAR-RIGHT: 127Hz band at X=390, 0.077
+ front-left vs 0.047 rear-right (64% gap, far outside the +-0.002-0.003
+ within-run spreads) - the shaper-targeted band at the right-hand end, quieted
+ specifically by correcting the right rail's own documented static fault.
+ => SHIM GOES AT REAR-RIGHT. frame_survey section 3 stands unchallenged.
+ Full detail and raw data index in sys/is.txt, final section.
+
+ STILL OPEN: both rails are END-PINNED ONLY, so none of this predicts full
+ assembly with intermediate fasteners tightened - that is what the graduated
+ section 3 schedule is for. NO STATIC MESH has been taken for either shim
+ state (vibration only); needs the accelerometer off, a real G28, then a cold
+ 4x4. Belts now 2.5/2.5, matched but under the 2.6/2.6 baseline - RE-CHECK
+ TENSION BEFORE ANY FUTURE COMPARISON, this whole correction exists because
+ that was not done.
+ STILL OPEN, UNCHANGED: front-right fastener suspected loose from an earlier
+ slacken/retighten test - never confirmed tight or ruled back in as a factor.
 
  NEW — DONE 13/08/2026: base/bottom insulation panel fitted, with all  
  associated sensors (air-off, chamber bottom) sorted.  
