@@ -468,6 +468,227 @@ itself the dominant error source. Use two plain rectangles per screw, one
 either side, no notch at all. Trev also confirmed 0.20 cuts cleanly with
 scissors, so no snips and no pressed pieces are needed anywhere.
 
+!!!!! M18 BETWEEN EVERY MESH RUN. NON-NEGOTIABLE. 25/08/2026. !!!!!
+Leaving the motors energised between G32/mesh cycles corrupts the twist metric
+by up to 0.1mm. Three leadscrews can leave the bed STRAINED - racked against
+the screws - after G32 completes. Energised, that strain is held into the next
+cycle and compounds. M18 lets it relax to its natural rest so each G32 starts
+unstrained. Trev's call, and it fixed it outright:
+     M18 between runs      motors left ON
+     r1  +0.0010           +0.1020
+     r2  -0.0020           +0.0940
+     r3  +0.0100           +0.0010
+     mean  +0.0030         spread 0.1010
+     spread 0.0120
+     sd     0.0062   <- now matches the 4.2um per-point probe noise
+=> TWIST IS +0.003, INDISTINGUISHABLE FROM ZERO. THE CURRENT SHIM SET IS
+   CORRECT. NOTHING NEEDS CUTTING OR ADDING.
+=> RETRACTED: the "scale the schedule by 1.51" conclusion from earlier this
+   evening. The +0.098 that prompted it was held strain, not geometry.
+=> ALSO SUSPECT: every twist figure measured today with motors left on,
+   including the -0.130 and -0.047 that the 0.686 and 0.760 rescales were
+   derived from. Pairs of consecutive runs AGREEING PROVES NOTHING - tonight's
+   first two agreed at +0.102/+0.094 and were both wrong. Any future schedule
+   derivation must use M18-separated runs.
+ALSO CHANGED 25/08/2026: bed.g dive height 40mm -> 20mm (H40:2 -> H20:2 and
+G1 Z40 -> G1 Z20); 40 was excessive. Backup: hevort_survey_data/bed.g.bak-
+20260825-diveheight. Note bed.g's M558 is H-only and does NOT wipe G31 -
+verified triggerHeight still -0.0300 after many G32 cycles.
+Raw: hevort_survey_data/mesh_4x4_m18_dive20_20260825_*_r?.csv
+
+=== AS-BUILT STATE AT END OF 25/08/2026 - WHAT IS ACTUALLY ON THE MACHINE ===
+SHIMS: the 0.686-scaled TWO-PIECE set, two identical stacks per screw (one fore,
+one aft), all scissors-cut at exact nominal:
+   screw  rail mm   each side             total
+     1      37.5    nothing                0.00
+     2      87.5    0.03                   0.03
+     3     137.5    0.02 + 0.05            0.07
+     4     187.5    0.01 + 0.10            0.11
+     5     237.5    0.15                   0.15
+     6     262.5    0.03 + 0.15            0.18
+     7     312.5    0.02 + 0.20            0.22
+     8     362.5    0.01 + 0.12 + 0.15     0.28
+     9     412.5    0.01 + 0.12 + 0.20     0.33
+    10     462.5    0.12 + 0.12 + 0.15     0.39
+LATERAL: both rails re-set CENTRED on the 3030 with a depth micrometer used as
+a stop against the extrusion side face. The reference is DERIVED, not remembered:
+(30 - 12)/2 = 9.0mm each side for a 12mm rail on 30mm extrusion. MEASURE FROM
+BOTH EDGES at each fastener - if both read 9.00 the rail is centred AND the
+extrusion is on nominal; if they differ the rail is off-centre; if they sum
+wrong the extrusion is not 30.00. Referencing one edge only puts the extrusion's
++/-0.15mm width tolerance straight into rail position.
+TORQUE: 0.5 N.m both rails (changed from the earlier 0.30 N.m).
+BELTS: both 2.6 on the RC2 meter (build spec; note the 0.149 IS benchmark was
+taken at 2.5).
+LAST MEASURED TWIST: -0.047 at 16:11, BUT THAT IS STALE - it predates the rails
+coming fully loose at 16:54, the lateral re-centring, and the re-torque.
+=> NEXT MEASUREMENT NEEDED: cold 4x4. Accelerometer must come off first.
+
+!!!!!! RETRACTED 25/08/2026 17:20 - IT WAS DEBRIS, NOT A RAIL DEFECT. !!!!!!
+!!!!!! DO NOT ORDER RAILS. THE RAILS AND BLOCKS ARE FINE.            !!!!!!
+The "rail defect" conclusion below is WRONG and is kept only to show the
+reasoning. THE THUD VANISHED ON ITS OWN, with Trev away from the machine and
+nothing touched, after a few hundred passes over it:
+   state                    mean rmsY   X10      X390    peak Hz   clip
+   defect state 16:53         0.507    0.5078   0.5419    48.2     26-30
+   after, 17:2x               0.1996   0.1955   0.2794   124.0       0
+   benchmark 23/08            0.1485   0.1355   0.1642  149/125      0
+Confirmed twice: a full-travel Y10-Y380 sweep (|aY| envelope at Y140-180 fell
+from 1.33-1.62 to 0.16-0.32, 12 sweeps both directions both X) and the standard
+is_xpos/is_diag set. 48Hz gone, replaced by 124Hz - a normal structural
+frequency, not impact ring-down. Zero clipping.
+A brinelled rail CANNOT HEAL. It was a hard fragment sitting on the raceway -
+swarf, a foil sliver, grit - struck every pass until crushed flat or ejected.
+WHY THE WRONG CONCLUSION LOOKED SO SOLID, and the lesson: position-locked to
+the sample, immune to clamping state, ONE event with no ball-recirculation
+periodicity - every one of those is equally consistent with DEBRIS ON THE
+RAILWAY as with a damaged rail. Nothing distinguished them except TRANSIENCE,
+which only time revealed. IF A DEFECT LOOKS MECHANICAL AND PERMANENT, RE-TEST
+IT AFTER A FEW HUNDRED PASSES BEFORE SPENDING MONEY.
+STATE AT RETRACTION: all ten Y rail screws still LOOSE, so the 0.1996 is an
+unclamped measurement and not a final figure. Re-torque to 0.30 N.m and re-run
+for the real number. Remaining item to watch: X390 127Hz band 0.221 vs the
+benchmark's 0.047, and X10/X390 0.70x vs 0.83x - both measured loose, so not
+yet meaningful.
+Raw: hevort_survey_data/accel_afterdefectgone_20260825/ and
+     hevort_survey_data/accel_yrail_fulltravel_20260825/
+ALSO CONFIRMED THIS SESSION: THE X RAIL (MGN9H) IS CLEAN over the full 370mm
+travel, both directions - the only elevated regions are acceleration transients
+at 17-28mm into each move (mirrored X, not common X). Y rails are MGN12H.
+Raw: hevort_survey_data/accel_xrail_test_20260825/
+METHOD NOTE: M956 accepts S3000 and A1 ("activate just before the next move"),
+which removes command-latency guesswork and gives EXACT position mapping. Use
+A1 + S3000 for any position-localisation work - far better than S1000 + A0.
+
+WRONG, KEPT FOR REASONING ONLY:
+*** DECISIVE: ALL TEN RAIL SCREWS LOOSE AND THE THUD IS UNCHANGED. ***
+25/08/2026. Trev slackened every Y rail screw on both rails - the rail is not
+clamped, constrained or distorted by anything - and the noise is IDENTICAL:
+   state                     X     rmsY    clip   burst rms   burst sample
+   all screws LOOSE         10    0.5078   21.7     1.046     455,457,457
+   all screws LOOSE        390    0.5419   24.3     1.155     457,457,473
+   torqued 0.30 Nm          10    0.5057   22.0     1.074     457,457,472
+   torqued 0.30 Nm         390    0.5223   25.3     1.103     472,457,458
+0.4% apart at X10; same samples, same amplitude. CLAMPING IS IRRELEVANT.
+=> RULES OUT, DEFINITIVELY: shim thickness, shim geometry, shim material,
+   fastener torque, frame flatness under the rail, rail bow from
+   over-constraint, and twist. None of them can be the cause.
+=> IT IS THE RAILS/CARRIAGES THEMSELVES. Trev's own read, and it is correct.
+=> ALSO RETIRES THE ORIGINAL TORQUE INVESTIGATION'S PREMISE. The 22/08
+   "vibration falls monotonically as you loosen" result does NOT reproduce.
+   Whatever that measured, it was not this.
+ALSO NOTE the event is ABSENT AT X=200 TO THE EAR, not just to the sensor -
+total silence mid-span, loud thud at X10 and X390. All three sensor axes read
+1.00 at X200. So it is not a sensing node. The physical explanation is CoreXY
+LOAD TRANSFER: toolhead mass sits over the left carriage at X10, the right at
+X390, and is shared at X200 - so each carriage sees its heaviest and lightest
+load at opposite X extremes. A defect that only bangs under high (or very low)
+load reproduces this pattern exactly.
+ANSWERED - IT IS THE RAIL, NOT THE BLOCK. No feel test needed (motor detent
+through the belts makes hand-feel useless on this machine anyway). A damaged
+BALL or block raceway repeats every ball circuit (~40-60mm on MGN12, so 3-5
+hits per 195mm sweep). A damaged RAIL gives one hit at one place. Envelope over
+6 captures, whole sweep:
+   s 200  0.26 0.22 0.17 0.16 0.17 0.18 0.18 0.18 0.19 0.17
+   s 400  0.17 0.41 1.33 1.62 1.19 0.66 0.40 0.26 0.18 0.17
+   s 600  0.14 0.15 0.15 0.16 0.17 0.17 0.16 0.15 0.14 0.17
+   s 800  0.15 0.16 0.16 0.16 0.18 0.18 0.17 0.15 0.15 0.13
+ONE contiguous burst (samples 422-512), no periodicity anywhere else above 0.35
+correlation, rest of the sweep flat at baseline 0.16.
+LIKELY MECHANISM - STATIC BRINELLING AT A PARKED POSITION. Both rails damaged
+at nearly the same Y is what that looks like: gantry parked around Y158 took a
+load (knock, transit, something leaning on it) and both carriages pressed
+indentations into their rails at that spot. A running defect would not land on
+both rails at the same place by chance.
+ACTION: replace the rails, AND the blocks with them - every pass since has been
+hammering those balls into a dent at 250mm/s, which brinells the balls in turn.
+Reusing blocks on new rails risks carrying the fault across.
+
+SUPERSEDED, kept for reasoning - STILL TO DETERMINE - RAIL OR BLOCK? Free test, belts off, screws already loose:
+hand-run each carriage through Y150-170 and feel for the notch, then move the
+CARRIAGE to a different part of the rail and try again.
+   notch stays at Y~158        -> the RAIL raceway is damaged there
+   notch follows the carriage  -> the BLOCK is bad (brinelled ball, broken
+                                  recirculation, lost preload); rail may be fine
+Both sides make the noise, so if it is blocks that is two bad blocks - which
+points at handling (MGN blocks are easily wrecked by running them off the rail).
+
+*** BOTH Y RAILS HAVE A DISCRETE DEFECT AT Y~158-160. 25/08/2026. ***
+*** THE "48Hz MODE" WAS NEVER A MODE - IT IS RING-DOWN FROM AN IMPACT.  ***
+Trev heard a noise at the FRONT of the Y sweep, at X10 and X390 but not X200.
+Time-resolving the captures found a burst at:
+    X=10    peak sample 457, 457, 457   -> Y ~158mm
+    X=390   peak sample 473, 473, 473   -> Y ~160mm
+    X=200   no burst (its 165 is only the start transient)
+IDENTICAL TO THE SAMPLE in every capture = position-locked to ~0.16mm. A
+resonance cannot do that. This is the carriage striking a defect at one place
+on the rail; the 48Hz is the gantry ringing down afterwards.
+ - Y158 is MIDWAY BETWEEN screw 4 (Y132) and screw 5 (Y182) - NOT at a fixing,
+   so not shim- or clamp-related.
+ - BOTH rails have it, offset ~2.5mm from each other (16 samples).
+ - ALL clipping in the entire dataset falls in that one block.
+THIS IS WHY NOTHING WE CHANGED HELPED. Graded stacks, uniform 0.5mm on both
+rails, end-pinning, and twist -0.130 -> -0.047 all left it at ~0.31 mean rmsY.
+A rail defect is invariant to every one of those.
+PROOF - SWEEP THE CLEAN REGION INSTEAD (Y180-375, same 195mm length):
+    state                      mean rmsY  X10 peak  X390 peak  clip  X10/X390
+    benchmark 23/08 (Y98-293)    0.149     149.3     124.8      0      0.83x
+    defect region   (Y98-293)    0.307      48.2      49.0    29-33    0.94x
+    clean region    (Y180-375)   0.173     134.7     133.9      0      0.84x
+Zero clipping, no 48Hz, X10/X390 0.84x vs benchmark 0.83x, diagA/diagB 1.01x.
+=> THE SHIMMING WORKED. Twist +0.283 -> -0.047 and, away from the defect, the
+   vibration is benchmark-class. Keep that work.
+=> The left/right asymmetry this whole investigation started from is RESOLVED.
+LOCATION: ~213mm from the FRONT END of each rail (machine Y + 55), +/-10mm on
+the absolute (depends on a ~30ms command-latency assumption; the repeatability
+is exact, the absolute is not). To pin it: repeat the sweep at 25mm/s, which
+cuts the latency error to under 1mm. Then belts off, run each carriage by hand
+through that region and feel for the notch - brinelled ball track, dent, or
+debris in the raceway.
+NOTE this was the original 23/08 recommended next step ("remove one Y rail,
+check its straightness off the machine, unclamped") which got SKIPPED when
+shimming appeared to work. It probably also underlies the old "no torque sweet
+spot, vibration falls monotonically to zero clamping" result - a loose rail can
+float over a defect, a clamped one cannot.
+*** IF THE RAILS ARE REPLACED, SECTION 3 IS VOID. New rails = new geometry;
+    the whole schedule must be re-derived. DO NOT CUT TO IT FIRST. ***
+Raw: hevort_survey_data/accel_cleanregion_Y180_375_20260825/
+
+*** FINAL SCHEDULE, DERIVED FROM TWO SAME-TORQUE POINTS - 25/08/2026 ***
+This supersedes every earlier scaling. It is the FIRST derivation that uses two
+shim states measured at the SAME torque (0.30 N.m) with the same script, so it
+carries none of the historic clamp-state contamination.
+    state                       dS       dD
+    0.686 schedule            0.4815   -0.1295
+    two-piece 0.686 set       0.3369   -0.0465   (runs -0.0440/-0.0490, spread
+                                                  0.005, well inside noise)
+    => sensitivity k = 0.574
+    => dS for zero twist 0.2559 -> scale THAT set by 0.760
+k = 0.574 INVALIDATES BOTH EARLIER ESTIMATES (0.857 from the historic baseline,
+0.691 from geometry). Back-solving, k=0.574 says the unshimmed state should have
+read dD = +0.147; the 23/08 measurement said +0.283. That gap is direct proof
+the 23/08 baseline was a DIFFERENT CLAMP STATE. NEVER SCALE FROM IT AGAIN.
+
+ screw  rail mm   each side       total   predicted
+   1      37.5    nothing          0.00
+   2      87.5    0.02             0.02
+   3     137.5    0.05             0.05
+   4     187.5    0.03 + 0.05      0.08
+   5     237.5    0.12             0.12
+   6     262.5    0.01 + 0.12      0.13
+   7     312.5    0.02 + 0.15      0.17
+   8     362.5    0.01 + 0.20      0.21
+   9     412.5    0.05 + 0.20      0.25
+  10     462.5    0.10 + 0.20      0.30    dS 0.2591, twist -0.002
+Two identical pieces per screw, fore and aft - see method below.
+NEARLY ALL PIECES ALREADY EXIST from the previous set. Only shortfall:
+    0.05  need 6, have 2  -> cut 2 more blanks
+    0.20  need 6, have 4  -> cut 1 more blank
+CAVEAT: this is an EXTRAPOLATION (0.081 below the nearer measured point,
+against a 0.145 gap between the two points), not an interpolation. Expect it
+close but allow for a residual 0.01-0.02 needing one trim. A third point makes
+the fit very well determined - log it if a trim is needed.
+
 TWO-PIECE SHIM METHOD (CURRENT) - 25/08/2026
 Per fixing, TWO identical plain rectangles, 12mm (full rail width) x ~8mm,
 one fore and one aft of the screw. No slot, no drilling, nothing captured on
