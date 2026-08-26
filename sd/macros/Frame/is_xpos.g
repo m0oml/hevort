@@ -125,6 +125,6 @@ G1 X200 Y98 F15000
 M400
 M201 X35000 Y35000
 M203 X30000 Y30000
-M593 P"zvd" F127 S0.05
+M593 P"zvd" F147 S0.05
 M400
 echo "is_xpos complete - 9 sweeps + 1 static in sys/accelerometer/ (kb-*)"
