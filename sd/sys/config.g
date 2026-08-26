@@ -46,9 +46,15 @@ M569.1 P73.0 T3 E6:10 R30 I1000 D0.05 V500 A100000      ; Y2: magnetic encoder
 ; Layout (top-down, front of printer at bottom):
 ;   Back-left:  73.0 Y2  |  Back-right:  70.0 X1
 ;   Front-left: 71.0 X2  |  Front-right: 72.0 Y1
+; 26/08/2026: line for 72.0 below previously read "(front-left)", duplicating
+; 71.0 and leaving front-right unassigned. Corrected to front-right to agree
+; with this layout block, which is self-consistent and matches 70.0/71.0/73.0.
+; COMMENT ONLY - no functional effect. NOT verified against the hardware; the
+; Z layout was confirmed by M584 single-driver remap (see above), and the same
+; method would settle this pair if it ever matters.
 M569 P70.0 S1 D4                                        ; Drive 70.0: X1 (back-right)
 M569 P71.0 S1 D4                                        ; Drive 71.0: X2 (front-left)
-M569 P72.0 S1 D4                                        ; Drive 72.0: Y1 (front-left)
+M569 P72.0 S1 D4                                        ; Drive 72.0: Y1 (front-right)
 M569 P73.0 S1 D4                                        ; Drive 73.0: Y2 (back-left)
 
 ; --- Axis Mapping ---
@@ -73,8 +79,10 @@ M201 X35000 Y35000 Z20 E250                             ; Accelerations (mm/s^2)
 ; Ring-down 121-147Hz, both axes, 8 unshaped captures across D2/D4 and I500/I1000 - structural.
 ; ZVD over MZV: same 1/F duration (7.9ms), +-20% band vs +-10%.
 ; Verified 19/08/2026: X ring-down rms 0.12 -> 0.08, 121Hz peak 0.14 -> 0.03, accel clipping eliminated.
-M593 P"zvd" F127                                                        ; Cancel ~127Hz gantry ringing
-M955 P0 C"spi.cs3+spi.cs2" I65
+M593 P"zvd" F147                                                        ; Cancel ~147Hz gantry ringing (was F127; re-derived 26/08/2026 - 127 was measured on the old slack/preloaded machine)
+;M955 P0 C"spi.cs3+spi.cs2" I65                          ; Accelerometer - COMMENTED OUT 26/08/2026, sensor removed.
+                                                        ; Uncomment before any input-shaping work; M956 will error without it.
+                                                        ; Orientation I65 was correct for the nozzle mount - do not change it.
 
 ; --- Z Brake Control ---
 ; Brakes are power-to-release (24V releases, de-energised engages)
