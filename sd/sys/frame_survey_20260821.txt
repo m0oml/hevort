@@ -468,6 +468,116 @@ itself the dominant error source. Use two plain rectangles per screw, one
 either side, no notch at all. Trev also confirmed 0.20 cuts cleanly with
 scissors, so no snips and no pressed pieces are needed anywhere.
 
+=======================================================================
+BELT TENSION AND THE "THUMP" - 25/08/2026 EVENING. READ BEFORE CHASING IT.
+=======================================================================
+SUMMARY: an audible thump, position-locked, that appears below ~2.5 on the RC2
+meter and is COMPLETELY ABSENT at 2.6. Nothing mechanical was ever found, and
+an exhaustive search says nothing is broken. It is a slack-belt phenomenon.
+
+TENSION SERIES (is_xpos + is_diag, standard conditions):
+  tension   mean rmsY   127Hz (x10/x200/x390)   clip   peak Hz (x10/x390)
+   1.9       0.3413      0.032/0.048/0.038      25.3      39/39
+   2.3       0.3740      0.100/0.084/0.087      54.0      45/46
+   2.6       0.2047      0.109/0.106/0.197       0.0     125/124
+   2.5 bench 0.1485      0.032/0.048/0.047       0.0     149/125
+NOT a smooth trade-off. There is a BAD BAND below ~2.5 where a low-frequency
+gantry mode is live (39Hz at 1.9, 45Hz at 2.3) and gets WORSE as you approach
+from below - 2.3 is worse than 1.9. Above it the mode vanishes and the peak
+jumps to ~125Hz. DO NOT sweep upward in small steps from below; you are just
+buying more runs inside the bad band.
+
+WHAT THE MOTORS SEE (M569.5 closed-loop capture, the decisive measurement):
+At 250mm/s, belts 1.9, both Y motors error IN THE SAME DIRECTION at Y147.5:
+  +1.03 steps -> through zero -> -1.00 steps over ~7mm of travel
+  = +/-0.21mm, 0.41mm peak-to-peak, one cycle at ~36Hz
+  PID control signal slams from ~30 to 84 catching it
+  baseline tracking error is 0.023-0.026 steps - so this is 35-40x normal
+Same sign on both motors = PURE Y TRANSLATION of the gantry, not a rack.
+CRITICAL: a rail defect displaces the carriage in Z, which the X/Y motors
+CANNOT SEE. The motors see a disturbance ALONG THE DIRECTION OF TRAVEL.
+
+POSITION IS FIXED, SEVERITY IS NOT. Same forward sweep at four speeds:
+   speed    peak |err|  ratio   at Y
+   100        0.050      2.7x   (noise only)
+   150        0.118      6.3x   147.7
+   200        0.600     27.4x   148.3
+   250        0.832     33.6x   146.8
+Position does not move with speed -> NOT a frequency crossing driven by tooth
+passing. Amplitude jumps 5x between 150 and 200mm/s where v^2 predicts 1.8x.
+At 62.5mm/s the error envelope is DEAD FLAT across the whole travel - not a
+reduced bump, NO BUMP AT ALL. A fixed obstruction would still perturb at
+62.5mm/s. It does not.
+
+X MOVES HAVE THEIR OWN, SEPARATE ONE. X10->X380 at 250mm/s, captured at Y=70
+and Y=200, event at X=258.5 BOTH TIMES (peak 0.10-0.17, ratio 4.8-7.5x, much
+weaker than the Y one). Since X+Y and X-Y both differ between those two runs,
+it is NOT locked to either belt's phase.
+
+EVERYTHING ELIMINATED, WITH THE EVIDENCE:
+ - RAILS. Trev ran every carriage by hand end to end with the belts off:
+   "buttery smooth, absolutely no issues", including while deliberately racking
+   the gantry by pushing one side of the X beam. That also clears rail
+   parallelism and gantry squareness.
+ - BELTS. Removed and run section by section through the hands, both toothed
+   and smooth faces, no defect.
+ - ANYTHING ROTATING (idlers, pulleys, bearings). Ruled out BY ARITHMETIC: a
+   rotating feature repeats once per revolution, ~40mm of belt travel on a 20T
+   GT2, so it would fire 4-5 times per 195mm sweep. We see exactly ONE event
+   per sweep, every time. Idlers also checked by hand and spin freely.
+ - BELT-BORNE DEFECT. See the X-move result above. NOTE the earlier reasoning
+   that "a belt defect would land at a different sample each rep" was WRONG -
+   a closed belt's phase is locked deterministically to gantry position and an
+   out-and-back sweep restores it exactly. It was correctly refuted later by
+   the X+Y / X-Y test, not by that argument.
+ - CLOSED-LOOP CONTROL. Ran the whole thing in open loop (D2). Same position,
+   same absolute amplitude (1.02/1.63/1.13 vs 1.24/1.71/1.41). The ratio only
+   improves because spreadCycle baseline noise doubles. The controller is
+   neither causing nor amplifying it.
+ - UMBILICAL, KEY-BAK, ACCELEROMETER LEAD. Trev watched and physically held
+   both during moves. No effect.
+ - RAIL CLAMPING, SHIMS, TORQUE, TWIST. All ten screws loose vs torqued gave
+   identical results (0.4% apart, same samples). Twist -0.130 -> -0.047 changed
+   nothing.
+ - PUSHING THE GANTRY BY HAND does not reproduce it.
+
+BEST REMAINING EXPLANATION (fits everything, NOT proven): a MODE CROSSING.
+Free belt span lengths change continuously with gantry position, so each span's
+natural frequency sweeps as the gantry traverses. Where it crosses the gantry's
+own mode the two couple resonantly and the span dumps energy into the gantry.
+That gives a position fixed by geometry and tension but NOT by speed (matches),
+severity set by speed (matches), disappearance at higher tension as the crossing
+moves out of travel (matches), separate X and Y positions from different span
+geometry (matches), and nothing physically wrong to find (matches).
+
+BELT DEBRIS: a lot of it, on a machine that has never printed. Belt edges are
+clean, so flange rub was considered and dropped. Most likely normal EPDM
+bed-in shedding, exaggerated by the hundreds of full-travel 250mm/s moves this
+investigation required. Consistent with the tensioners running out of travel -
+stretch plus shed material is the break-in signature.
+
+STATE AT END OF DAY: belts REMOVED. Tensioners had run out of adjustment before
+reaching a usable tension, so belt must be taken up at the clamps. When
+refitting: wind tensioners back to MID-TRAVEL FIRST, then take up slack at the
+clamps, match by METER not by how much belt was pulled (path lengths differ by
+design - see project-long.txt BELT TENSION), then belt_settle, re-gauge,
+re-home. Aim 2.6-2.7 with tensioner left in hand so bed-in cannot walk it back
+down into the bad band.
+NEXT STEP: derive a MATHEMATICAL tension target rather than a dial reading.
+
+METHOD NOTES WORTH KEEPING:
+ - M569.5 closed-loop capture is far more diagnostic than the accelerometer for
+   this kind of work: it sees the drive axis directly, gives absolute position
+   error in steps (80 steps/mm, 16x microstep => 1 full step = 0.2mm), and A1
+   gives exact position mapping. Use D24 (Current Error + PID signal), R1500
+   S4000 covers a 195mm sweep down to 100mm/s. Phase Shift (1024) records as
+   all zeros on this firmware - do not bother asking for it.
+ - Two M569.5 captures cannot overlap: "Closed loop data is already being
+   collected" if the previous one is still writing. Leave a gap.
+ - M956 accepts S3000 and A1. Use A1 + S3000 for position work, not S1000 + A0.
+ - Baseline closed-loop tracking error on this machine is 0.023-0.026 steps.
+   That is a good health check after any drive work.
+
 !!!!! M18 BETWEEN EVERY MESH RUN. NON-NEGOTIABLE. 25/08/2026. !!!!!
 Leaving the motors energised between G32/mesh cycles corrupts the twist metric
 by up to 0.1mm. Three leadscrews can leave the bed STRAINED - racked against
