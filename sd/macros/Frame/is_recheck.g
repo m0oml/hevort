@@ -48,6 +48,6 @@ G4 P500
 ; --- restore, is.txt "Restore after" line ---
 M201 X35000 Y35000
 M203 X30000 Y30000
-M593 P"zvd" F127
+M593 P"zvd" F147
 M400
 echo "is_recheck complete - 3 captures in sys/accelerometer/"
