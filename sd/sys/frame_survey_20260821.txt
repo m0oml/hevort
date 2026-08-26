@@ -469,6 +469,80 @@ either side, no notch at all. Trev also confirmed 0.20 cuts cleanly with
 scissors, so no snips and no pressed pieces are needed anywhere.
 
 =======================================================================
+HOT SOAK AT 60C - FIRST PROPER CHARACTERISATION, 26/08/2026
+=======================================================================
+Chamber SP 600, three 4x4 meshes during the soak, M18 between each.
+Machine state: 78 N belts, couplings synced, twist +0.004 cold.
+
+   time    twist     dev     mean     bowX     bowY
+   15:47  +0.0960  0.2004  -0.2322  -0.3489  +0.0505
+   16:00  +0.0870  0.2027  -0.2132  -0.3447  +0.0690
+   16:12  +0.1190  0.2004  -0.1974  -0.3378  +0.0953
+   cold   +0.0037  0.0755   ------  -0.0700  +0.1370
+
+1. THE X BEAM BOW IS WHAT HEAT DOES TO THIS MACHINE. bowX goes -0.070 cold
+   to -0.349 hot - FIVE TIMES - and is most of the 0.200 hot deviation on its
+   own. That is the documented bimetallic bow (steel rail bolted to aluminium
+   extrusion). It reaches its value FAST and then holds: only 0.011 of change
+   across the whole 21-minute soak. NOT SHIMMABLE - mesh it.
+
+2. THE MACHINE IS NOT SETTLED AFTER 21 MINUTES. Two effects still moving:
+     DATUM  +1.5 then +2.0 um/min, not slowing, +34.8 um over 21 min.
+            Matches this file's existing "~2 microns/min" figure exactly.
+            The documented overshoot-and-reversal had NOT happened yet.
+     bowY   +0.051 -> +0.069 -> +0.095, monotonic, 0.044 over 21 min, well
+            clear of noise. TWO meshes looked like scatter; THREE made it a
+            trend - do not call a drift settled off a pair.
+   => A REPRESENTATIVE HOT MESH NEEDS A LONGER SOAK THAN 20 MINUTES. This
+      series understates bowY. Worth a longer run to find where it plateaus,
+      since that is the number a synthesised hot map needs (section 4).
+
+3. DATUM DRIFT DOES NOT MATTER IN PRACTICE - G30 re-zeroes before every print.
+   SHAPE drift is the one that would, and bowY is the open question.
+
+4. Twist scatters +0.087..+0.119 hot against +0.004 cold. Small next to the
+   beam bow but the frame does not stay square through a heat soak.
+
+5. COOLED BACK DOWN AND RE-MEASURED - FULLY REVERSIBLE, GEOMETRY INTACT.
+   Cold mesh taken once the chamber was back to 26.1C:
+     state                     twist     dev     bowX     bowY
+     cold BEFORE belts (n=6)  +0.0037  0.0754  -0.0733  +0.1363
+     hot 60C                  +0.1190  0.2004  -0.3378  +0.0953
+     cold AFTER, now          +0.0010  0.0794  -0.0525  +0.1613
+   THE X BEAM BOW COMES BACK: -0.073 cold -> -0.338 hot -> -0.053 cold. Purely
+   thermal, elastic, no meaningful hysteresis. Confirms it as the bimetallic
+   bow rather than anything settling or yielding.
+   TWIST IS STILL ZERO, +0.0010 vs +0.0037 - and in between the belts came OFF
+   ENTIRELY, went back on at nearly 4x the tension (20 N -> 78 N), the couplings
+   were resynced twice, and the machine did a full 60C heat cycle. None of it
+   moved the frame geometry. The shim work of 25/08 is confirmed good.
+   SHAPE REPEATABILITY ACROSS ALL OF THAT: 17.6 um rms, deviation 0.079 vs
+   0.075. Use 17.6 um as the realistic cold repeatability figure across a
+   teardown, not the 5.3 um per-cell figure from six back-to-back runs.
+   The +36 um mean shift between the two cold sets is DATUM ONLY - G32/G30
+   re-establish it every run, so the absolute offset carries no information.
+   AT THE EDGE OF NOISE: bowY +0.136 -> +0.161, i.e. 25 um against a 17.6 um
+   repeatability. bowY was also the term still growing when the hot soak was
+   stopped. Might be residual, might be scatter. Watch it on the next soak;
+   do not chase it on one measurement.
+   Raw: hevort_survey_data/mesh_4x4_coldagain_20260826_*.csv
+
+RELATED OPEN ITEM - G31 IS A COLD NUMBER. Trigger height -0.030 was measured
+by slip gauge at ambient. The nozzle grows as the hotend heats: ~20mm of
+brass/steel at ~19 um/m/degC gives ~0.049mm from 20 to 150C and ~0.087mm to
+250C. So the cold value is out by roughly half a first layer against any
+realistic probing temperature.
+FIX WHEN THE HOTEND PT1000 IS REPLACED (currently a bare RTD foil-taped to the
+frame as a chamber sensor, so hotend temperature is unavailable and cannot be
+held): pick a standby temperature - 150C is sensible, below flow for most
+materials so no ooze while probing - measure the trigger height by slip gauge
+AT THAT TEMPERATURE, and always probe at it. The requirement is not that it is
+hot, it is that G31 and probing happen at the SAME temperature. The residual
+150->250C growth (~35-40 um) is a uniform Z shift and is what a per-material
+Z offset or babystep handles.
+Raw: hevort_survey_data/mesh_4x4_hot60_20260826_*_run{1,2,3}.csv
+
+=======================================================================
 *** RESOLVED 26/08/2026 - BEST STATE THIS MACHINE HAS EVER MEASURED ***
 =======================================================================
 TWO fixes, both Trev's diagnosis:
@@ -508,10 +582,25 @@ TWO fixes, both Trev's diagnosis:
    Trev confirms the motors were NOT fighting before the belts came off. It is
    introduced by CLAMPING THE BELT with the paired motors at whatever phase they
    happen to sit at. So it will happen again after EVERY belt refit.
-   => MAKE THE COUPLING RESYNC PART OF THE BELT REFIT PROCEDURE, and check idle
-      error afterwards. Healthy is ~0.02 steps error and low idle PID; 366 total
-      |PID| at standstill is the failed state. Only accel_belt123hz_20260826
-      carries this preload - data from before 26/08 does not.
+   *** ORDER MATTERS AND AN EARLIER VERSION OF THIS NOTE HAD IT WRONG. ***
+   SQUARE THE GANTRY MECHANICALLY FIRST, *THEN* RESYNC THE COUPLINGS.
+   Trev's finding, 26/08 late: the resync makes each motor's zero agree with
+   WHEREVER THE GANTRY HAPPENS TO BE. Do it on a racked gantry and the motors
+   stop fighting because they have accepted the skew as correct - zero error,
+   low idle PID, and THE RACK IS NOW THE REFERENCE. It silences the symptom and
+   cements the cause.
+   The 366 units of standstill fight WAS THE RACK expressing itself: opposing
+   signs WITHIN a pair means two motors on the same belt pulling against each
+   other, which is what a racked gantry demands of them. Resyncing took it
+   366 -> 64 -> 16, looking better each time, while the geometry stayed wrong.
+   Squaring the gantry mechanically then dropped a 400mm/s move from 227/240 to
+   140/148 - 35% of motor authority recovered - which no amount of resyncing had
+   achieved.
+   *** LOW IDLE PID IS NOT A GEOMETRY CHECK. *** It is exactly what a locked-in
+   rack looks like. Use belt_check (peak effort on a standard move) for that -
+   a racked gantry shows there and cannot hide.
+   Only accel_belt123hz_20260826 carries the original preload; data from before
+   26/08 does not.
       driver   before err/PID      after       (1 full step = 0.2mm)
       70.0    +0.718 / +101.6   -0.001 /  +0.7
       71.0    -0.343 /  -90.4   +0.000 /  +9.5
