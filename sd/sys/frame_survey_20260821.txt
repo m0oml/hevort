@@ -469,6 +469,143 @@ either side, no notch at all. Trev also confirmed 0.20 cuts cleanly with
 scissors, so no snips and no pressed pieces are needed anywhere.
 
 =======================================================================
+*** THE GANTRY RACK - 26/08/2026 LATE. THE REAL FAULT. READ THIS FIRST. ***
+=======================================================================
+THE MACHINE WAS RACKED AND EVERY OTHER MEASUREMENT WAS READING THROUGH IT.
+Trev found it. Squaring it recovered 35% of motor authority in one step -
+more than every other change made in three days put together.
+
+    state              belt_check peak |PID|   authority used
+    racked                227 / 240              89% / 94%
+    squared               140 / 148              55% / 58%
+    squared + tensioned   133 / 134              52% / 52%
+
+WHY IT HID FOR SO LONG:
+ - A RACK IS INVISIBLE TO THE MESH. It is an XY squareness error; the bed
+   heightmap is blind to it. Twist read +0.001 (perfect) with the gantry
+   badly out of square. NEVER take a good mesh as evidence of squareness.
+ - IT MASQUERADES AS SLACK BELTS in anything that measures motor effort,
+   because dragging a skewed gantry loads the motors exactly as a slack belt
+   does. Hours were spent tensioning belts to fix it. Proof: tension was
+   raised from 42 N to 64 N (+52%) and peak effort did not move at all
+   (238.6 -> 239.6). The rack was swamping the tension signal completely.
+ - HIGH TENSION MASKS IT. At 78 N the vibration numbers were the best ever
+   recorded (8.4 um displacement) WHILE the motors sat at 89-94% authority.
+   Those two results were reported separately and are the same finding:
+   enough belt stiffness to hold a racked gantry rigidly buys low vibration
+   at the price of nearly all the control range. Trev's read, and correct -
+   that "best state ever" was a compensated state, not a healthy one.
+
+*** SQUARE THE GANTRY MECHANICALLY BEFORE RESYNCING THE MOTOR COUPLINGS. ***
+The coupling resync makes each motor's zero agree with WHEREVER THE GANTRY
+HAPPENS TO BE. Do it racked and the motors accept the skew as correct -
+zero position error, low idle PID - and the fault becomes the reference.
+That is why the standstill fight kept "returning": each resync re-baselined
+onto a worse skew. 366 -> 64 -> 16 while the geometry got worse.
+LOW IDLE PID IS NOT A GEOMETRY CHECK. It is what a locked-in rack looks like.
+Use belt_check for geometry; a rack shows there and cannot hide.
+
+HOW THE RACK GETS INTRODUCED - IT WILL HAPPEN AGAIN:
+ The tensioners are on the FRONT motor towers only, and each motor pair is a
+ DIAGONAL - one front motor, one rear:
+     X pair: 70.0 back-right + 71.0 front-left
+     Y pair: 72.0 front-right + 73.0 back-left
+ So tensioning changes the belt length between the two motors OF THE SAME
+ PAIR. That forces a phase offset between motors commanded to identical
+ positions, they fight, and the gantry racks because that is the compliant
+ direction. Structural, not a mistake.
+
+THE FIX FOR TENSIONING WITHOUT RACKING IT - ONE OPERATION, ONE POSITION:
+ There are NO HARD STOPS on this machine (optical endstops only), so the
+ gantry must be held square by a fixture. Trev used a pair of 1-2-3 blocks;
+ printed matched spacers are being made for the front, where the grub screws
+ are reachable. BOTH LEFT MOTORS (71.0 and 73.0) are the accessible pair and
+ conveniently are one motor from each belt pair, which is exactly what is
+ needed.
+     1. gantry held square against the spacers
+     2. slacken the couplings on 71.0 and 73.0   (pulleys now free)
+     3. tension the belts - free pulleys rotate, NO phase offset is forced
+     4. clamp the couplings, still held square
+ Doing it this way means there is nothing to resync afterwards and no second
+ visit that costs the reference.
+ IF USING PRINTED SPACERS: they must be a MATCHED PAIR to better than the
+ rack you are correcting. FDM tolerance (+/-0.1-0.2mm) is the same size as
+ the error, so print slightly short, mic them, and SHIM THE SHORTER ONE with
+ the foil stock to match. Print lying down so load runs along the layers.
+
+=======================================================================
+BELT TENSION - MEASURING IT ON THIS MACHINE, 26/08/2026
+=======================================================================
+mu MEASURED: 95 g over 496 cm = 0.01915 kg/m (19.2 g/m). NORMAL for 12mm GT2
+fibreglass (Gates GT2-LL). Steel cord would be ~31 g/m. An earlier claim that
+these were steel cord came from comparing against a SIX millimetre table
+figure and is retracted.
+     T = 4 L^2 f^2 mu ;  on the 260mm span,  T = 0.005179 * f^2
+     85 Hz -> 37 N    88 Hz -> 40 N    111 Hz -> 64 N    123 Hz -> 78 N
+
+WHAT EACH TOOL IS ACTUALLY GOOD FOR:
+ SPECTROID / PLUCKING - only gives usable numbers when the belt is TOO TIGHT.
+   Trev's observation and it is physically right: lower tension means lower
+   frequency (toward 50Hz mains hum) and a slacker belt damps faster, so the
+   signal weakens exactly as the noise gets relatively louder. THE METHOD'S
+   USABLE RANGE STARTS ABOVE THE OPERATING RANGE. Readings of 79/82/124 on
+   the same belt are the app latching onto different spans. Do not rely on it.
+ RC2 METER - deflection gauge, tables for 6 and 9mm only, FULL SCALE 29.4 N
+   which is BELOW what this machine needs. Its absolute numbers are
+   meaningless on 12mm belt (reads ~20 N where the physics says 60). Its
+   REPEATABILITY is fine - use it only for matching and for tracking drift.
+ belt_check (macros/Frame/belt_check.g) - THE PRACTICAL ONE. Runs one
+   standard move and reads peak motor effort. No microphone, no mains hum, no
+   belt-width tables. Needs a SQUARE gantry to mean anything.
+ DEFLECTION + LUGGAGE SCALE - if an absolute number is ever needed, and it
+   gets MORE sensitive as tension drops, i.e. it works exactly where plucking
+   fails.  T = F * L / (4 * d).  On the 260mm span at d = 10mm:
+     30 N -> 0.47 kg    40 N -> 0.63 kg    60 N -> 0.94 kg    78 N -> 1.22 kg
+   A programmable sonic meter would solve it properly but they start near
+   GBP 800 in the UK; the cheap 2GT gauges on Amazon are deflection type with
+   6/9mm tables - the same trap as the RC2. Do not buy one.
+
+HOW MUCH TENSION DOES IT ACTUALLY NEED:
+   T_min = m*a/4 per belt (no-slack), recommended m*a/2.
+     at 35000 mm/s2:  3 kg -> 26 N min    4 kg -> 35 N min
+     at 20000 mm/s2:  3 kg -> 15 N min    4 kg -> 20 N min
+   The 3 kg gantry mass is an ESTIMATE and the weakest number in the chain.
+   An earlier recommendation of 53-78 N was sized for a RACKED machine and is
+   too high. ~40 N on a square gantry is quiet and gives 52% authority used.
+   NOTE the acceleration sweep found 20k and 35k INDISTINGUISHABLE (17.1 vs
+   17.2 um on X), so dropping M201 to 20000 cuts the tension requirement 43%
+   for no measurable loss.
+
+=== REFERENCE STATE, 26/08/2026, SQUARE GANTRY ===
+   plucked      85 / 88 Hz  =  37.4 / 40.1 N
+   RC2          2.8, both even
+   belt_check   133.4 / 133.9   (matched to 0.5)
+   standstill   70 total - X pair opposing (+21.6 / -35.9), Y pair clean
+   thump        SILENT
+ The X-pair standing offset is the tensioning artefact described above.
+ LEAVE IT. 70 is a fraction of the 366 the rack cost, move-time effort is the
+ lowest ever measured, and resyncing it is what caused the rack last time.
+ To make belt_check read newtons it needs ONE more pluck-and-run pair at a
+ different tension. It will come naturally at the next re-tension.
+
+STILL OPEN:
+ - Ringing tower to confirm the shaper frequency. config.g is now F147 (was
+   F127) but at 400mm/s the dominant peak is EXACTLY 200Hz = tooth-passing
+   (400mm/s / 2mm pitch), so cruise captures are contaminated by forced
+   excitation and cannot identify a resonance cleanly. Only a ringing tower
+   can. f = speed / ringing spacing.
+ - 500 mm/s IS NOT USABLE. The drive saturates: 94% authority, 0.47 steps of
+   steady lag, 1.7 steps peak-to-peak wander. 400 mm/s is clean (85 peak,
+   33%). Cap M203 at 24000 if you want it enforced.
+ - G31 is a COLD number (-0.030). Redo at a 150C standby once the hotend
+   PT1000 is replaced - see the hot soak section.
+ - Belts bed in FAST: one 60C cycle and ~2 hours took 78 N down to 55/41 N.
+   Re-check after every heat cycle until it stops moving.
+ - Y-pair headroom split and the two position-locked features (Y~148, X258.4)
+   were both measured on a RACKED machine and need re-checking now it is
+   square.
+
+=======================================================================
 HOT SOAK AT 60C - FIRST PROPER CHARACTERISATION, 26/08/2026
 =======================================================================
 Chamber SP 600, three 4x4 meshes during the soak, M18 between each.
