@@ -469,6 +469,97 @@ either side, no notch at all. Trev also confirmed 0.20 cuts cleanly with
 scissors, so no snips and no pressed pieces are needed anywhere.
 
 =======================================================================
+*** RESOLVED 26/08/2026 - BEST STATE THIS MACHINE HAS EVER MEASURED ***
+=======================================================================
+TWO fixes, both Trev's diagnosis:
+
+1. BELT TENSION. Belts were ~20 N against a ~45-53 N requirement. Refitted with
+   belt taken up at the clamps (tensioners had run out of travel) and set by the
+   FREQUENCY method, not the RC2 meter - which tops out at 29.4 N, BELOW what
+   this machine needs and therefore useless here.
+      T = 4 L^2 f^2 mu ;  123 Hz on a 260mm span  ->  78.4 N
+   *** mu MEASURED 26/08/2026: 95 g over 496 cm = 0.01915 kg/m (19.2 g/m). ***
+   THIS IS NORMAL for a 12mm GT2 fibreglass belt (Gates GT2-LL). Worked from
+   geometry: 12mm x 1.38mm thick with 0.75mm teeth gives ~16 g/m of rubber plus
+   ~5 g/m of fibreglass cord = ~21 g/m. STEEL cord would be ~31 g/m, i.e. you
+   would notice. Nothing here suggests a counterfeit.
+   TWO EARLIER ERRORS IN THIS SECTION, both mine, both corrected:
+     - "45 N" used a table mu of 0.011 kg/m. That 9-11 g/m figure is for SIX
+       millimetre belt, not twelve. Wrong by 74%.
+     - "almost certainly STEEL CORD" followed from that same bad comparison.
+       It is fibreglass. RETRACTED.
+   The 78.4 N figure is unaffected - mu was measured, not assumed, so the tension
+   never depended on what the cord is made of.
+   Frequency targets on a 260mm span with the measured mu:
+       53 N -> 101 Hz    65 N -> 112 Hz    78 N -> 123 Hz    90 N -> 132 Hz
+   Requirement for a ~3kg gantry: T = m*a/4 minimum, m*a/2 recommended.
+   At 35 m/s^2 that is 26 N min, 53 N rec FOR A 3kg GANTRY - but 3kg was an
+   ESTIMATE and is the weakest number in the chain. At 4kg it is 35/70 N, at 5kg
+   43.8/87.5 N. The actual 78 N therefore sits right on the recommendation for a
+   4-5kg gantry, which is plausible for CNC towers + 12mm AWD + full toolhead.
+   The machine also measures its best ever at this tension. LEAVE IT. At the 8 m/s^2 the IS tests use it is
+   only 12 N - SO THE IS TESTS DO NOT EXERCISE TENSION AT ALL. If high-accel
+   travel matters, test at M201 X35000, not X8000.
+
+2. MOTOR PAIRS WERE FIGHTING EACH OTHER AT STANDSTILL. Found by Trev. With four
+   motors closed-loop on two belt pairs, their commanded positions could not all
+   be satisfied and the belts stored the difference as standing preload.
+   *** THIS IS A REASSEMBLY ARTEFACT, NOT A BUILD FAULT, AND IT WILL RECUR. ***
+   Trev confirms the motors were NOT fighting before the belts came off. It is
+   introduced by CLAMPING THE BELT with the paired motors at whatever phase they
+   happen to sit at. So it will happen again after EVERY belt refit.
+   => MAKE THE COUPLING RESYNC PART OF THE BELT REFIT PROCEDURE, and check idle
+      error afterwards. Healthy is ~0.02 steps error and low idle PID; 366 total
+      |PID| at standstill is the failed state. Only accel_belt123hz_20260826
+      carries this preload - data from before 26/08 does not.
+      driver   before err/PID      after       (1 full step = 0.2mm)
+      70.0    +0.718 / +101.6   -0.001 /  +0.7
+      71.0    -0.343 /  -90.4   +0.000 /  +9.5
+      72.0    +0.351 /  +90.5   +0.000 / +23.9
+      73.0    -0.113 /  -83.2   +0.000 / -29.5
+      total |PID| at standstill  366 -> 64   (-83%)
+   THE METHOD MATTERS AND MY FIRST VERSION WAS WRONG. Do NOT disable the motors,
+   slacken and re-clamp - that locks in the MECHANICAL rest position and the
+   fight returns on re-enable. Correct method (Trev's): motors ENGAGED AND
+   HOLDING, slacken the coupling clamp on the plain motor shaft one motor at a
+   time, let the controller walk its own error to zero, then re-clamp. That
+   makes the motor's zero and the mechanical position agree.
+   RESIDUAL: the Y pair (72/73) still opposes at ~10% of authority with ZERO
+   position error - a standing force, not a tracking error. A second pass did
+   not shift it, so it is most likely a small tension difference between the two
+   Y spans. Pluck each Y span separately to check. Not worth a strip-down.
+
+RESULT - EQUIVALENT DISPLACEMENT (um rms), the metric that matters:
+   state              mean total   spread across X
+   synced 45N run1       8.5        7.6 - 9.5
+   synced 45N run2       8.3        7.4 - 9.4
+   45N pre-sync          9.9        9.0 - 11.3
+   2.5 benchmark        10.4        7.6 - 14.2
+   1.9 dial            139.3       88 - 172
+20% better than the benchmark and far more uniform. X390, always the worst
+corner, went 14.2 -> 9.4. No clipping, no low-frequency modes, runs reproducible
+to 1.2%.
+
+*** USE DISPLACEMENT, NOT ACCELERATION RMS, TO COMPARE STATES. ***
+Acceleration rms weights harmless high-frequency content the same as damaging
+low-frequency content; displacement falls as 1/f^2, so at 218Hz a given
+acceleration moves the nozzle ~30x less than the same acceleration at 40Hz.
+Hours were wasted on 25/08 chasing a "35% worse than benchmark" gap that did not
+exist in displacement terms. Convert: d = a*9.81/(2*pi*f)^2.
+
+INPUT SHAPER: config.g has M593 P"zvd" F127. That was derived on a machine with
+slack belts and 366 units of standing preload - different hardware. The only
+genuine isolated structural resonance now is 146.9 Hz (147.7 at X10, 146.9 at
+X390, 100-200Hz centroid 144.7). => SET F147. The low-frequency displacement
+content (25-80Hz) is a diffuse smear, not a mode, and is not shaper-targetable.
+CONFIRM WITH A RINGING TOWER - f = speed / ringing spacing. A cruise-window
+accelerometer capture is not the proper way to identify a shaper frequency.
+
+STILL OPEN: weigh a length of belt to firm up mu and therefore the 45 N figure;
+re-check tension after a few hours running (these belts have stretched once
+already and dropping below 26 N returns to the bad band); Y-pair residual.
+
+=======================================================================
 BELT TENSION AND THE "THUMP" - 25/08/2026 EVENING. READ BEFORE CHASING IT.
 =======================================================================
 SUMMARY: an audible thump, position-locked, that appears below ~2.5 on the RC2
@@ -634,6 +725,22 @@ LAST MEASURED TWIST: -0.047 at 16:11, BUT THAT IS STALE - it predates the rails
 coming fully loose at 16:54, the lateral re-centring, and the re-torque.
 => NEXT MEASUREMENT NEEDED: cold 4x4. Accelerometer must come off first.
 
+!!!!!! CORRECTED 26/08/2026 - IT WAS BELT TENSION, NOT DEBRIS AND NOT RAILS !!!!!!
+The "debris got crushed out" explanation below is ALSO WRONG and is kept only
+to show the reasoning. Trev's correction, and it is right: DEBRIS DOES NOT GO
+AWAY AND THEN COME BACK, AND IT CANNOT APPEAR IN X-ONLY TRAVEL AT A FIXED X.
+It was slack belts from start to finish.
+The apparent "vanishing" at 17:20 with nothing touched was NOT a fragment being
+crushed. The rails had just been fully loosened, re-centred laterally and
+re-torqued - which changes the belt path geometry and therefore the tension.
+The drive got stiffer, so the same slack-belt symptom stopped showing. It came
+back the moment tension was dropped to 1.9.
+THE CONCLUSION "RAILS AND BLOCKS ARE FINE, DO NOT ORDER" STILL STANDS - it was
+confirmed independently later by hand-running every carriage with the belts off
+("buttery smooth"), including under deliberate racking. Only the MECHANISM was
+wrong.
+
+WRONG, KEPT FOR REASONING ONLY:
 !!!!!! RETRACTED 25/08/2026 17:20 - IT WAS DEBRIS, NOT A RAIL DEFECT. !!!!!!
 !!!!!! DO NOT ORDER RAILS. THE RAILS AND BLOCKS ARE FINE.            !!!!!!
 The "rail defect" conclusion below is WRONG and is kept only to show the
@@ -918,6 +1025,12 @@ The recalled map dies if the FR4 is lifted. Clip or magnetically hold it.
 - bed.g's final centre G30 can fail silently and leave the datum unset, which
   displaces a whole map while reporting success. The result check is now in
   bed.g - keep it.
+- PHYSICAL E-STOP HELD IN = the board is held in boot and reports state
+  "starting", not "idle". That is NOT a DCS fault - it is the lockout working.
+  M999 with the E-stop still depressed does not release it; it just quiets the
+  fans. Release the button before expecting the machine to come back.
+  This is the safest state for working in the belt path - hardware lockout,
+  not software (26/08/2026).
 - DO NOT DRIVE THIS MACHINE WITH ONE "CodeConsole -c" PER COMMAND. Each
   invocation opens a fresh socket to DCS, allocates a code channel and tears it
   down. Dozens in tight loops correlate with the unexplained M112 halts, and the
