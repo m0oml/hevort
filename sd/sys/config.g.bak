@@ -79,8 +79,25 @@ M201 X35000 Y35000 Z20 E250                             ; Accelerations (mm/s^2)
 ; Ring-down 121-147Hz, both axes, 8 unshaped captures across D2/D4 and I500/I1000 - structural.
 ; ZVD over MZV: same 1/F duration (7.9ms), +-20% band vs +-10%.
 ; Verified 19/08/2026: X ring-down rms 0.12 -> 0.08, 121Hz peak 0.14 -> 0.03, accel clipping eliminated.
-M593 P"zvd" F147                                                        ; Cancel ~147Hz gantry ringing (was F127; re-derived 26/08/2026 - 127 was measured on the old slack/preloaded machine)
-M955 P0 C"spi.cs3+spi.cs2" I65                           ; Accelerometer (LIS2DW, nozzle-mounted) - re-enabled 27/08/2026
+;
+; RE-VERIFIED 27/08/2026, post gantry-squaring and belt rebuild:
+;   The tracked band moved 126.2Hz (19-20/08 baseline) -> 145.5Hz (142.4/144.7/149.3,
+;   is_recheck method). Low-speed Resonance Lab captures (30 and 60 mm/s, effectively
+;   impulse tests) independently give 149.6/149.7Hz. F147 sits between the two.
+;   DO NOT "correct" this to Resonance Lab's 110.4Hz recommendation. That plugin
+;   sweeps only 5-135Hz and the response is still RISING at 135, so its fit is
+;   truncated on the flank and lands low. There is a genuine minor mode near 112Hz,
+;   but it is not the dominant one.
+;   Shaper A/B, n=8 paired and interleaved, ring-down rms after a 195mm 250mm/s move:
+;     Y move:  none 53.78 | ei2 F128 47.98 (-10.8%, t=-3.40) | zvd F147 50.01 (-7.0%, t=-2.47)
+;              ei2 vs zvd147 t=-1.66 NOT separable, and ei2 costs 11.69ms delay vs 6.81ms.
+;              F147 kept: same benefit within error, 72% less corner rounding.
+;     X move:  NO shaper helps. X ring-down is dominated by the 204Hz band (21.0mg vs
+;              2.2mg on Y) - the X-beam first torsional mode. 204Hz is out of band for
+;              any shaper compatible with Y, and M593 has no per-axis frequency.
+;              X ringing is STRUCTURAL (20x20x3 6063 beam) and not shapable here.
+M593 P"zvd" F147                                        ; Cancel ~147Hz gantry ringing (was F127; re-derived 26/08/2026 - 127 was measured on the old slack/preloaded machine)
+M955 P0 C"spi.cs3+spi.cs2" I65                          ; Accelerometer (LIS2DW, nozzle-mounted) - re-enabled 27/08/2026
                                                         ; Uncomment before any input-shaping work; M956 will error without it.
                                                         ; Orientation I65 was correct for the nozzle mount - do not change it.
 
