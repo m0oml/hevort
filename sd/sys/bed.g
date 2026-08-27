@@ -32,6 +32,10 @@ M558 K0 H20:2                                                    ; Dive: 20mm on
 ; travels within the loop need no further Z handling.
 ; M569.7 fires the brake port at the same time as driver enable, but RRF gives
 ; no automatic delay in this direction - force enable and wait before moving Z.
+M18 Z                                                            ; 27/08/2026: force a genuine disable->enable transition. M569.7's brake
+G4 P300                                                          ; port only changes state on a transition, and M17 on an already-enabled
+                                                                 ; driver is a no-op. Brakes twice stayed locked across repeated homing
+                                                                 ; attempts - mechanism unproven, this is hygiene. 300ms > M569.7 S200.
 M17 Z                                                            ; Enable Z, releasing brakes
 G4 P1500                                                         ; Wait for brake solenoids to fully release (raised from 800ms 22/08/2026 - brakes failed to release in time, forced an E-stop)
 G1 Z20 F1000                                                     ; Lower bed to dive height before first travel
