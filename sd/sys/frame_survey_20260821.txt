@@ -471,9 +471,16 @@ scissors, so no snips and no pressed pieces are needed anywhere.
 =======================================================================
 *** THE GANTRY RACK - 26/08/2026 LATE. THE REAL FAULT. READ THIS FIRST. ***
 =======================================================================
-THE MACHINE WAS RACKED AND EVERY OTHER MEASUREMENT WAS READING THROUGH IT.
-Trev found it. Squaring it recovered 35% of motor authority in one step -
-more than every other change made in three days put together.
+*** THE RACK IS NOT A PRE-EXISTING FAULT. WE CREATED IT. ***
+The machine was SQUARE WHEN BUILT and square when it went together. The rack
+appeared ALONGSIDE THE BELT REMOVAL AND RETENSIONING - it is introduced by the
+act of retensioning and by slackening the motor couplings, both of which move
+the gantry while nothing is holding it square. Trev's point, and it changes
+what this section is for: this is NOT "check for a hidden rack", it is
+"YOUR TENSIONING PROCEDURE MAKES ONE unless you constrain the gantry".
+Once created it dominated every other measurement on the machine. Squaring it
+recovered 35% of motor authority in one step - more than every other change
+made in three days put together.
 
     state              belt_check peak |PID|   authority used
     racked                227 / 240              89% / 94%
