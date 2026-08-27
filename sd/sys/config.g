@@ -97,9 +97,24 @@ M201 X35000 Y35000 Z20 E250                             ; Accelerations (mm/s^2)
 ;              any shaper compatible with Y, and M593 has no per-axis frequency.
 ;              X ringing is STRUCTURAL (20x20x3 6063 beam) and not shapable here.
 M593 P"zvd" F147                                        ; Cancel ~147Hz gantry ringing (was F127; re-derived 26/08/2026 - 127 was measured on the old slack/preloaded machine)
-M955 P0 C"spi.cs3+spi.cs2" I65                          ; Accelerometer (LIS2DW, nozzle-mounted) - re-enabled 27/08/2026
+;M955 P0 C"spi.cs3+spi.cs2" I65                          ; Accelerometer (LIS2DW, nozzle-mounted) - re-enabled 27/08/2026
                                                         ; Uncomment before any input-shaping work; M956 will error without it.
                                                         ; Orientation I65 was correct for the nozzle mount - do not change it.
+
+; NOTE 27/08/2026 - Z brakes twice failed to release and STAYED locked (E-stops
+; at 20:27 and during the homeall ending 20:28:01). Mechanism NOT yet identified.
+; Established facts only:
+;   - Not a timing/dwell problem. They do not release late, they stay locked
+;     across repeated homing attempts. Do not "fix" this by raising the G4 dwells.
+;   - config.g completed normally on every run (the M307 warning at line 157 is
+;     logged, which is past M569.7), so the port init did happen.
+;   - The run that recovered (homeall 20:28:44) was immediately preceded by a
+;     config.g re-run at 20:28:10. A config re-run appears to RECOVER the brakes.
+; M569.7 turns the brake port off when executed, and the port then only changes
+; state on a driver enable/disable transition, so the M18 below makes the driver
+; state and the port state agree on every config run. That is hygiene consistent
+; with the 20:28:44 recovery - it is NOT a proven fix.
+M18                                                     ; Drivers disabled so the M569.7 port init below is consistent
 
 ; --- Z Brake Control ---
 ; Brakes are power-to-release (24V releases, de-energised engages)
