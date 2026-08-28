@@ -151,6 +151,57 @@ OUTSTANDING WORK — FULL DETAIL
 Ordered roughly by what blocks what. This is the working list.  
 
 ---------------------------------------------------------------------------  
+0. Z BRAKES INTERMITTENTLY FAIL TO RELEASE  [BLOCKS ALL MOTION - do not print]  
+---------------------------------------------------------------------------  
+Numbered 0 to avoid renumbering the list below. This blocks everything.  
+
+First seen 27/08/2026. The three commoned Z brake solenoids sometimes do not  
+release. When it happens they STAY locked across repeated homing attempts and  
+the Z motors grind against them. Two E-stops on 27/08/2026: ~20:27, and again  
+during the homeall that ended 20:28:01. Recovered on the homeall at 20:28:44.  
+
+WHAT IS RULED OUT:  
+ - NOT a timing/dwell problem. They do not release late, they never release.  
+   The G4 P800/P1500 dwells in the home macros were added 22/08/2026 assuming a  
+   slow solenoid. Raising them is a dead end. Trev: "its not a timing issue as  
+   the fail to release and stay locked subsequently".  
+ - NOT config.g failing to reach M569.7. config.g completed on every run - the  
+   M307 warning further down the file is logged every time.  
+ - NOT RRF's brake-control logic. Driving the port manually with M950+M42,  
+   completely bypassing M569.7, is intermittent in the same way. Trev: "i know  
+   it can work it just doesnt always".  
+
+WHAT IS LEFT: everything downstream of the command - the OUT1 output stage, the  
+wiring, the connector, or the coils.  
+
+PRIME SUSPECT - the commoning point. From project-long.txt LOW block:  
+   T1  Z brake +    Duet OUT1 signal  (all three brakes commoned)  
+   T2  Z brake GND  Duet OUT1 GND  
+All three brakes share ONE terminal pair. Three coils do not fail together, but  
+one shared crimp does - and that explains total silence rather than a partial  
+release, plus the latch-until-disturbed behaviour and the spontaneous recovery.  
+
+SECOND SUSPECT - no flyback diode. M569.7 docs: OUT/FAN pins on Duet 3 have  
+flyback diodes, but if a HEATER output is used "you must add a flyback diode in  
+parallel with the brake solenoid". OUT1 is heater-class on the 6HC (same class  
+as OUT0 hotend and OUT7 bed SSR). Three inductive coils switched hard with no  
+diode, every enable/disable cycle for months, degrades before it fails outright.  
+
+NEXT STEP - meter it WHILE THE FAULT IS LATCHED, with OUT1 held on:  
+ - 24V at OUT1 but not at T1/T2  -> loom, connector or crimp.  
+ - nothing at OUT1               -> output stage gone; move the brakes to a  
+                                    fan-class OUT pin, which has the diode.  
+To hold the port on manually:  
+   M17 Z                    ; motors holding first  
+   M569.7 P0.0 C"nil"       ; hand OUT1 back  
+   M950 P2 C"out1"          ; claim it as plain GPIO (P2 and P3 are free)  
+   M42 P2 S1                ; drive it  
+Restore afterwards with M42 P2 S0, M950 P2 C"nil", M569.7 P0.0 C"out1" S200.  
+
+Per the standing hard rule, any brake config change is bench-tested in isolation  
+(motors decoupled, timing verified) before a live reload under load.  
+
+---------------------------------------------------------------------------  
 1. HOTEND PT1000 REPLACEMENT  [blocks all hotend work]  
 ---------------------------------------------------------------------------  
 The fitted PT1000 has FAILED. Replacement on order, not yet arrived.  
