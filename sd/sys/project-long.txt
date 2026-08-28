@@ -1404,3 +1404,90 @@ Google Drive IDs (permanent):
  HevORT root 1PoLWUQ7OmlYgXSx2vq1slJsSYNy9L-8e  
  config.g 177pyavgoX4eFi_z4xae3Es8-uoJSUdm4  
  FrameCalculator.xlsx (Old folder) 1zz7EkzzbHFOsBM6v6Csn_zKn2BMLs-4z  
+
+=======================================================================================================
+CONFIG.G PROVENANCE — reasoning stripped out of config.g 27/08/2026
+=======================================================================================================
+Rule agreed with Trev 27/08/2026: comments in config.g explain what the command
+does, nothing else. No reasoning, no decisions, no dates, no evidence. All of
+that lives here. Pure lookup maps (driver layout, brake wiring) stayed in
+config.g because they are read at the terminal, not argued with.
+
+M929 P"eventlog.txt" S1 — persistent event log
+  Added 22/08/2026. journald on this Pi is VOLATILE (/var/log/journal empty), so
+  every previous emergency stop was unrecoverable. This log lives on the SD card
+  and survives reboots. Added while investigating repeated unexplained M112
+  halts — see frame_survey_20260821.txt section 16. Raise to S2 for more context.
+
+M569 P0.0/0.1/0.2 — Z driver layout
+  Confirmed 15/08/2026 by isolating each driver via M584 single-driver remap and
+  forcing individual moves. Z0 front-right, Z1 rear, Z2 front-left — the last by
+  elimination, unconfirmed. Extruder is on 0.5 because it is closest to the edge.
+
+M569.1 P70.0-P73.0 — closed-loop encoder tuning
+  Must be configured BEFORE setting drive mode. Tuned 15/08/2026 per the Duet
+  1HCL procedure (P -> A -> V -> D -> I). E6:10 set from the measured worst
+  residual of 4.71 full steps across the verified envelope.
+
+M569 P70.0-P73.0 — AWD drive mode
+  Homing files drop to D2 and restore D4 per Duet 1HCL documentation.
+  26/08/2026: the line for 72.0 previously read "(front-left)", duplicating 71.0
+  and leaving front-right unassigned. Corrected to front-right to agree with the
+  layout map, which is self-consistent and matches 70.0/71.0/73.0. COMMENT ONLY,
+  no functional effect. NOT verified against the hardware — the Z layout was
+  settled by M584 single-driver remap and the same method would settle this pair
+  if it ever matters.
+
+M917 X100 Y100 — AWD holding current 100%, required for closed loop (1HCL doc).
+
+M208 Z-10:300 — the negative Z min exists so an out-of-tram bed can be probed
+  below the Z0 datum.
+
+M203 X30000 Y30000 — X/Y 500mm/s verified; saturates 600-700.
+M201 X35000 Y35000 — 35000 verified, headroom to ~48000.
+
+M593 P"zvd" F147 — input shaping. Full derivation, A/B statistics and the
+  reason it is NOT Resonance Lab's 110.4Hz recommendation are in is.txt under
+  "INPUT SHAPING — 27/08/2026". Was F127; 127 was measured on the old slack
+  and mis-preloaded machine.
+
+M955 P0 C"spi.cs3+spi.cs2" I65 — accelerometer, normally commented out.
+  Uncomment before any input-shaping work; M956 errors without it. Orientation
+  I65 is correct for the nozzle mount — do not change it. REMOVE THE
+  ACCELEROMETER FROM THE NOZZLE before any G28/G30/G29 — homeall.g probes Z at
+  bed centre and will drive it into the bed.
+
+M569.7 P0.0 C"out1" S200 — Z brakes.
+  S200 is the delay before the driver disables after the brake engages; it is a
+  placeholder and has never been tuned on hardware. The claim that the brakes
+  are "commoned across Z0/Z1/Z2, single brake config covers all three via a
+  shared output" is an ASSUMPTION carried in the comment, not a verified wiring
+  fact — and it sits directly on the open brake fault. See project.txt item 0.
+
+M42 P1 S0 — forces the ALPS enable LOW at boot rather than relying on the GPIO
+  default state.
+
+M558/G31 — ALPS probe.
+  NOTE 21/08/2026: the ALPS cannot complete a large mesh in a hot chamber. It
+  latches "probe already triggered" after ~21-25 points (~150-200 strikes) and
+  recovers between runs. Known ALPS behaviour, seen before on this machine.
+  Raising the deployprobe settle to 800ms and adding R0.4 did NOT help — both
+  reverted. Use a COARSE grid for hot meshes instead.
+  G31 Z-0.030 measured COLD 21/08/2026 by SLIP GAUGE at Z1.100: 1.06 free, 1.07
+  push fit -> contact 0.030, uncertainty +/-0.005. Supersedes an earlier
+  paper-feeler value of -0.025 (agreed to 5um). NEGATIVE by design — the ALPS is
+  a strain gauge and the nozzle presses in before the trigger threshold is
+  crossed. REDO at printing temperature once the hotend PT1000 is replaced.
+  Remember M558 silently wipes G31 — always re-issue G31 immediately after.
+
+M307 H0 — bed PID model calculated for the 20mm granite slab.
+M308 S1 — coolant NTC now in a Barrow G1/4 stop fitting; was the bed slab sensor.
+
+M950 P0 C"out8" / M42 P0 — PLC safety relay R1 coil.
+  HIGH = relay latched = PLC %I0.0 healthy = heater enabled. Drops on any Duet
+  stop/estop condition via the trigger macros. Held low at startup until the
+  stop button is confirmed, so the machine starts in a known good state.
+
+M575 P3 — RS485 to the Siemens S7-1200 for chamber heating. IO1 is dedicated to
+  RS485 with the RS485_EN jumper fitted. Was P2 in RRF 3.6.x; 3.7 shifted the
+  device numbering by one when all Duet 3 mains gained a second USB CDC channel.
