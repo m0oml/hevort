@@ -16,10 +16,6 @@ M569 P73.0 S1 D2                                                ; Y2 open loop
 ; M569.7 fires the brake port at the same time as driver enable, but RRF gives
 ; no automatic delay in this direction (S param on M569.7 only covers the
 ; engage-on-disable side). Force enable and wait before the first Z move.
-M18 Z                                                            ; 27/08/2026: force a genuine disable->enable transition. M569.7's brake
-G4 P300                                                          ; port only changes state on a transition, and M17 on an already-enabled
-                                                                 ; driver is a no-op. Brakes twice stayed locked across repeated homing
-                                                                 ; attempts - mechanism unproven, this is hygiene. 300ms > M569.7 S200.
 M17 Z                                                            ; Enable Z, releasing brakes
 G4 P800                                                          ; Wait for brake solenoids to fully release
 
