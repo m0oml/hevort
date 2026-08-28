@@ -156,9 +156,10 @@ to be worth remembering if the input-shaping re-run (already planned - project
 notes, screws were loose during that tuning) turns up a similar frequency.
 
 INDEPENDENT CONFIRMATION - RESONANCELAB, 20/08/2026 (predates this weekend's
-shim work, still valid as a belt-only check): sys/accelerometer/rlab-belta-xy-
-20260820211035.csv and rlab-beltb-xy-20260820211118.csv, swept excitation, peak
-response 285Hz (A) vs ~277Hz (B), ~3.6% apart - MATCHED. Independent of the
+shim work, still valid as a belt-only check): rlab-belta-xy-20260820211035.csv
+and rlab-beltb-xy-20260820211118.csv (moved 27/08/2026 to
+/home/trev/hevort_survey_data/sys_archive_20260827/accelerometer/), swept
+excitation, peak response 285Hz (A) vs ~277Hz (B), ~3.6% apart - MATCHED. Independent of the
 22/08 hand-pluck check above (~120 vs ~120-123Hz): different excitation method,
 likely a different mode, numbers don't need to agree - but both calls agree the
 belts are matched, from two dates and two methods.
