@@ -211,8 +211,9 @@ fault.
 RETEST 22/08/2026 — KEY-BAK MOUNT FITTED, UMBILICAL SUPPORTED
 --------------------------------------------------------------------------------
 macros/is_xpos.g re-run unchanged, extended to cover all three X positions in
-one continuous run (kb-x10/x200/x390-1..3 in sys/accelerometer/, plus a
-stationary control kb-static.csv). The 21/08 captures are archived in
+one continuous run (kb-x10/x200/x390-1..3, plus a stationary control
+kb-static.csv; moved 27/08/2026 to
+/home/trev/hevort_survey_data/sys_archive_20260827/accelerometer/). The 21/08 captures are archived in
 /home/trev/hevort_survey_data/accel_pre_keybak/. Sensor mount verified
 undisturbed between sessions: gravity vectors agree to 3.7mg / 0.11 degrees,
 so the comparison is valid.
@@ -1094,3 +1095,91 @@ ALSO CORRECTED: macros/accel_setup.g does NOT exist. M955 P0 C"spi.cs3+spi.cs2"
 I65 is in config.g line 77 and survives a reset, so the "run accel_setup.g
 manually before a session" note earlier in this file is stale - nothing to run.
 ================================================================================
+
+================================================================================
+INPUT SHAPING — 27/08/2026  (moved out of config.g, which now carries no reasoning)
+================================================================================
+LIVE SETTING: M593 P"zvd" F147
+
+Earlier basis (19/08/2026, kept for the record):
+  Ring-down 121-147Hz on both axes, 8 unshaped captures across D2/D4 and
+  I500/I1000 - structural. ZVD chosen over MZV: same 1/F duration (7.9ms) but a
+  +-20% band vs +-10%. Verified 19/08: X ring-down rms 0.12 -> 0.08, 121Hz peak
+  0.14 -> 0.03, accelerometer clipping eliminated.
+
+RE-VERIFIED 27/08/2026, post gantry-squaring and belt rebuild:
+  The tracked band moved 126.2Hz (19-20/08 baseline) -> 145.5Hz (142.4 / 144.7 /
+  149.3, is_recheck method). Low-speed Resonance Lab captures at 30 and 60 mm/s,
+  which are effectively impulse tests, independently give 149.6 / 149.7Hz.
+  F147 sits between the two.
+
+  DO NOT "correct" this to Resonance Lab's 110.4Hz recommendation. That plugin
+  sweeps only 5-135Hz and the response is still RISING at 135, so its fit is
+  truncated on the flank and lands low. There is a genuine minor mode near 112Hz,
+  but it is not the dominant one.
+
+  Shaper A/B, n=8 paired and interleaved, ring-down rms after a 195mm 250mm/s
+  move (captures must be long enough to contain the ring-down - an S1000 capture
+  sits entirely inside the 0.81s move and shows nothing):
+
+    Y move:  none      53.78
+             ei2 F128  47.98   (-10.8%, t=-3.40)
+             zvd F147  50.01   (-7.0%,  t=-2.47)
+             ei2 vs zvd147 t=-1.66 - NOT separable. ei2 costs 11.69ms of delay
+             against 6.81ms for zvd147. F147 kept: same benefit within error,
+             72% less corner rounding.
+
+    X move:  NO shaper helps. X ring-down is dominated by the 204Hz band
+             (21.0mg vs 2.2mg on Y) - the X-beam first torsional mode. 204Hz is
+             out of band for anything compatible with Y, and M593 has no
+             per-axis frequency. X ringing is STRUCTURAL (20x20x3 6063 beam) and
+             is not shapable here.
+
+  Withdrawn along the way: an n=3 result that appeared to favour F110.4 reversed
+  when the run order was reversed. That difference was always noise.
+
+  Optional, untested: ei2/ei3 centred ~165Hz, to see whether a wide shaper can
+  span both the Y modes and X's 204Hz.
+
+================================================================================
+RAW CAPTURE ARCHIVE — 27/08/2026
+================================================================================
+sys/accelerometer/, sys/closed-loop/ and sys/resonanceLab/ were emptied on
+27/08/2026. Everything kept is in:
+
+  /home/trev/hevort_survey_data/sys_archive_20260827/
+      accelerometer/   38 files, 17M
+      closed-loop/     94 files, 4.9M   (all of it - none was duplicated)
+      resonanceLab/     2 files, 852K   (the two plugin sweep macros)
+
+Deleted, not archived (306 files, 66M): 110 captures already byte-identical to
+copies in hevort_survey_data, 8 superseded rlab sweeps from 20/08 and 22/08
+(40M of the total), and 93 raw captures from the 27/08 shaper A/B whose results
+are written up in the INPUT SHAPING section of this file.
+
+Kept deliberately: kb-* (cited above), rlab-belta/b-xy-20260820* (cited in
+frame_survey_20260821.txt), the 27/08 sweeps and belt checks, and 13 captures
+that share a filename with an archived file but hold DIFFERENT data - the
+is_xpos.g/is_diag.g fixed-filename overwrite trap. Those 13 were found by
+comparing content, not names; matching on names alone would have destroyed them.
+
+NOTE the two resonanceLab .g macros carry a stale restore line,
+M593 P"zvd" F127.0 S0.05, baked in when they were generated. Re-running either
+would silently drop the shaper from F147 to F127. Let the plugin generate fresh
+ones rather than re-running these.
+
+ADDENDUM — files recovered FROM Drive before the Drive cleanup, 27/08/2026:
+  sys_archive_20260827/drive_only/sys/         9 files - old config/is.txt .bak
+                                                 files and junk that existed only
+                                                 on Drive, never locally
+  sys_archive_20260827/drive_only/macros/      2 files - closed_loop.g and
+                                                 _test_scope.g. These exist nowhere
+                                                 else. Everything else flagged in the
+                                                 macros folder had simply MOVED:
+                                                 printstart.g and printend.g are in
+                                                 sys/ (byte-identical), and the is_*
+                                                 and speed macros went into
+                                                 macros/Frame and macros/Speed.
+  sys_archive_20260827/drive_only/sys_historic/ 37 files, 13M - captures deleted in
+                                                 earlier sessions and never archived
+Run /home/trev/cleanup_drive.sh to prune Drive. It is manual and dry-run by default.
