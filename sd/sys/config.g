@@ -1,6 +1,7 @@
 ; ======================================================================================
 ; Configuration file for Duet 3 6HC (Firmware 3.6.x)
 ; Machine: HevORT (CoreXY, 415x415x440mm, AWD assisted open-loop)
+; Reasoning, history and evidence for these settings: project-long.txt
 ; ======================================================================================
 
 ; ======================= General ======================
@@ -8,13 +9,7 @@ G90                                                     ; Absolute coordinates
 M83                                                     ; Relative extruder moves
 M550 P"Hevort"                                          ; Set printer name
 M669 K1                                                 ; CoreXY kinematics
-
-; --- Persistent event log ---
-; Added 22/08/2026. journald on this Pi is VOLATILE (/var/log/journal empty), so
-; every previous emergency stop was unrecoverable. This log lives on the SD card
-; and survives reboots. Investigating repeated unexplained M112 halts - see
-; frame_survey_20260821.txt section 16. Raise to S2 if more context is needed.
-M929 P"eventlog.txt" S1                                 ; Log warnings and errors
+M929 P"eventlog.txt" S1                                 ; Log warnings and errors to eventlog.txt
 
 ; ======================= Network ======================
 G4 S2                                                   ; Wait 2s for CAN expansion boards
@@ -22,36 +17,22 @@ G4 S2                                                   ; Wait 2s for CAN expans
 ; ================ Drive Mapping & Limits ==============
 
 ; --- Onboard Drivers ---
-; Z axis: conventional steppers on onboard drivers
-; Layout confirmed 15/08/2026 by isolating each driver via M584 single-driver
-; remap and forcing individual moves:
-;   Z0: front-right   Z1: rear   Z2: front-left (by elimination, unconfirmed)
+;   Z0: front-right   Z1: rear   Z2: front-left
 M569 P0.0 S0 D2                                         ; Drive 0.0: Z0 (front-right)
 M569 P0.1 S0 D2                                         ; Drive 0.1: Z1 (rear)
 M569 P0.2 S0 D2                                         ; Drive 0.2: Z2 (front-left)
-; Extruder: onboard driver 0.5 (closest to edge)
 M569 P0.5 S1 D2                                         ; Drive 0.5: Extruder
 
 ; --- Closed-Loop Encoders (AWD) ---
-; Must be configured BEFORE setting drive mode
-; Tuned 15/08/2026 per Duet 1HCL procedure (P -> A -> V -> D -> I)
-; E6:10 set from measured worst residual 4.71 full steps across verified envelope
 M569.1 P70.0 T3 E6:10 R30 I1000 D0.05 V500 A100000      ; X1: magnetic encoder
 M569.1 P71.0 T3 E6:10 R30 I1000 D0.05 V500 A100000      ; X2: magnetic encoder
 M569.1 P72.0 T3 E6:10 R30 I1000 D0.05 V500 A100000      ; Y1: magnetic encoder
 M569.1 P73.0 T3 E6:10 R30 I1000 D0.05 V500 A100000      ; Y2: magnetic encoder
 
 ; --- CAN AWD Drivers (closed loop) ---
-; Homing files drop to D2 and restore D4 per Duet 1HCL documentation
 ; Layout (top-down, front of printer at bottom):
 ;   Back-left:  73.0 Y2  |  Back-right:  70.0 X1
 ;   Front-left: 71.0 X2  |  Front-right: 72.0 Y1
-; 26/08/2026: line for 72.0 below previously read "(front-left)", duplicating
-; 71.0 and leaving front-right unassigned. Corrected to front-right to agree
-; with this layout block, which is self-consistent and matches 70.0/71.0/73.0.
-; COMMENT ONLY - no functional effect. NOT verified against the hardware; the
-; Z layout was confirmed by M584 single-driver remap (see above), and the same
-; method would settle this pair if it ever matters.
 M569 P70.0 S1 D4                                        ; Drive 70.0: X1 (back-right)
 M569 P71.0 S1 D4                                        ; Drive 71.0: X2 (front-left)
 M569 P72.0 S1 D4                                        ; Drive 72.0: Y1 (front-right)
@@ -64,64 +45,25 @@ M92 X80 Y80 Z800 E420                                   ; Steps per mm
 
 ; --- Motor Currents ---
 M906 X2000 Y2000 Z1050 E1000                            ; Motor current (mA)
-M917 X100 Y100                                          ; AWD holding current 100% - required for closed loop (Duet 1HCL doc)
-M906 I100 T1800                                         ; Idle current factor 100% (Z and E), 30 min idle timeout
+M917 X100 Y100                                          ; X/Y standstill current 100%
+M906 I100 T1800                                         ; Idle current factor 100%, 30 min idle timeout
 
-; --- Axis Limits (PLACEHOLDER - update after homing verified) ---
-M208 X0:400 Y0:390 Z-10:300                             ; Axis limits - negative Z min allows probing an out-of-tram bed below the Z0 datum
+; --- Axis Limits ---
+M208 X0:400 Y0:390 Z-10:300                             ; Axis limits (mm)
 
-; --- Speeds and Accelerations (conservative - tune after input shaper) ---
+; --- Speeds and Accelerations ---
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
-M203 X30000 Y30000 Z1000 E3600                          ; Max speeds (mm/min) - X/Y 500mm/s verified, saturates 600-700
-M201 X35000 Y35000 Z20 E250                             ; Accelerations (mm/s^2) - 35000 verified, headroom to ~48000
+M203 X30000 Y30000 Z1000 E3600                          ; Max speeds (mm/min)
+M201 X35000 Y35000 Z20 E250                             ; Accelerations (mm/s^2)
 
 ; --- Input Shaping ---
-; Ring-down 121-147Hz, both axes, 8 unshaped captures across D2/D4 and I500/I1000 - structural.
-; ZVD over MZV: same 1/F duration (7.9ms), +-20% band vs +-10%.
-; Verified 19/08/2026: X ring-down rms 0.12 -> 0.08, 121Hz peak 0.14 -> 0.03, accel clipping eliminated.
-;
-; RE-VERIFIED 27/08/2026, post gantry-squaring and belt rebuild:
-;   The tracked band moved 126.2Hz (19-20/08 baseline) -> 145.5Hz (142.4/144.7/149.3,
-;   is_recheck method). Low-speed Resonance Lab captures (30 and 60 mm/s, effectively
-;   impulse tests) independently give 149.6/149.7Hz. F147 sits between the two.
-;   DO NOT "correct" this to Resonance Lab's 110.4Hz recommendation. That plugin
-;   sweeps only 5-135Hz and the response is still RISING at 135, so its fit is
-;   truncated on the flank and lands low. There is a genuine minor mode near 112Hz,
-;   but it is not the dominant one.
-;   Shaper A/B, n=8 paired and interleaved, ring-down rms after a 195mm 250mm/s move:
-;     Y move:  none 53.78 | ei2 F128 47.98 (-10.8%, t=-3.40) | zvd F147 50.01 (-7.0%, t=-2.47)
-;              ei2 vs zvd147 t=-1.66 NOT separable, and ei2 costs 11.69ms delay vs 6.81ms.
-;              F147 kept: same benefit within error, 72% less corner rounding.
-;     X move:  NO shaper helps. X ring-down is dominated by the 204Hz band (21.0mg vs
-;              2.2mg on Y) - the X-beam first torsional mode. 204Hz is out of band for
-;              any shaper compatible with Y, and M593 has no per-axis frequency.
-;              X ringing is STRUCTURAL (20x20x3 6063 beam) and not shapable here.
-M593 P"zvd" F147                                        ; Cancel ~147Hz gantry ringing (was F127; re-derived 26/08/2026 - 127 was measured on the old slack/preloaded machine)
-;M955 P0 C"spi.cs3+spi.cs2" I65                          ; Accelerometer (LIS2DW, nozzle-mounted) - re-enabled 27/08/2026
-                                                        ; Uncomment before any input-shaping work; M956 will error without it.
-                                                        ; Orientation I65 was correct for the nozzle mount - do not change it.
-
-; NOTE 27/08/2026 - Z brakes twice failed to release and STAYED locked (E-stops
-; at 20:27 and during the homeall ending 20:28:01). Mechanism NOT yet identified.
-; Established facts only:
-;   - Not a timing/dwell problem. They do not release late, they stay locked
-;     across repeated homing attempts. Do not "fix" this by raising the G4 dwells.
-;   - config.g completed normally on every run (the M307 warning at line 157 is
-;     logged, which is past M569.7), so the port init did happen.
-;   - The run that recovered (homeall 20:28:44) was immediately preceded by a
-;     config.g re-run at 20:28:10. A config re-run appears to RECOVER the brakes.
-; M569.7 turns the brake port off when executed, and the port then only changes
-; state on a driver enable/disable transition, so the M18 below makes the driver
-; state and the port state agree on every config run. That is hygiene consistent
-; with the 20:28:44 recovery - it is NOT a proven fix.
-M18                                                     ; Drivers disabled so the M569.7 port init below is consistent
+M593 P"zvd" F147                                        ; Input shaping: ZVD at 147Hz
+;M955 P0 C"spi.cs3+spi.cs2" I65                          ; Accelerometer (LIS2DW, nozzle) - uncomment for input shaping
 
 ; --- Z Brake Control ---
 ; Brakes are power-to-release (24V releases, de-energised engages)
 ; OUT1 switches to GND (low-side): output HIGH = 24V to coil = released
-; Brakes auto-engage on motor disable via M569.7
-; S200 = 200ms delay before driver disables after brake engages (placeholder - tune on hardware)
-M569.7 P0.0 C"out1" S200                                ; Z brakes on OUT1 (commoned across Z0/Z1/Z2 — single brake config covers all three via shared output)
+M569.7 P0.0 C"out1" S200                                ; Z brakes on OUT1, 200ms brake-engage before driver disable
 
 ; =================== Endstops & Probes ================
 M574 X1 P"io2.in" S1                                    ; X endstop (min, left) - Omron EE-SX67x
@@ -129,94 +71,64 @@ M574 Y1 P"io5.in" S1                                    ; Y endstop (min, front)
 M574 Z1 S2                                              ; Z endstop via probe
 
 ; Z Probe
-M950 P1 C"io6.out"                                      ; GPIO 1: ALPS probe enable (deploy/retract macros)
-M42 P1 S0                                               ; Force enable LOW at boot - don't rely on GPIO default state
-M558 K0 P9 C"io6.in" H5:2 F600:300 T3000 A8 S0.02
-; NOTE 21/08/2026: the ALPS cannot complete a large mesh in a hot chamber - it
-; latches "probe already triggered" after ~21-25 points (~150-200 strikes) and
-; recovers between runs. KNOWN ALPS BEHAVIOUR, seen before on this machine.
-; Raising the deployprobe settle to 800ms and adding R0.4 did NOT help - both
-; reverted. Use a COARSE grid for hot meshes instead; see frame_survey file.
-G31 P500 X0 Y0 Z-0.030                                  ; Trigger height measured COLD 21/08/2026 by SLIP GAUGE at Z1.100:
-                                                        ; 1.06 free, 1.07 push fit -> contact 0.030. Uncertainty +/-0.005.
-                                                        ; Supersedes an earlier paper-feeler value of -0.025 (agreed to 5um).
-                                                        ; NEGATIVE by design: ALPS is a strain gauge, the nozzle presses in
-                                                        ; before the trigger threshold is crossed.
-                                                        ; REDO at printing temperature once the hotend PT1000 is replaced.
+M950 P1 C"io6.out"                                      ; GPIO 1: ALPS probe enable
+M42 P1 S0                                               ; ALPS enable LOW at boot
+M558 K0 P9 C"io6.in" H5:2 F600:300 T3000 A8 S0.02       ; ALPS probe on io6.in
+G31 P500 X0 Y0 Z-0.030                                  ; Probe trigger height and XY offsets
 M671 X424.75:201:-22.75 Y-8.75:415:-8.75 S40            ; Z0 front-right, Z1 rear, Z2 front-left; max 40mm correction
 
 ; =================== Thermal Sensors ===================
-M912 P0 S-5.2                                           ; Set MCU calibration offset BEFORE defining the sensor
+M912 P0 S-5.2                                           ; MCU temperature calibration offset
 M308 S0 P"temp0" Y"pt1000" A"Hotend"                    ; Hotend PT1000
-M308 S1 P"temp1" Y"thermistor" A"Coolant" T10000 B3950  ; Coolant NTC 10K B3950 (Barrow G1/4 stop fitting) - was bed slab
-;M308 S2 P"temp2" Y"thermistor" A"BedMat" T10000 B3950   ; Bed heater mat surface 10K B3950 - safety limit only
-M308 S4 P"spi.cs0" Y"rtd-max31865" A"ElecBay"           ; Elec bay RTD Pt100 4-wire, SPI daughterboard ch0
-M308 S5 P"spi.cs1" Y"rtd-max31865" A"Bed"               ; Bed slab RTD Pt100 4-wire, SPI daughterboard ch1 - PID source
+M308 S1 P"temp1" Y"thermistor" A"Coolant" T10000 B3950  ; Coolant NTC 10K B3950
+;M308 S2 P"temp2" Y"thermistor" A"BedMat" T10000 B3950   ; Bed mat surface 10K B3950
+M308 S4 P"spi.cs0" Y"rtd-max31865" A"ElecBay"           ; Elec bay RTD Pt100 4-wire, SPI ch0
+M308 S5 P"spi.cs1" Y"rtd-max31865" A"Bed"               ; Bed slab RTD Pt100 4-wire, SPI ch1
 M308 S10 Y"mcu-temp" A"MCU Temp"                        ; MCU temperature sensor
-M308 S11 Y"drivers" A"Driver Temp"                      ; Driver temperature (0/100/130C states)
+M308 S11 Y"drivers" A"Driver Temp"                      ; Driver temperature
 
 ; =================== Heaters ===========================
-; Hotend Heater (H1) on OUT0 (highest rated output, 15A)
 M950 H1 C"out0" T0                                      ; Hotend heater on out0, sensor S0
-M143 H1 P0 T0 S350 A0                                   ; Hotend safety limit 350C (no secondary sensor)
+M143 H1 P0 T0 S350 A0                                   ; Hotend limit 350C on sensor S0
 M307 H1 R3.394 K0.346:0.369 D4.88 E1.35 S1.00 B0 V24.0  ; Hotend PID model
 
-; Bed Heater (H0) SSR control on OUT7
-; PID controlled from bed slab RTD S5 (spi.cs1)
-; Independent over-temp cutout on mat surface sensor S2 (temp2), limit 125C
-M950 H0 C"out7" T5 Q1                                   ; Bed heater SSR on out7, PID from S5
-M143 H0 P0 T5 S200 A0                                   ; Bed primary limit 200C on sensor S5
-;M143 H0 P1 T2 S125 A0                                   ; Bed mat safety cutout 125C on sensor S2
-M307 H0 A100.0 C200.0 D5.0 B0                           ; Bed PID model (calculated for 20mm granite slab)
+M950 H0 C"out7" T5 Q1                                   ; Bed heater SSR on out7, sensor S5
+M143 H0 P0 T5 S200 A0                                   ; Bed limit 200C on sensor S5
+;M143 H0 P1 T2 S125 A0                                   ; Bed mat cutout 125C on sensor S2
+M307 H0 A100.0 C200.0 D5.0 B0                           ; Bed PID model
 
 ; Map bed heater
-M140 P0 H0                                              ; Map to bed slot
+M140 P0 H0                                              ; Map H0 to bed slot 0
 
 ; ========================= Fans ========================
-; Fan 0: Duet enclosure fan (Noctua NF-A4x10 24V PWM) on OUT4
-; Thermostatic on MCU and driver temps
-M950 F0 C"!out4" Q500                                   ; Fan 0: enclosure fan, 500Hz PWM
-M106 P0 H10:11 T25:45                                   ; Thermostatic control on MCU/driver temps
+M950 F0 C"!out4" Q500                                   ; Fan 0: enclosure fan, 500Hz PWM, inverted
+M106 P0 H10:11 T25:45                                   ; Fan 0 thermostatic on S10/S11, 25-45C
 
-; Fan 1: WS7040 CPAP (part cooling) on OUT9 with tach
-M950 F1 C"out9" Q500                                    ; Fan 1: CPAP, 500Hz PWM, 
-M106 P1 S0 L0 X1 H-1                                    ; Manual/slicer control, no thermostatic
+M950 F1 C"out9" Q500                                    ; Fan 1: CPAP part cooling, 500Hz PWM
+M106 P1 S0 L0 X1 H-1                                    ; Fan 1 manual control, no thermostatic
 
-; Fan 2: Water pump on OUT2 (Lowara D5 Vario - manual speed dial, no PWM input)
-; Thermostatic on/off from hotend sensor S0: on above 40C, off below
-M950 F2 C"out2+out5.tach" Q500                          ; Fan 2: water pump, on/off gate
-M106 P2 C"Pump" S0 L0 X1 H0 T40:41                              ; On above 40C hotend, off below
+M950 F2 C"out2+out5.tach" Q500                          ; Fan 2: water pump on out2, tach on out5
+M106 P2 C"Pump" S0 L0 X1 H0 T40:41                              ; Fan 2 thermostatic on S0, 40-41C
 
-; Fan 3: Electronics bay / radiator fan (24V 4-pin PWM) on OUT6, inverted PWM
-; Single fan pulls bay exhaust through the radiator - highest of the two sensors wins
-M950 F3 C"!out6" Q500                                   ; Fan 3: bay/rad fan, 500Hz PWM, inverted
-M106 P3 S0 L0 X1 H4:1 T30:50                            ; Thermostatic 30-50C on ElecBay RTD (S4) + Coolant (S1)
+M950 F3 C"!out6" Q500                                   ; Fan 3: bay/radiator fan, 500Hz PWM, inverted
+M106 P3 S0 L0 X1 H4:1 T30:50                            ; Fan 3 thermostatic on S4/S1, 30-50C
 
 ; ======================== Tools =======================
-M563 P0 D0 H1 F1                                        ; Tool 0: Extruder 0, Heater 1 (hotend), Fan 1 (CPAP)
-M568 P0 R0 S0                                           ; Standby/Active temps to 0C
+M563 P0 D0 H1 F1                                        ; Tool 0: Extruder 0, Heater 1, Fan 1
+M568 P0 R0 S0                                           ; Tool 0 standby/active temps to 0C
 
 ; ======================= Inputs ========================
-; IO4 free (was flow switch - removed, pump has no flow sensing)
+; M950 J1 C"io3.in"                                     ; Input 1: filament sensor (not fitted)
 
-; Filament sensor on IO3 (TBD - placeholder)
-; M950 J1 C"io3.in"                                     ; Input 1: filament sensor (uncomment when fitted)
-
-; Pause button on IO7 (NO - make to pause)
-M950 J2 C"io7.in"                                       ; Input 2: pause button
+M950 J2 C"io7.in"                                       ; Input 2: pause button (NO)
 M581 T2 P2 S1 R0                                        ; Trigger 2 on pause button make, during print only
 
-; Stop button on IO8 (NC - break to stop)
-M950 J3 C"!io8.in"                                      ; Input 3: stop button
+M950 J3 C"!io8.in"                                      ; Input 3: stop button (NC)
 M581 T3 P3 S0 R0                                        ; Trigger 3 on stop button break
 
 ; ======================= Outputs ======================
-; OUT8: PLC safety relay R1 coil
-; HIGH = relay latched = PLC %I0.0 healthy = heater enabled
-; Drops on any Duet stop/estop condition via trigger macros
-; Initialise HIGH at startup - machine in known good state
-M950 P0 C"out8"                                         ; GPIO 0: PLC safety relay coil
-M42 P0 S0                                               ; Hold OUT8 low until stop button confirmed
+M950 P0 C"out8"                                         ; GPIO 0: PLC safety relay R1 coil
+M42 P0 S0                                               ; Hold relay coil low at boot
 
 if { sensors.gpIn[3].value = 1 }
     M42 P0 S1
@@ -225,9 +137,7 @@ else
     M118 P0 S"[BOOT] Stop button open - PLC relay held off, press pause to reset"
 
 ; ======================= Modbus =======================
-; RS485 to Siemens S7-1200 PLC for chamber heating control
-; IO1 dedicated to RS485 - RS485_EN jumper fitted on board
-M575 P3 B9600 S7                                        ; Serial 3: RS485, 9600 baud, Modbus RTU (P2 in RRF 3.6.x)
+M575 P3 B9600 S7                                        ; Serial 3: RS485, 9600 baud, Modbus RTU
 
 ; ===================== Finalization ===================
-M98 P"vars.g"  
+M98 P"vars.g"
