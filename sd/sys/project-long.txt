@@ -1,6 +1,6 @@
 =======================================================================================================  
 HevORT Build — Project Brief (FULL DETAIL)  
-Last updated: 20/08/2026  
+Last updated: 29/08/2026  
 Index / current state / open items: see project.txt in the same sys folder.  
 
 =======================================================================================================  
@@ -325,18 +325,28 @@ model has been removed. Running the bed on the bare mat with this model will
 overshoot badly — it expects ~10kg of thermal mass that is not yet present.  
 
 OTHER OPEN CONFIG ITEMS:  
+- M569 P0.5 S0 — extruder direction. Was S1 and fed BACKWARDS; caught 29/08/2026  
+ by a forced cold move with no filament (M302 P1, T0, M83, G1 E10 F300) and  
+ corrected. It had never been driven, so nothing else extruder-side should be  
+ assumed correct - M92 E420 in particular has not been calibrated.  
 - M917 X100 Y100 — AWD standstill current is 100%, config.g line 48, confirmed  
  live at move.axes[0].percentStstCurrent = 100 on 29/08/2026. This entry  
  previously read "M917 X0 Y0 sets AWD holding current to zero ... CLOSED" and  
  was simply WRONG — contradicted by both config.g and the object model. If zero  
  holding current is ever wanted for D4 closed loop it has to be set, not  
  assumed. CLOSED, corrected 29/08/2026.  
-- CPAP tach pin: config says out5.tach, earlier notes say out6.tach. OUT5 is now  
- free so there is no longer a conflict either way, but confirm the physical  
- wiring.  
-- Axis limits M208 are still placeholders pending homing verification.  
-- Hotend PID model is a placeholder — autotune required.  
-- G31 probe offsets and trigger height are placeholders.  
+- CPAP tach pin: RESOLVED 29/08/2026. The tach is on OUT5 and belongs to the  
+ WATER PUMP (Fan 2, out2 + out5.tach). The CPAP has no tach at all - it was  
+ dropped in favour of the pump, verified live (Fan 1 rpm reads -1). Config  
+ and physical wiring agree.  
+- Axis limits M208: RESOLVED 29/08/2026. Raised and TESTED, both driven and  
+ cleared - Y 390->400, Z 300->370, config.g line 52. Z370 is provisional  
+ pending the granite, not a placeholder.  
+- Hotend PID model: RESOLVED 29/08/2026. Autotuned and transcribed by hand to  
+ config.g line 93, M307 H1 R5.147 K0.348:0.572 D2.53 E1.35.  
+- G31: RESOLVED 29/08/2026. Trigger height set and derived, G31 Z-0.030,  
+ config.g line 77. The X0 Y0 offsets are CORRECT, not placeholders - the ALPS  
+ is a strain gauge on the hotend, so the nozzle IS the probe. Do not 'fix'.  
 - Motors audibly hum at idle in D5. Expected for 76mm NEMA23s actively holding  
  against the encoder. Investigate only if the gantry drifts or the noise is  
  hunting/oscillation rather than steady hum.  
@@ -548,7 +558,9 @@ Cable : OSP1 1x2x24AWG overall screened, drain grounded at PLC end
  only, 260mm run — no termination resistor needed  
 Duet config : M575 P3 B9600 S7  (P2 on RRF 3.6.x)  
 Protocol : 9600 8N1, Duet = master, PLC CB1241 = slave address 1  
-Polling : daemon.g every 5s. M260.1 write of all 5 registers in one  
+Polling : daemon.g every 10s - RRF re-runs the file itself once end of  
+ file is reached. Was 5s; the figure was changed and this line  
+ lagged it until 29/08/2026. M260.1 write of all 5 registers in one  
  transaction, then M261.1 read. The M261.1 call is INLINED in  
  daemon.g, not called via M98 — DSF 3.7.0-beta.1 fails to  
  declare a new local var inside a file invoked via M98 from  
@@ -705,7 +717,7 @@ DUET FILES
  is_x390_frontrear.g Front vs rear split at X=390  
  is_x390_middle.g Mid-travel run at X=390  
  NOTE: is_xpos.g and is_diag.g write FIXED filenames and silently overwrite.  
- Archive to /home/trev/hevort_survey_data/ BEFORE re-running.  
+ Archive to /home/trev/hevort_project/survey_data/ BEFORE re-running.  
 
 bed.g is an 86-line iterative 3-point tramming macro: ALPS probe plus M671  
 geometry, converging at deviation < 0.02mm or bailing at 15 iterations, and it  
@@ -1232,8 +1244,10 @@ FIRMWARE
 - RRF 3.7.0: M575 P2 becomes P3. Done 20/08/2026 in config.g and daemon.g;  
  plc_read.g was already P3 (superseded, inlined in daemon.g).  
 - RRF 3.7.0: a failed M261.1 leaks its V variable, poisoning every later  
- iteration of a while loop permanently. daemon.g carries an  
- exists()/break guard to recover. Do not remove it.  
+ iteration of a while loop permanently, and DSF escalates the resulting  
+ expression error to a full EMERGENCY STOP. exists() guards were tried and  
+ do NOT prevent it. The fix is a loop block that runs ONCE per invocation -  
+ see DAEMON.G SINGLE-PASS LOOP at the end of this file.  
 - daemon.g must be renamed to be edited while RRF is running.  
 - G1 moves without an H parameter default to H0, which applies axis limits and  
  refuses unhomed axes. Homing back-off moves need H2.  
@@ -1326,7 +1340,6 @@ Suppliers:
 
 Google Drive IDs (permanent):  
  project.txt 1D93u56_lanbWWxL06J5bvLS5Emb5yV4M  
- project-long.txt __FILL IN AFTER UPLOAD__  
  sys folder 1gLAcXXCszW8oZrBpZwaeeRTaJNPs9gTI  
  macros folder 1oXYyhdUJHUqfROvr4jJeL3fo5T1uOwUI  
  HevORT root 1PoLWUQ7OmlYgXSx2vq1slJsSYNy9L-8e  
@@ -1468,9 +1481,43 @@ rests on three points so contributes only a plane, which G32 removes. The frame
 is support-insensitive: 4.35mm under one foot produces 6um of twist, so it needs  
 no levelling.  
 
-Raw captures and maps: /home/trev/hevort_survey_data/. Full working detail in  
-sys/is.txt and sys/frame_survey_20260821.txt.  
+Raw captures and maps: /home/trev/hevort_project/survey_data/. Full working detail in  
+~/hevort_project/is.txt and ~/hevort_project/frame_survey_20260821.txt
+on the Pi (moved out of sys/ 29/08/2026, so they are NOT on Drive).  
 
+
+=======================================================================================================  
+THERMAL BEHAVIOUR OF THE Z DATUM - METHOD AND RAW DATA, 29/08/2026  
+=======================================================================================================  
+Summary and the operational rules are in project.txt THERMAL BEHAVIOUR. This is  
+the method and where the raw data lives.  
+
+METHOD. Repeated G30 S-1 at bed centre, one sample every ~34s, with the hotend  
+held at 150C throughout so nozzle growth is constant and excluded. Each cycle  
+was batched as G30 S-1 / M400 / G1 Z10 F1000 / M400 / read, so the bed is moved  
+AWAY immediately after every probe - a hot nozzle must not be left parked at  
+trigger height over one spot, it locally heats the slab and corrupts the very  
+thing being measured. G30 S-1 reports the RAW trigger height, which is what  
+makes it usable as a repeated measurement without disturbing the datum.  
+
+RESULT. 10.7 um per degC of chamber, R^2 = 0.93 over 39.9 -> 60.0C. 307um of  
+total datum movement during the climb; 23um band and 1.2 um/min residual once  
+the chamber held setpoint. Hotend varied by 0.24C across the whole run.  
+
+FIRST ATTEMPT WAS WRONG AND IS WORTH REMEMBERING. The first logger sampled the  
+probe's RESTING value (sensors.probes[0].value) against temperature, expecting  
+a baseline drift toward the G31 threshold. It read exactly 0 at every sample  
+from 25C to 48.5C, because a strain gauge reads zero at rest by definition -  
+there is no force on it until the nozzle touches. The measurement that matters  
+is the TRIGGER HEIGHT, not the resting value. That null result is kept as  
+probe_thermal_20260829.csv.  
+
+RAW DATA in /home/trev/hevort_project/survey_data/  
+  datum_drift_150C_20260829.csv         the 10.7 um/degC series  
+  probe_thermal_20260829.csv            the resting-value null result  
+  mesh_7x7_HOT_chamber60_hotend150_20260829_1853.csv  
+  mesh_7x7_COLD_chamber28_20260829_2123.csv    NOT settled, see caveat  
+  mesh_7x7_cold_20260823_2201.csv       the benchmark  
 
 =======================================================================================================  
 CONFIG.G PROVENANCE — reasoning stripped out of config.g 27/08/2026
@@ -1507,7 +1554,7 @@ M569 P70.0-P73.0 — AWD drive mode
 
 M917 X100 Y100 — AWD holding current 100%, required for closed loop (1HCL doc).
 
-M208 Z-10:300 — the negative Z min exists so an out-of-tram bed can be probed
+M208 Z-10:370 — the negative Z min exists so an out-of-tram bed can be probed
   below the Z0 datum.
 
 M203 X30000 Y30000 — X/Y 500mm/s verified; saturates 600-700.
@@ -1620,3 +1667,57 @@ Restore afterwards with M42 P2 S0, M950 P2 C"nil", M569.7 P0.0 C"out1" S200.
 Per the standing hard rule, any brake config change is bench-tested in isolation
 (motors decoupled, timing verified) before a live reload under load.
 
+
+=======================================================================================================  
+DAEMON.G SINGLE-PASS LOOP - THE "while { iterations < 1 }" FIX, 29/08/2026
+=======================================================================================================  
+daemon.g opens with "while { iterations < 1 }" - a loop block that executes
+exactly ONCE per invocation. THIS IS DELIBERATE AND IT IS NOT A MISTAKE FOR
+"while true". Do not "fix" it. Full bug report, with three separate defects
+written up for Duet3D, is at /home/trev/duet_bug_report_20260829.txt.
+
+WHY THERE IS A LOOP BLOCK AT ALL
+M261.1's V parameter declares a LOCAL variable, and DSF refuses that at file top
+level, logging "Cannot add local variable because there is no open code block".
+The declaration silently does not happen, execution continues, and the reads
+that follow fail - so the macro half-works. The PLC heartbeat kept incrementing
+(M260.1 declares nothing) while the read values silently froze. A loop block
+gives M261.1 the open block it needs.
+
+An "if" block is NOT an acceptable substitute. Tested 29/08/2026: reading
+plcRegs from inside one throws "unknown variable 'plcRegs^'" - a corrupted name
+carrying a caret that appears nowhere in the file.
+
+WHY IT RUNS ONLY ONCE
+RRF re-runs daemon.g by itself once end-of-file is reached, so the file needs no
+loop of its own to keep polling. The single-pass block gives the reads the same
+shape they always had, but the SCOPE CLOSES at the end of every invocation
+instead of persisting across polls.
+
+That persistence was the fault. A failed M261.1 left plcRegs broken inside a
+scope that never ended, so the loop could never recover: later iterations failed
+either with "plcRegs already exists" or with "unknown variable".
+
+WHY IT MATTERED - IT EMERGENCY-STOPPED THE MACHINE, TWICE
+DSF escalates that expression error to a full EMERGENCY STOP. The machine halts,
+all four CAN expansion boards drop off the bus (70-73), and M999 is required to
+recover. It fired at 23/08/2026 21:41 and again at 29/08/2026 14:54:38 - BOTH
+TIMES WITH THE MACHINE IDLE. No job running, no operator action.
+
+What makes it dangerous is WHERE the expression fails. Failing while DSF is
+EXECUTING a code logs an error and carries on. Failing while DSF is READING
+AHEAD in the macro is what raises the Emergency Stop. That is defect 2 in the
+bug report and it is the serious one.
+
+EXISTS() GUARDS DO NOT PREVENT IT
+They were tried and they do not work. Earlier notes in both project files
+claimed daemon.g "carries an exists()/break guard to recover" - that was WRONG,
+corrected 29/08/2026. There is no such guard and there never was one that
+helped; the only exists() in the file guards vars.g loading, not plcRegs. The
+single-pass scope is the entire fix.
+
+EDITING IT
+daemon.g cannot be edited in place while RRF is running it - rename it (e.g.
+daem6on.g), edit, rename back. To reload it without resetting the board, use
+"sudo systemctl restart duetcontrolserver"; that is lighter than M999 when a
+macro is all you need reloaded.
