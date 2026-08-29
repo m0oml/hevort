@@ -1,7 +1,7 @@
 ; =====================================================================
 ; is.txt POST-ALPS-FIX COMPARISON  -  Y sweep, nozzle sensor, X=200
-; Conditions are fixed by sys/is.txt TEST CONDITIONS. Changing any of
-; them invalidates the comparison against the 19-20/08/2026 baseline.
+; Conditions are fixed by ~/hevort_project/is.txt TEST CONDITIONS. Changing
+; any of them invalidates the comparison against the 19-20/08/2026 baseline.
 ;
 ; SAFETY - READ BEFORE RUNNING
 ;   Contains NO Z moves and must never gain any. Z is expected to be
