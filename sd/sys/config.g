@@ -21,7 +21,7 @@ G4 S2                                                   ; Wait 2s for CAN expans
 M569 P0.0 S0 D2                                         ; Drive 0.0: Z0 (front-right)
 M569 P0.1 S0 D2                                         ; Drive 0.1: Z1 (rear)
 M569 P0.2 S0 D2                                         ; Drive 0.2: Z2 (front-left)
-M569 P0.5 S1 D2                                         ; Drive 0.5: Extruder
+M569 P0.5 S0 D2                                         ; Drive 0.5: Extruder (S0 = reverse; S1 fed backwards, confirmed 29/08/2026)
 
 ; --- Closed-Loop Encoders (AWD) ---
 M569.1 P70.0 T3 E6:10 R30 I1000 D0.05 V500 A100000      ; X1: magnetic encoder
