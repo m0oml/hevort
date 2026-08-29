@@ -93,7 +93,7 @@ XY/AWD motors : 4x M23CL-76-2804 (18.9 kg/cm, 0.48 kg/cm^2 rotor inertia),
  M8 connectors are MALE on the motor housing (3-pin power,  
  4-pin CAN), cables supplied with the motors, star topology  
  to the TDB.  
-Motion controller: Duet 3 6HC v1.02c SBC mode, RRF 3.6.3  
+Motion controller: Duet 3 6HC v1.02c SBC mode over USB, RRF 3.7.0-beta.3  
 Toolhead : Mellow CNC Vz-HextrudORT water-cooled, Goliath hotend  
  (water-cooled variant). Fully assembled.  
  Z PROBE: Mellow ALPS Pressure Sensor Module (SKU 5030721022),  
@@ -118,10 +118,20 @@ AWD Motor Layout (top-down, front at bottom):
  Front-left: 71.0 X2 | Front-right: 72.0 Y1  
 
 Z MOTOR -> DRIVER -> POSITION (settled 12/08/2026):  
- Z0 driver 0.0 front-left arm LOW block T3-T6  
+ Z0 driver 0.0 front-right arm LOW block T3-T6  
  Z1 driver 0.1 rear arm LOW block T7-T10  
- Z2 driver 0.2 front-right arm LOW block T11-T14  
+ Z2 driver 0.2 front-left arm LOW block T11-T14  
 M671 coordinate triples must be listed in this same order.  
+CORRECTED 29/08/2026. This block previously had Z0 as the front-LEFT arm and  
+Z2 as the front-RIGHT, "settled 12/08/2026" — a desk assignment that was  
+superseded nine days later by the M584 single-driver jog of 21/08/2026 and  
+never updated here. The live config.g M671 coordinates are the proof:  
+X424.75:201:-22.75 Y-8.75:415:-8.75 pairs Z0 to high-X/low-Y (front-right),  
+Z1 to mid-X/high-Y (rear) and Z2 to low-X/low-Y (front-left). bed.g probes in  
+that same order and Trev confirmed it by watching G32 run on 29/08/2026.  
+The TERMINAL NUMBERS below were always right — only the arm names were wrong —  
+so no wiring is affected, but check the physical block labels if they were  
+ever written from this document.  
 
 WETTED-METAL VERIFICATION (RESOLVED 04/07/2026):  
 Goliath's only water-cooled component is the aluminium heatsink. The  
@@ -186,11 +196,19 @@ Reference points:
  2 kg (19.6 N) hung from a 12mm sample read 2.8 on this meter  
  Table value for ~20 N on 9mm EPDM is 2.6 — hence the ~0.2 offset  
 
-ACTUAL: both belts fitted and reading 2.6, matched. Ample tensioner travel  
-remaining in the tightening direction for bed-in. Lever positions differ  
-between upper and lower belt — this is expected and not a fault; belt path  
-lengths differ because the idler arrangement reverses between the motor towers  
-and the crossbeam joint. Tension is what matters, not lever position.  
+SUPERSEDED 26/08/2026 — THE RC2 METER CANNOT SET TENSION ON THIS MACHINE. Its  
+EPDM table tops out at 29.4 N and this gantry needs ~40 N, so the working point  
+is off the top of the scale. Everything above is still valid as background on  
+why the meter reads ~0.2 high on 12mm belt and why it is usable for MATCHING,  
+but it cannot give the absolute figure.  
+
+METHOD NOW: pluck the belt and measure the note. T = 4L^2 f^2 mu. The reference  
+state is 85/88 Hz on a 260mm span = 37/40 N, which reads 2.8 on the RC2.  
+
+Lever positions differ between upper and lower belt — expected, not a fault.  
+Belt path lengths differ because the idler arrangement reverses between the  
+motor towers and the crossbeam joint. Tension is what matters, not lever  
+position.  
 
 NOTE: the NEMA17 radial force table in the meter's manual does NOT apply to  
 this machine. The M23CL motors drive through spider couplings into a separate  
@@ -199,8 +217,11 @@ pulley between them. Motor bearings see torque only, no radial belt load. The
 limit is the 625-2RS pulley bearings and shaft bending, both with headroom.  
 
 Belts could not be normalised by hand — the motors are too heavy to backdrive  
-the gantry. Re-measure after the first powered full-travel moves and again  
-after a few hours of running.  
+the gantry.  
+
+CRITICAL, AND IT COST THREE DAYS: retensioning RACKS THE GANTRY unless it is  
+physically held square. See FRAME GEOMETRY AND VIBRATION below before touching  
+a tensioner.  
 
 =======================================================================================================  
 FIRMWARE CONFIGURATION (config.g rewritten 12/08/2026)  
@@ -240,10 +261,12 @@ TEMPERATURE SENSOR MAP (revised 12/08/2026):
 
 FAN / PUMP MAP (revised 12/08/2026):  
  F0 OUT4 !out4 Duet enclosure fan, thermostatic H10:11 T25:45  
- F1 OUT9 out9+out5.tach CPAP, manual/slicer, K1 tach correction  
- F2 OUT2 Water pump, thermostatic ON/OFF from hotend S0, T40:41  
+ F1 OUT9 out9 CPAP, manual/slicer. NO TACH — dropped in favour of the pump  
+ F2 OUT2 out2+out5.tach Water pump, thermostatic ON/OFF from hotend S0, T40:41  
  F3 OUT6 !out6 Bay/radiator fan, thermostatic H4:1 T30:50  
-OUT5 is now free (pump moved off it).  
+OUT5 is NOT free — it carries the PUMP tach, on F2. An earlier note here put  
+the tach on F1/CPAP and called OUT5 free; both were wrong. Verified live  
+29/08/2026 against the object model: F1 rpm -1 (no tach), F2 tachoPpr 2.0.  
 
 Fan 3 serves BOTH the electronics bay and the radiator in series — the single  
 fan pulls bay exhaust through the radiator. M106 accepts a sensor list on H and  
@@ -302,9 +325,12 @@ model has been removed. Running the bed on the bare mat with this model will
 overshoot badly — it expects ~10kg of thermal mass that is not yet present.  
 
 OTHER OPEN CONFIG ITEMS:  
-- M917 X0 Y0 sets AWD holding current to zero. Correct for D4 closed loop,  
- where the driver detects slip and corrects. Confirmed holding position at  
- idle. CLOSED.  
+- M917 X100 Y100 — AWD standstill current is 100%, config.g line 48, confirmed  
+ live at move.axes[0].percentStstCurrent = 100 on 29/08/2026. This entry  
+ previously read "M917 X0 Y0 sets AWD holding current to zero ... CLOSED" and  
+ was simply WRONG — contradicted by both config.g and the object model. If zero  
+ holding current is ever wanted for D4 closed loop it has to be set, not  
+ assumed. CLOSED, corrected 29/08/2026.  
 - CPAP tach pin: config says out5.tach, earlier notes say out6.tach. OUT5 is now  
  free so there is no longer a conflict either way, but confirm the physical  
  wiring.  
@@ -342,13 +368,15 @@ DRAFTED THIS SESSION — NOT YET LIVE (awaiting manual paste/upload):
    axes[0]/[1].homed before moving to bed centre — flagged, not fixed,  
    separate issue.  
 
-3. AWD DRIVE-MODE SWITCHING — DESIGNED, NOT FINAL, DO NOT IMPLEMENT AS DRAFTED.  
-   First pass used global.awdClosedLoop (0/1) with if/else blocks in the  
-   restore-mode section of homex.g, homey.g and homeall.g, plus new  
-   sys/closedloop.g and sys/openloop.g macros flipping the variable and  
-   triggering G28 X Y. SUPERSEDED BY REQUEST: the variable must store the  
-   ACTUAL D value (2/4/5) directly, not a boolean, so any mode is selectable  
-   from one variable. Redesign OUTSTANDING.  
+3. AWD DRIVE-MODE SWITCHING — DROPPED 29/08/2026, DO NOT RE-PROPOSE. The idea  
+   was to switch drive mode from a DWC macro. A first pass used  
+   global.awdClosedLoop (0/1) with if/else blocks in the restore-mode section  
+   of homex.g, homey.g and homeall.g plus sys/closedloop.g and sys/openloop.g  
+   macros; that was rejected because a boolean cannot express D5 (assisted  
+   open loop), only D2 and D4. The replacement design would have stored the  
+   ACTUAL D value. Trev's own idea and Trev's own call to drop it: closed loop  
+   is working well, so there is nothing to switch between and the complexity  
+   buys nothing. The hardcoded M569 D2/D4 pairs in the homing files stay.  
 
 4. TRIGGER RENUMBERING (stop->T0, pause->T1) INVESTIGATED AND REJECTED. RRF  
    hardcodes trigger 0 to M112 emergency stop and trigger 1 to M25 pause;  
@@ -357,11 +385,11 @@ DRAFTED THIS SESSION — NOT YET LIVE (awaiting manual paste/upload):
    heater-off sequencing, custom messages) onto T0/T1 would lose all of it.  
    STAYING on T2 (pause) / T3 (stop). Do not reopen.  
 
-sys/trigger0.g AND sys/trigger1.g should both be DELETED. trigger0.g is the  
-dead flow-switch file. trigger1.g is also dead code — no M581 T1 binding exists  
-in config.g — and its header comment wrongly claims IO6 is the filament sensor  
-pin, which now conflicts with the ALPS Z probe on IO6. trigger2.g and  
-trigger3.g stay as-is.  
+sys/trigger0.g AND sys/trigger1.g WERE DELETED 29/08/2026, locally and from  
+Drive. trigger0.g was the dead flow-switch file; trigger1.g was dead code with  
+no M581 T1 binding in config.g, and its header wrongly claimed IO6 was the  
+filament sensor pin, which conflicts with the ALPS Z probe now on IO6.  
+trigger2.g and trigger3.g stay as-is.  
 
 =======================================================================================================  
 CHAMBER HEATING SYSTEM  
@@ -639,9 +667,6 @@ DUET FILES
  exists() — safe to call repeatedly.  
  daemon.g Modbus poll only — REWRITTEN 12/08/2026  
  sys/plc_read.g Superseded — M261.1 is now inlined in daemon.g  
- sys/trigger0.g DELETE — flow switch removed, cannot fire  
- sys/trigger1.g DELETE — dead code, no M581 T1 binding, misleading header  
- macros/accel_setup.g LIS2DW accelerometer setup — run manually, NOT in config.g  
  sys/trigger2.g Pause button -> abort chamber heat, else M25  
  sys/trigger3.g Stop button -> M42 P0 S0 + M0  
  sys/deployprobe.g ALPS enable assert — NEW 12/08/2026  
@@ -649,18 +674,45 @@ DUET FILES
  sys/homex.g REWRITTEN 12/08/2026 (min/left, H2 back-off)  
  sys/homey.g REWRITTEN 12/08/2026 (H2 back-off)  
  sys/homeall.g REWRITTEN 12/08/2026 (sequential X then Y)  
- sys/homez.g Unchanged — already correct  
+ sys/homez.g Probes bed CENTRE — corrected 29/08/2026, it had been  
+ hardcoded to X10 Y10 during testing  
+ sys/mesh.g G29 grid mesh, runs G32 first and verifies convergence  
+ sys/bed.g G32 triple-Z tramming (described below)  
+ sys/pause.g / resume.g / stop.g Job control  
+ sys/tfree0.g / tpre0.g / tpost0.g Tool change (single tool)  
+ macros/motors_off.g Drops motors, engages Z brakes  
  sleep.g M42 P0 S0 to drop R1  
  macros/chamber_heat.g Chamber preheat, abort via global.chamberAbort  
  macros/chamber_abort.g Sets global.chamberAbort=1  
  macros/plc_status.g Live PLC status report  
- macros/printstart.g OUTSTANDING  
- macros/printend.g OUTSTANDING  
- macros/speedtest/speedtest.g Speed/drift test — G1 H3 endstop probing  
- macros/speedtest/_st_measure.g Measurement sub-macro, M122 B70-73  
 
-bed.g is a single G29 stub. M671 coordinates pending granite delivery and bed  
-frame geometry lock.  
+ The LIS2DW accelerometer is NOT a macro. M955 lives COMMENTED OUT at config.g  
+ line 61 — uncomment for a session, comment it back afterwards. There is no  
+ macros/accel_setup.g and there never was.  
+ sys/printstart.g Print start routine — exists, in sys/ not macros/  
+ sys/printend.g Print end routine — exists, in sys/ not macros/  
+ macros/Speed/speedtest.g Speed/drift test — G1 H3 endstop probing  
+ macros/Speed/_st_measure.g Measurement sub-macro, M122 B70-73  
+ (note the folder is "Speed", capital S — this filesystem is case sensitive)  
+
+ macros/Frame/ — the input-shaping and belt toolkit the whole 23-26/08 frame  
+ investigation ran on. DO NOT write new sweep macros, use these:  
+ belt_check.g Motor effort / racking check  
+ belt_settle.g Belt settling routine  
+ is_xpos.g Y sweep at fixed X positions (both belt pairs)  
+ is_diag.g One belt pair at a time — exposed to tension imbalance  
+ is_recheck.g / is_x10_recheck.g Repeat runs for a given position  
+ is_x390_frontrear.g Front vs rear split at X=390  
+ is_x390_middle.g Mid-travel run at X=390  
+ NOTE: is_xpos.g and is_diag.g write FIXED filenames and silently overwrite.  
+ Archive to /home/trev/hevort_survey_data/ BEFORE re-running.  
+
+bed.g is an 86-line iterative 3-point tramming macro: ALPS probe plus M671  
+geometry, converging at deviation < 0.02mm or bailing at 15 iterations, and it  
+aborts if the closing centre-datum G30 fails. M671 IS set, config.g line 78 —  
+but it was derived against the TEMPORARY slab, so both it and the three probe  
+points need re-validating once the final slab is in and the bed frame geometry  
+is locked.  
 
 Sub-macros live in macros/[subfolder]/ to collapse DWC menu entries.  
 
@@ -783,9 +835,10 @@ Grommets to be printed to suit as needed.
 
 10mm OD PU tube (rad return -> reservoir) does not cross any panel.  
 
-STILL TO COLLECT from Power Electrical Factors (commodity, not blocking):  
-gland bodies as required, plus a 20mm momentary push button for IO7 pause.  
-The IO8 stop button is a separate, already in-hand, break-to-stop NC device.  
+Gland bodies were sourced from Power Electrical Factors but ENDED UP NOT BEING  
+USED — they are in hand if ever wanted. The 20mm IO7 pause button from the same  
+supplier IS fitted and wired (config.g M950 J2 C"io7.in", M581 T2). The IO8 stop  
+button is a separate, break-to-stop NC device.  
 
 =======================================================================================================  
 TERMINAL SCHEDULE  
@@ -845,7 +898,7 @@ Note io6.in and io6.out are NOT adjacent — GND sits between them.
 LOW Block (21 terminals):  
  T1 Z brake + Duet OUT1 signal (all three brakes commoned)  
  T2 Z brake GND Duet OUT1 GND  
- T3 Z0 B1 (red) Duet driver 0.0 front-left arm  
+ T3 Z0 B1 (red) Duet driver 0.0 front-right arm  
  T4 Z0 B2 (blue) Duet driver 0.0  
  T5 Z0 A1 (green) Duet driver 0.0  
  T6 Z0 A2 (black) Duet driver 0.0  
@@ -853,7 +906,7 @@ LOW Block (21 terminals):
  T8 Z1 B2 (blue) Duet driver 0.1  
  T9 Z1 A1 (green) Duet driver 0.1  
  T10 Z1 A2 (black) Duet driver 0.1  
- T11 Z2 B1 (red) Duet driver 0.2 front-right arm  
+ T11 Z2 B1 (red) Duet driver 0.2 front-left arm  
  T12 Z2 B2 (blue) Duet driver 0.2  
  T13 Z2 A1 (green) Duet driver 0.2  
  T14 Z2 A2 (black) Duet driver 0.2  
@@ -886,7 +939,9 @@ Cord: Key-Bak retractable reel, clipped/zip-tied to the umbilical bundle sleeve
 every 50-75mm so the bundle hangs in a shallow curve rather than loading at one  
 point. The 13oz reel already in hand is TOO STRONG for this load — replaced by  
 the Key-Bak Sidekick, 4oz retraction force, Kevlar cord (heat-tolerant for the  
-chamber-side segment). ORDERED, awaiting arrival.  
+chamber-side segment).  
+
+BUILT AND FITTED as described above, 29/08/2026.  
 
 Bundle carries: CPAP cable, water lines (in + out), PTFE tube. Water lines  
 confirmed NOT heat-sensitive at this duty (closed loop, radiator-cooled) — no  
@@ -954,11 +1009,10 @@ Coolant : Mayhems X1 Clear Premix, aluminium-safe. Contains its own biocide and
 
 Estimated fill volume ~0.9-1L. Tube runs not yet measured.  
 
-STATUS: pump, reservoir and radiator all MOUNTED on the rear panel. Loop not  
-yet plumbed. Pump and coolant sensor still to be wired.  
-Loop assembly and pressure test are INDEPENDENT of the granite and can be done  
-at any time — worth doing before the machine is fully buttoned up, since a leak  
-found on the bench is much better than one found inside a finished chamber.  
+STATUS: COMPLETE 29/08/2026. Pump, reservoir and radiator mounted on the rear  
+panel; pump and coolant sensor wired; loop plumbed. It was deliberately done  
+before the machine was buttoned up — a leak found on the bench is much better  
+than one found inside a finished chamber.  
 
 =======================================================================================================  
 GRANITE BED  
@@ -971,8 +1025,8 @@ Spec: £180. Top surface 440x440x20mm, top-face holes water-jet cut, top and
  sides polished. Volcanic rock.  
 
 STATUS 13/08/2026: ORDERED AND PAID FOR. Not yet ready for collection — chase  
-if not heard within a reasonable window. This is now the ONLY outstanding  
-delivery, and it blocks: bed frame geometry lock, M671 coordinates, FR4 hole  
+if not heard within a reasonable window. It blocks: bed frame geometry lock  
+(M671 is currently set against the temporary slab), FR4 hole  
 positions, Z endstop configuration, and any bed heating (see the PID model  
 warning in FIRMWARE CONFIGURATION).  
 
@@ -1042,145 +1096,13 @@ fix rotation while leaving the radial direction free for frame expansion.
 NOT DECIDED.  
 
 =======================================================================================================  
-IMMEDIATE NEXT STEPS  
+PROCUREMENT — INVENTORY IN HAND  
 =======================================================================================================  
 
- 1. Wire the OUT6 bay/radiator fan — DONE  
- 2. Wire the OUT2 water pump — DONE. Pump wired and commissioned.  
- OPEN: whether the CPAP->pump tach reassignment (out5.tach -> OUT6.tach) was  
- actually carried out alongside the pump wiring. Not confirmed. CHECK THE  
- PHYSICAL WIRING.  
- 3. Wire the coolant sensor to temp1 — DONE  
- 4. Toolhead bundle wiring — COMPLETE except the hotend PT1000, which has  
- FAILED and is awaiting a replacement sensor. On fitting: rebond (Rutland  
- Furnace Cement or Omega OB-200) and extend the cable as needed.  
- 5. Top panel insulation — OUTSTANDING, no change (base insulation done).  
- 7. Cut and fit the MGN9 X rail — DONE  
- 8. Delete sys/trigger0.g AND sys/trigger1.g  
- 9. Water loop plumbing and pressure test (independent of granite)  
- 10. Door frame built and glazed — DONE. Seal comparison (foam tape vs tube  
- cord) still to run now the frame exists.  
- 11. Verify M917 X0 Y0 holds position in D5 — CONFIRMED, homing fine  
- 12. CPAP tach pin — pump does have a tach output after all (previous "no  
- tach" note was wrong). Pump tach -> OUT6.tach, CPAP tach dropped.  
- Execution unconfirmed — see item 2.  
+What is still ON ORDER lives in project.txt PROCUREMENT, not here. This  
+section is the record of what the machine is actually built from.  
 
- 13. Front frame extension — IN PROGRESS.  
- 14. Waveshare display mount — printing on the Voron V2, not yet fitted.  
- 15. Pi F1 fuse replacement + pogo-pin insulation before repowering (see  
- RASPBERRY PI / DISPLAY).  
- 16. Y rail mounting: NOT RESOLVED, ACTIVELY MOVING — 23/08/2026 — not a  
- torque-spec problem, confirmed a rail/frame geometry (or clamp-stress)  
- defect. Full torque progression (original/1Nm/by-feel x2/fully-slack/  
- totally-loose) showed a monotonic relationship with no sweet spot: clamping  
- was twisting the carriage against an untrue mounting surface, not "needing  
- a lighter torque".  
- SEQUENCE SO FAR: rear-right fastener shimmed 0.5mm (slip gauge, temporary),
- confirmed working there specifically (127Hz band reversed from 2.25x
- rear-louder to 0.63x rear-quieter). Then Trev REMOVED that shim and moved it
- to the FRONT-LEFT fastener instead. A full sweep with the shim at
- front-left appeared to give the best asymmetry result of the day (X10/X390
- 1.41x->0.96x, diagA/diagB 1.36x->1.03x), which seemed to contradict
- frame_survey_20260821.txt section 3, "Do NOT shim the left rail".
-
- RESOLVED 23/08/2026 LATE — THAT CONTRADICTION WAS A BELT TENSION ARTEFACT.
- THERE IS NO LONGER ANY EVIDENCE FAVOURING THE LEFT RAIL.
- Trev flagged that the belts were slackened when the rails came off for
- inspection, which puts a validity boundary partway through is.txt: the whole
- torque progression and the PIVOT predate it and are clean, but everything
- after (pinned-ends onward, INCLUDING both shim results) was measured at
- unknown belt tension. is_diag.g isolates one belt pair at a time, so it is
- directly exposed to a tension imbalance; is_xpos.g drives both pairs together
- and is not. Caught live: three n=3 runs of the SAME unchanged front-left
- state gave diagA/diagB 1.03x / 1.19x / 1.02x, with the Y-pair (diagB) both
- dropping 16% and throwing a 149.2Hz peak outlier in the middle run. Belts
- were then gauged and set EVEN AT 2.5/2.5 and the ratio returned to 1.02x.
- THE A/B WAS THEN RUN PROPERLY - same 0.5mm gauge physically moved between
- the two positions, belts verified even for both, both rails end-pinned,
- X/Y re-homed before each:
-                 front-left    rear-right
-   X=10          0.145         0.136
-   X=200         0.167         0.171
-   X=390         0.174         0.164
-   diagA         0.142         0.136
-   diagB         0.139         0.136
-   X10/X390      0.83x         0.83x
-   diagA/diagB   1.02x         1.00x
- EQUIVALENT on overall rms (2-6% apart, against 12% between-run scatter), and
- both asymmetry ratios identical. The apparently decisive 0.96x-vs-0.64x gap
- that drove "front-left is better" was belt tension, not geometry.
- ONE REAL DIFFERENCE AND IT FAVOURS REAR-RIGHT: 127Hz band at X=390, 0.077
- front-left vs 0.047 rear-right (64% gap, far outside the +-0.002-0.003
- within-run spreads) - the shaper-targeted band at the right-hand end, quieted
- specifically by correcting the right rail's own documented static fault.
- => SHIM GOES AT REAR-RIGHT. frame_survey section 3 stands unchallenged.
- Full detail and raw data index in sys/is.txt, final section.
-
- STILL OPEN: both rails are END-PINNED ONLY, so none of this predicts full
- assembly with intermediate fasteners tightened - that is what the graduated
- section 3 schedule is for. NO STATIC MESH has been taken for either shim
- state (vibration only); needs the accelerometer off, a real G28, then a cold
- 4x4. Belts now 2.5/2.5, matched but under the 2.6/2.6 baseline - RE-CHECK
- TENSION BEFORE ANY FUTURE COMPARISON, this whole correction exists because
- that was not done.
- STILL OPEN, UNCHANGED: front-right fastener suspected loose from an earlier
- slacken/retighten test - never confirmed tight or ruled back in as a factor.
-
- NEW — DONE 13/08/2026: base/bottom insulation panel fitted, with all  
- associated sensors (air-off, chamber bottom) sorted.  
-
-ON GRANITE ARRIVAL:  
- - Drill/bond inserts (JB Weld), bond kinematic brackets and heater mat  
- (Dowsil 736)  
- - Drill FR4 from the granite pattern  
- - Lock bed frame geometry, set M671  
- - Reduce Z max by 1mm for the FR4  
- - Only then run the bed heater  
-
-COMMISSIONING:  
- - Continuity testing once the umbilical is run  
- - Closed-loop PID tuning, ONE MOTOR AT A TIME. Duet firmware only supports  
- tuning one driver at a time; on a multi-driver axis the other motor does not  
- move, which on a belted AWD gantry risks stressing or misaligning the axis.  
- Plan the mitigation before starting. P and D scale roughly with reflected  
- inertia as a starting point; I does not scale linearly. Treat calculated  
- values as a commissioning start and verify empirically with the DWC Closed  
- Loop plugin.  
- - Hotend PID autotune  
- - Probe trigger height and offsets  
- - Air-off RTD fitting and PID_Compact_2 retune — DONE 13/08/2026 (see  
- AIR-OFF RTD in CHAMBER HEATING SYSTEM)  
- CHAMBER PID_Compact_1 (OUTER LOOP) — TUNED 20/08/2026:
-Pretuning (SUT) in TIA Portal wizard rejected the run despite a genuine 38°C
-gap (ambient 22, SP 60) — recurring TIA quirk with slow thermal loads, not
-specific to this rig. Ran Fine tuning instead, against the already-closed
-air-off inner loop as plant. Result (TIA Portal fine-tune): Kp 23.2822,
-Ti 65.35211s, Td 16.54922s, PWeighting 0.2560298, DWeighting 0.0,
-TdFiltRatio 0.1, Cycle 1.399945s, PID structure. Uploaded to DB5, program
-saved and downloaded to CPU. Verified on a second heat-up from partial
-cooldown: overshoot only ~0.4°C past 60°C SP, settled cleanly. Weighted PV
-at steady state 60.1°C (chamber 60.0, top 63.3, bottom 57.2 — ~6°C
-stratification, expected with top panel insulation not yet fitted). Both
-cascade loops (air-off inner, chamber outer) now tuned and validated.
- - Input shaping, then raise M201/M203 from placeholders  
- - Re-check belt tension after the first hours of running  
- - Display mount design in Onshape (Waveshare STEP from the Waveshare wiki)  
-
-=======================================================================================================  
-PROCUREMENT  
-=======================================================================================================  
-
-OUTSTANDING:  
- - Granite slab, Just Granite, £180 — ORDERED AND PAID, awaiting collection  
- - Hotend PT1000 replacement — original has failed  
- - Key-Bak Sidekick 4oz Kevlar retractable reel — ORDERED, awaiting arrival  
- - F1 3.15A 5V MDR fuse (spare)  
-
-TO COLLECT (commodity, not blocking):  
- - Cable glands as required, Power Electrical Factors  
- - 20mm momentary push button for IO7 pause  
-
-EVERYTHING ELSE IS IN HAND, including: Duet 3 6HC; TDB v1.0; 4x M23CL with  
+IN HAND: Duet 3 6HC; TDB v1.0; 4x M23CL with  
 cables; Mellow CNC towers, toolhead and gantry order (fully assembled); 12mm  
 pulleys, idlers and belts; MGN12H rails; MGN9H rail; X beam extrusion; Ooznest  
 door hardware and 3030; extrusion drill/tap jig and stock; T1-T4 PSUs; Omron  
@@ -1201,9 +1123,11 @@ display was pressed or touched, blowing F1 (3.15A 5V MDR — covers Pi 4, Duet
 logic, DSI display). NOT an EMI/DSI signal-integrity issue as first suspected.  
 Earth topology, motor proximity and shielding were all checked and ruled out  
 along the way — that work wasn't wasted, but it wasn't the fault.  
-ACTION PENDING: confirm the short is cleared, check pogo pins for damage,  
-replace F1, then insulate the contact area (Kapton tape, or a printed  
-standoff/spacer holding the display face clear of the frame with real margin)  
+RESOLVED. F1 replaced, the display mount fitted and the Pi repowered; the Pi,  
+the DSI panel and the DWC kiosk have all been running since. The fix was to  
+insulate the contact area — Kapton tape, or a printed standoff/spacer holding  
+the display face clear of the frame with real margin (the standoff is preferred,  
+tape is a wear item here)  
 BEFORE repowering.  
 
 DSI CABLE ORIENTATION (hardware note):  
@@ -1212,8 +1136,9 @@ NOT the "opposite direction" type assumed by generic Pi/Waveshare wiring
 guides. Orientation is consistent at both connectors, not mirrored. Confirmed  
 by physical inspection. Trust the part in hand over generic documentation.  
 
-DISPLAY MOUNT: designed in Onshape from the Waveshare STEP file, being printed  
-on the Voron V2. Not yet fitted.  
+DISPLAY MOUNT: designed in Onshape from the Waveshare STEP file, printed on the  
+Voron V2, FITTED. The mount also carries the pogo-pin clearance that stops the  
+short described above.  
 
 =======================================================================================================  
 ACCELEROMETER / INPUT SHAPING  
@@ -1231,10 +1156,13 @@ assumed.
 Orientation I65 derived: accelerometer X+ = machine -Y, accelerometer Y+ =  
 machine -X, giving Z-code 6 (machine -Z) and X-code 5 -> I65.  
 
-NOT in config.g — this fit is temporary. Kept as a standalone macro  
-(macros/accel_setup.g) so removing the accelerometer later doesn't cause a  
-boot-time "accelerometer not found" warning. Run the macro manually before an  
-input-shaping session.  
+NOT active in config.g — this fit is temporary. The M955 line is kept COMMENTED  
+OUT at config.g line 61 so that removing the accelerometer later cannot cause a  
+boot-time "accelerometer not found" warning. Uncomment it before an  
+input-shaping session and comment it back out afterwards.  
+
+An earlier note here claimed this lived in a standalone macros/accel_setup.g.  
+No such file exists and none ever did — corrected 29/08/2026.  
 
 =======================================================================================================  
 FILAMENT HANDLING — UNDECIDED  
@@ -1360,7 +1288,7 @@ TOOLS & RESOURCES
 =======================================================================================================  
 
 Core system:  
- Duet 3 6HC v1.02c, RRF 3.6.3, SBC mode, Pi 4 (hostname hevort, user trev)  
+ Duet 3 6HC v1.02c, RRF 3.7.0-beta.3, SBC mode over USB, Pi 4 (hostname hevort, user trev)  
  Siemens S7-1212C DC/DC/Rly FW V4.3.1, SM1222 slot 3 base %QB13, SM1231 RTD  
  KTP700 Basic PN HMI, Helmholz 700-850-4PS01 PROFINET switch  
  DuetWebControl with Closed Loop plugin  
@@ -1405,9 +1333,148 @@ Google Drive IDs (permanent):
  config.g 177pyavgoX4eFi_z4xae3Es8-uoJSUdm4  
  FrameCalculator.xlsx (Old folder) 1zz7EkzzbHFOsBM6v6Csn_zKn2BMLs-4z  
 
-=======================================================================================================
+=======================================================================================================  
+FRAME GEOMETRY AND VIBRATION — RESOLVED 23-26/08/2026  
+=======================================================================================================  
+
+Three days of measurement that ended with one procedure change worth more than  
+everything else combined. The wrong turns are recorded deliberately: each one  
+looked convincing at the time and would otherwise be repeated.  
+
+--- What was actually wrong, in the order it was found -------------------------  
+
+1. REAR-RIGHT Y RAIL SAT LOW. The one genuinely shimmable fault. Measured as the  
+   front-to-rear change in rail differential, which is what a shim corrects:  
+   0.344mm cold 23C, 0.372mm at 45C, 0.358mm at 60C — temperature independent to  
+   +/-0.02mm across 23K, so it is measured COLD. Corrected with 0.5mm at the rear  
+   fastener. Confirmed by two independent methods:  
+      static   cold 4x4 mesh corner twist   0.283mm -> 0.011mm (repeat 0.024mm)  
+      dynamic  127Hz band at X=390          2.25x rear-louder -> 0.63x rear-quieter  
+      aX cross-axis coupling                1.76x -> 1.08x (near parity)  
+   A 7x7 cold map then gave corner twist -0.005mm and deviation 0.067mm, the best  
+   the machine has produced. PERMANENT SHIM FITTED 29/08/2026 at the same ~0.5mm,  
+   replacing the slip gauge, with ALL rail fasteners torqued to 0.5 N.m - the  
+   documented repeatable spec this investigation always lacked. The confirming  
+   cold 7x7 re-mesh is still to be taken, and must be taken at that same torque.  
+
+2. BELTS WERE FAR TOO SLACK. Running ~20 N against a calculated ~53 N requirement  
+   (3kg gantry, 35 m/s^2) — below even the no-slack minimum of 26 N. This was  
+   invisible because the RC2 meter tops out at 29.4 N, so it reads "fine" at the  
+   top of its scale while the belt is half the tension it needs.  
+
+3. THE GANTRY WAS RACKED, AND WE CREATED IT. The machine was square when built.  
+   The rack appeared alongside the belt removal and retensioning, because both  
+   retensioning and slackening the motor couplings move the gantry while nothing  
+   holds it square. Squaring it took belt_check peak effort from 227/240 to  
+   140/148, then 133/134 after tensioning — about 35% of motor authority  
+   recovered in a single step.  
+
+--- Why the rack hid for so long ----------------------------------------------  
+
+THE MESH IS BLIND TO IT. A rack is an XY squareness error. Twist read +0.001mm,  
+essentially perfect, with the gantry badly out of square. No bed measurement of  
+any kind will find this.  
+
+IT MASQUERADES AS SLACK BELTS. Raising tension 42 -> 64 N, a 52% increase, moved  
+peak motor effort not at all: 238.6 -> 239.6. Hours went into tensioning belts to  
+fix what was a geometry fault.  
+
+HIGH TENSION MASKS IT. At 78 N the vibration numbers were the best ever recorded  
+(8.4um mean displacement) while the motors sat at 89-94% authority. Both are the  
+same finding: belt stiffness holding a racked gantry rigidly buys quiet at the  
+cost of nearly all the control range. That "best state ever" was compensated,  
+not healthy.  
+
+--- The wrong turns, and why each was wrong ------------------------------------  
+
+"IT IS A TORQUE SPEC." Tested every clamp state from original through 1.0 N.m,  
+"by feel" twice, fully slack and totally loose. Vibration fell MONOTONICALLY to  
+zero clamp force, with no sweet spot, and "by feel" was unreproducible (0.215 vs  
+0.310 rms at X=10 from an identical procedure). There is no torque that both  
+locates the rail and avoids stressing it, because clamping a straight rail  
+against an untrue surface twists the carriage. Torque was never causal — it was  
+only how hard the twist got squeezed. A 2.0 N.m-floor ratchet was bought for this  
+plan and is the wrong tool; 1.0 N.m was tested directly and was far too tight.  
+
+BUT A SPEC IS STILL REQUIRED, and this is the distinction that took three days to  
+see. Torque is not the CAUSE, so no torque value fixes the geometry — that is what  
+the shim is for. Torque is still a VARIABLE, because clamping state moves the twist  
+by tens of microns, so it has to be held constant or no two measurements compare.  
+Settled 29/08/2026: ALL RAILS AT 0.5 N.m, set with a torque screwdriver. Light  
+enough to locate the rail without squeezing it, and repeatable, which "by feel"  
+never was.  
+
+"A BRINELLED RAIL." A burst appeared position-locked to the accelerometer sample  
+(457/457/457 at X=10, 473/473/473 at X=390, ~0.16mm repeatability), immune to  
+clamping state, with no ball-recirculation periodicity. Every one of those is  
+equally consistent with debris, and it was neither — see below. THE LESSON: if a  
+defect looks mechanical and permanent, re-test after a few hundred passes before  
+spending money. Rails and blocks are FINE. Do not order replacements.  
+
+"IT WAS DEBRIS THAT GOT CRUSHED OUT." Also wrong. Debris does not vanish and then  
+return, and it cannot appear in X-only travel at a fixed X. The apparent  
+disappearance came immediately after the rails were loosened, re-centred and  
+re-torqued, which changes belt path geometry and therefore tension. Dropping to  
+1.9 on the meter brought it straight back.  
+
+"THE MACHINE IS 35% WORSE THAN BENCHMARK." An artefact of the metric. Acceleration  
+rms weights harmless 200Hz content the same as damaging 40Hz content. Converted to  
+displacement the gap did not exist. ALWAYS COMPARE IN DISPLACEMENT: d = a*9.81/(2*pi*f)^2.  
+
+--- Procedures that came out of it --------------------------------------------  
+
+BELT TENSION — pluck, do not meter. T = 4L^2 f^2 mu. Reference state is 85/88 Hz  
+on a 260mm span = 37/40 N, which happens to read 2.8 on the RC2. ~40 N is enough;  
+the earlier 53-78 N figures were sized for a racked gantry and are too high.  
+
+TENSIONING — the tensioners are on the FRONT towers only and each pair is a  
+diagonal (X = 70 back-right + 71 front-left; Y = 72 front-right + 73 back-left),  
+so tensioning changes belt length BETWEEN a pair and forces a phase offset. Hold  
+the gantry square against a fixture, slacken the couplings on 71 and 73 (both  
+left, one per pair), tension with those pulleys free, then clamp. One operation,  
+one position, and no resync needed afterwards.  
+
+COUPLING RESYNC — the four closed-loop motors fight each other at standstill after  
+any belt refit, burning 366 units of PID authority against a healthy ~70. It is a  
+reassembly artefact and it RECURS, introduced by clamping the belt with the paired  
+motors at whatever phase they happen to sit at.  
+  - SQUARE THE GANTRY FIRST. The resync makes each motor's zero agree with wherever  
+    the gantry currently is, so doing it racked makes the skew the reference. That  
+    is why the fight kept "returning": 366 -> 64 -> 16, each resync re-baselining  
+    onto a worse skew. LOW IDLE PID IS NOT A GEOMETRY CHECK.  
+  - Motors ENGAGED AND HOLDING, slacken one coupling at a time on the plain motor  
+    shaft, let the controller drive its own error to zero, re-clamp. Do NOT disable  
+    the motors to re-clamp — that locks in the mechanical rest position and the  
+    fight comes straight back.  
+
+MEASUREMENT — check belt tension before any vibration comparison. is_diag.g  
+isolates one belt pair at a time and is directly exposed to a tension imbalance:  
+an UNCHANGED machine gave 1.03x / 1.19x / 1.02x purely from slack belts, and that  
+artefact was read as a rail asymmetry for most of a day. is_xpos.g drives both  
+pairs together and is largely immune.  
+
+--- Reference state, square ----------------------------------------------------  
+
+Plucked 85/88 Hz = 37/40 N, RC2 2.8, belt_check 133.4/133.9, standstill 70,  
+silent. Mean displacement 8.4um across X, uniform 7.4-9.5 (was 7.6-14.2); X390,  
+always the worst corner, went 14.2 -> 9.4. Shaper F147 — the only genuine  
+isolated resonance on the squared machine is 146.9 Hz. The old F127 was derived  
+on the slack, racked, preloaded machine.  
+
+Other geometry terms, for context: the X beam bows -11.7um/K, linear, and is NOT  
+shimmable (bimetallic — steel rail on aluminium beam), so it is meshed. Granite  
+is 0.114mm astigmatic and is not a flat reference; FR4 sheet is 0.028mm. The bed  
+rests on three points so contributes only a plane, which G32 removes. The frame  
+is support-insensitive: 4.35mm under one foot produces 6um of twist, so it needs  
+no levelling.  
+
+Raw captures and maps: /home/trev/hevort_survey_data/. Full working detail in  
+sys/is.txt and sys/frame_survey_20260821.txt.  
+
+
+=======================================================================================================  
 CONFIG.G PROVENANCE — reasoning stripped out of config.g 27/08/2026
-=======================================================================================================
+=======================================================================================================  
 Rule agreed with Trev 27/08/2026: comments in config.g explain what the command
 does, nothing else. No reasoning, no decisions, no dates, no evidence. All of
 that lives here. Pure lookup maps (driver layout, brake wiring) stayed in
@@ -1462,7 +1529,8 @@ M569.7 P0.0 C"out1" S200 — Z brakes.
   placeholder and has never been tuned on hardware. The claim that the brakes
   are "commoned across Z0/Z1/Z2, single brake config covers all three via a
   shared output" is an ASSUMPTION carried in the comment, not a verified wiring
-  fact — and it sits directly on the open brake fault. See project.txt item 0.
+  fact — and it sat directly on the brake fault. That fault was retired from the
+  working list 29/08/2026; see the Z BRAKE section at the end of this file.
 
 M42 P1 S0 — forces the ALPS enable LOW at boot rather than relying on the GPIO
   default state.
@@ -1491,3 +1559,64 @@ M950 P0 C"out8" / M42 P0 — PLC safety relay R1 coil.
 M575 P3 — RS485 to the Siemens S7-1200 for chamber heating. IO1 is dedicated to
   RS485 with the RS485_EN jumper fitted. Was P2 in RRF 3.6.x; 3.7 shifted the
   device numbering by one when all Duet 3 mains gained a second USB CDC channel.
+
+
+=======================================================================================================  
+Z BRAKE INTERMITTENT RELEASE FAULT - retired from the working list 29/08/2026
+=======================================================================================================  
+Removed from project.txt OUTSTANDING at Trev's call: "remove point 0 if it
+reoccurs I'll jump on it". NOT fixed and NOT explained - it simply stopped
+happening and is not worth blocking on. Everything below is the state of the
+diagnosis when it was parked, kept so it does not have to be redone.
+
+---------------------------------------------------------------------------
+0. Z BRAKES INTERMITTENTLY FAIL TO RELEASE  [BLOCKS ALL MOTION - do not print]
+---------------------------------------------------------------------------
+Numbered 0 to avoid renumbering the list below. This blocks everything.
+
+First seen 27/08/2026. The three commoned Z brake solenoids sometimes do not
+release. When it happens they STAY locked across repeated homing attempts and
+the Z motors grind against them. Two E-stops on 27/08/2026: ~20:27, and again
+during the homeall that ended 20:28:01. Recovered on the homeall at 20:28:44.
+
+WHAT IS RULED OUT:
+ - NOT a timing/dwell problem. They do not release late, they never release.
+   The G4 P800/P1500 dwells in the home macros were added 22/08/2026 assuming a
+   slow solenoid. Raising them is a dead end. Trev: "its not a timing issue as
+   the fail to release and stay locked subsequently".
+ - NOT config.g failing to reach M569.7. config.g completed on every run - the
+   M307 warning further down the file is logged every time.
+ - NOT RRF's brake-control logic. Driving the port manually with M950+M42,
+   completely bypassing M569.7, is intermittent in the same way. Trev: "i know
+   it can work it just doesnt always".
+
+WHAT IS LEFT: everything downstream of the command - the OUT1 output stage, the
+wiring, the connector, or the coils.
+
+PRIME SUSPECT - the commoning point. From project-long.txt LOW block:
+   T1  Z brake +    Duet OUT1 signal  (all three brakes commoned)
+   T2  Z brake GND  Duet OUT1 GND
+All three brakes share ONE terminal pair. Three coils do not fail together, but
+one shared crimp does - and that explains total silence rather than a partial
+release, plus the latch-until-disturbed behaviour and the spontaneous recovery.
+
+SECOND SUSPECT - no flyback diode. M569.7 docs: OUT/FAN pins on Duet 3 have
+flyback diodes, but if a HEATER output is used "you must add a flyback diode in
+parallel with the brake solenoid". OUT1 is heater-class on the 6HC (same class
+as OUT0 hotend and OUT7 bed SSR). Three inductive coils switched hard with no
+diode, every enable/disable cycle for months, degrades before it fails outright.
+
+NEXT STEP - meter it WHILE THE FAULT IS LATCHED, with OUT1 held on:
+ - 24V at OUT1 but not at T1/T2  -> loom, connector or crimp.
+ - nothing at OUT1               -> output stage gone; move the brakes to a
+                                    fan-class OUT pin, which has the diode.
+To hold the port on manually:
+   M17 Z                    ; motors holding first
+   M569.7 P0.0 C"nil"       ; hand OUT1 back
+   M950 P2 C"out1"          ; claim it as plain GPIO (P2 and P3 are free)
+   M42 P2 S1                ; drive it
+Restore afterwards with M42 P2 S0, M950 P2 C"nil", M569.7 P0.0 C"out1" S200.
+
+Per the standing hard rule, any brake config change is bench-tested in isolation
+(motors decoupled, timing verified) before a live reload under load.
+
