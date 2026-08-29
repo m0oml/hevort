@@ -6,5 +6,4 @@
 
 ### The following files were updated:
 
-### The following files were deleted:
-sd/sys/trigger0.g<br>sd/sys/trigger1.g<br>
+### No files were deleted 
