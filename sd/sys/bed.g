@@ -39,10 +39,10 @@ G1 Z20 F1000                                                     ; Lower bed to 
 ; --- 3. Iterative alignment loop ---
 while true
     ; Point 0: front-right, near Z0
-    G0 X400 Y16 F9000                                            ; Travel to front-right probe point
+    G0 X398 Y16 F9000                                            ; Travel to front-right probe point (2mm off the X400 limit)
     M400                                                          ; Wait for move to finish
     G4 P250                                                       ; Stabilisation delay
-    G30 P0 X400 Y16 Z-99999                                       ; Probe and store as point 0
+    G30 P0 X398 Y16 Z-99999                                       ; Probe and store as point 0
     G4 P250
 
     ; Point 1: rear, near Z1 (driver 0.1)
