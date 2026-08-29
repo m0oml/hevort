@@ -47,8 +47,12 @@ RRF QUIRK: daemon.g cannot be edited in place while RRF is running it. Rename
 =======================================================================================================  
 MACHINE AT A GLANCE  
 =======================================================================================================  
-415 x 415 x 440mm CoreXY AWD HevORT. Duet 3 6HC v1.02c, SBC mode, Pi 4  
-(hostname hevort, user trev). RRF 3.7.0-beta.3 as of 20/08/2026.  
+415 x 415 x 440mm frame CoreXY AWD HevORT. USABLE TRAVEL is the M208 limit,  
+not the frame size: X0:400 Y0:400 Z-10:370, config.g line 52. Y raised 390->400  
+and Z 300->370 on 29/08/2026, both driven and cleared; Z370 is provisional and  
+gets revisited when the bed goes in.  
+Duet 3 6HC v1.02c, SBC mode over USB since 27/08/2026 (was SPI).  
+Pi 4, hostname hevort, user trev. RRF 3.7.0-beta.3 as of 20/08/2026.  
 
 Motion   : 4x M23CL-76-2804 CAN-FD on 48V via TDB v1.0. D4 closed loop, tuned.  
            CAN 70 = X1 back-right, 71 = X2 front-left,  
@@ -69,20 +73,28 @@ Network  : PROFINET 192.168.32.x — Pi .70, PLC .71, KTP700 .72, switch .73.
 LIVE REFERENCE MAPS  
 =======================================================================================================  
 TEMPERATURE SENSORS  
- S0  temp0     Hotend PT1000                    ** SENSOR FAILED, awaiting replacement  
+ S0  temp0     Hotend PT1000, replaced and PID tuned 29/08/2026, reads ok  
  S1  temp1     Coolant, Barrow G1/4 10K B3950 NTC  
- S2  temp2     Bed heater mat surface 10K B3950 — safety limit only  
+ S2  NOT FITTED. The bed mat surface sensor is COMMENTED OUT at config.g line  
+     84 and does not exist in the object model. Do not cite it as a safety limit.  
  S4  spi.cs0   ElecBay Pt100 4-wire (SPI daughterboard ch0)  
- S5  spi.cs1   Bed slab Pt100 4-wire (ch1) — bed PID source  
+ S5  spi.cs1   Bed slab Pt100 4-wire (ch1) — bed PID source.  
+     READS state "hardwareError", value 2000.0 (open circuit) as of 29/08/2026.  
+     Expected, not a new fault: the temporary slab has no heater mat and no RTD  
+     attached. It will read properly once the final slab and mat are fitted.  
+     The bed heater is barred until then anyway (see item 7).  
  S10 MCU temp / S11 Driver temp  
  temp3 FREE. XNQ PT100 probe is spare, unassigned.  
 
 FANS / PUMP  
  F0 OUT4  !out4              Duet enclosure fan, thermostatic H10:11 T25:45  
- F1 OUT9  out9+out5.tach     CPAP, manual/slicer, K1 tach correction  
- F2 OUT2                     Water pump, thermostatic ON/OFF from S0, T40:41  
+ F1 OUT9  out9              CPAP, manual/slicer. NO TACH - it was dropped in  
+                             favour of the pump, verified live 29/08 (F1 rpm -1)  
+ F2 OUT2  out2+out5.tach     Water pump, thermostatic ON/OFF from S0, T40:41.  
+                             THE TACH IS HERE, on out5, not on the CPAP  
  F3 OUT6  !out6              Bay/radiator fan, thermostatic H4:1 T30:50  
- OUT5 free. Pump has NO PWM speed control (Vario, manual dial) — ON/OFF gate only.  
+ OUT5 is NOT free - it carries the pump tach. Pump has NO PWM speed control  
+ (Vario, manual dial) — ON/OFF gate only.  
 
 DUET IO  
  Free               : IO0, IO4  
@@ -110,8 +122,10 @@ MCB SCHEDULE (C-curve)
  MCB3 6A bed heater SSR1          MCB4 10A chamber heater  
 
 MODBUS REGISTERS (DB1, HR40001 base)  
- R0 Chamber_SP (D->P)   R1 Duet_Heartbeat (D->P)   R2 UNUSED (retained, do not  
- remove — would shift R3/R4)   R3 Chamber_PV (P->D)   R4 Status_Bits (P->D)  
+ R0 Chamber_SP (D->P)   R1 Duet_Heartbeat (D->P)   R2 Duet_Control_Bits (D->P,  
+ bit 0 = Printer_Active, see vars.g) — daemon.g DOES write this, it is not  
+ unused as previously recorded here; whether the PLC acts on it is unconfirmed  
+ R3 Chamber_PV (P->D)   R4 Status_Bits (P->D, bit 4 = PLC heartbeat toggle)  
 
 =======================================================================================================  
 CURRENT STATE — SUMMARY OF COMPLETED WORK  
@@ -120,12 +134,15 @@ One line each. Detail in project-long.txt under the named section.
 
 - Gantry 9mm->12mm conversion COMPLETE, all four CNC towers, both XY joints,  
   X beam installed. Shim stacks settled. [GANTRY]  
-- Belts fitted and matched at 2.6 on the RC2 meter, ample tensioner travel  
-  left. Re-check after first hours of running. [BELT TENSION]  
+- Belts fitted and tensioned to ~40 N per belt, set by PLUCK FREQUENCY  
+  (85/88 Hz on a 260mm span, T = 4L^2 f^2 mu). NOT by the RC2 meter, which  
+  tops out at 29.4 N - below what this machine needs. [BELT TENSION]  
 - D4 CLOSED LOOP commissioning COMPLETE — all four AWD motors tuned and  
   verified. Encoder calibration (M569.6 V2) persists in motor flash.  
   Validated at 500 mm/s / 35,000 mm/s^2, drift within +/-0.025mm. [FIRMWARE]  
-- M917 X0 Y0 zero holding current confirmed correct in D4, holds at idle.  
+- M917 X100 Y100 standstill current, config.g line 48, confirmed live at 100%.  
+  An earlier note here claimed X0 Y0 zero holding current; that was WRONG and is  
+  contradicted by both config.g and the object model. Corrected 29/08/2026.  
 - Cascade chamber PID both loops TUNED and validated: air-off inner  
   (Kp 10.97, Ti 26.7s, Td 6.72s), chamber outer (Kp 23.2822, Ti 65.35211s,  
   Td 16.54922s). ~0.4degC overshoot, ~6degC stratification with top panel  
@@ -139,169 +156,63 @@ One line each. Detail in project-long.txt under the named section.
 - MGN9 X rail cut and fitted. TDB v1.0 installed. All four M23CL wired.  
 - Pi crash root cause found and understood: display pogo pins shorting to  
   chassis, blowing F1. NOT EMI. [RASPBERRY PI / DISPLAY]  
-- Accelerometer working: M955 P0 C"spi.cs3+spi.cs2" I65, held in  
-  macros/accel_setup.g not config.g. [ACCELEROMETER / INPUT SHAPING]  
-- Structural gantry mode at ~127 Hz identified and treated with  
-  M593 P"zvd" F127 — halved X ring-down rms.  
-- Toolhead bundle wiring complete except the failed hotend PT1000.  
+- Accelerometer working: M955 P0 C"spi.cs3+spi.cs2" I65. It lives COMMENTED  
+  OUT at config.g line 61 - uncomment it for an input-shaping session. There  
+  is NO macros/accel_setup.g. [ACCELEROMETER / INPUT SHAPING]  
+- Structural resonance treated with M593 P"zvd" F147. The earlier F127 was  
+  derived on the slack, racked, preloaded machine and is superseded.  
+- Toolhead bundle wiring COMPLETE. Replacement hotend PT1000 wired, reading  
+  (sensor S0 "ok") and PID TUNED, model live at config.g line 93  
+  (M307 H1 R5.147 K0.348:0.572 D2.53 E1.35). 29/08/2026.  
+- Rear-right Y rail SHIMMED 0.5mm with PERMANENT shim stock, 29/08/2026 -  
+  the temporary slip gauge is out. The machine's one shimmable geometry fault,  
+  fixed and confirmed by two independent methods. [FRAME GEOMETRY]  
+- Gantry SQUARED after the racking fault was found - ~35% of motor authority  
+  recovered in one step. [FRAME GEOMETRY]  
+- Top panel insulation FITTED. That was the last insulation panel; sides, rear,  
+  return duct and base were already done. [CHAMBER INSULATION]  
+- Umbilical cable support FITTED - fixed top anchor, Key-Bak Sidekick reel.  
+  [UMBILICAL CABLE SUPPORT]  
+- Water cooling loop PLUMBED. [WATER COOLING LOOP]  
+- Front frame extension COMPLETE. Door complete including seal.  
+- Waveshare display mount fitted, display running. The F1 fuse / pogo-pin short  
+  is resolved. [RASPBERRY PI / DISPLAY]  
+- Pump tach wired and configured (Fan 2, out2 + out5.tach); CPAP tach dropped  
+  as planned. Config and wiring agree, verified 29/08/2026.  
+- IO7 pause button FITTED AND WIRED. Configured at config.g lines 123-124,  
+  M950 J2 C"io7.in" + M581 T2 P2 S1 R0, firing sys/trigger2.g during a print.  
+- Dead trigger0.g and trigger1.g deleted 29/08/2026 (no M581 bindings existed).  
+- MACHINE LIMITS raised and TESTED 29/08/2026: Y 390->400, Z 300->370. Both  
+  driven and cleared. config.g line 52. Z370 is provisional pending the bed.  
+- Homing and tramming macros corrected 29/08/2026 for the new limits and the  
+  bed centre moving to X200 Y200: homez.g now probes bed CENTRE (it was  
+  hardcoded to X10 Y10, so G28 Z and G28 set different datums); homeall.g  
+  gained the missing abort guard after its G30; mesh.g grid re-centred to  
+  M557 X10:390 Y16:384; bed.g front-right point pulled to X398 off the limit,  
+  with its G30 P0 coordinate matched. VALIDATED by a real G28 + G32 - converged  
+  at 0.0058mm residual against bed.g's own 0.02mm criterion, zero errors.  
+- daemon.g REWRITTEN 29/08/2026 to "while { iterations < 1 }" - a loop block  
+  that runs once per invocation instead of a persistent loop. Fixes the DSF  
+  fault that emergency-stopped the machine twice. See FRAME/daemon notes in  
+  project-long.txt and /home/trev/duet_bug_report_20260829.txt.  
 
 =======================================================================================================  
 OUTSTANDING WORK — FULL DETAIL  
 =======================================================================================================  
-Ordered roughly by what blocks what. This is the working list.  
-
----------------------------------------------------------------------------  
-0. Z BRAKES INTERMITTENTLY FAIL TO RELEASE  [BLOCKS ALL MOTION - do not print]  
----------------------------------------------------------------------------  
-Numbered 0 to avoid renumbering the list below. This blocks everything.  
-
-First seen 27/08/2026. The three commoned Z brake solenoids sometimes do not  
-release. When it happens they STAY locked across repeated homing attempts and  
-the Z motors grind against them. Two E-stops on 27/08/2026: ~20:27, and again  
-during the homeall that ended 20:28:01. Recovered on the homeall at 20:28:44.  
-
-WHAT IS RULED OUT:  
- - NOT a timing/dwell problem. They do not release late, they never release.  
-   The G4 P800/P1500 dwells in the home macros were added 22/08/2026 assuming a  
-   slow solenoid. Raising them is a dead end. Trev: "its not a timing issue as  
-   the fail to release and stay locked subsequently".  
- - NOT config.g failing to reach M569.7. config.g completed on every run - the  
-   M307 warning further down the file is logged every time.  
- - NOT RRF's brake-control logic. Driving the port manually with M950+M42,  
-   completely bypassing M569.7, is intermittent in the same way. Trev: "i know  
-   it can work it just doesnt always".  
-
-WHAT IS LEFT: everything downstream of the command - the OUT1 output stage, the  
-wiring, the connector, or the coils.  
-
-PRIME SUSPECT - the commoning point. From project-long.txt LOW block:  
-   T1  Z brake +    Duet OUT1 signal  (all three brakes commoned)  
-   T2  Z brake GND  Duet OUT1 GND  
-All three brakes share ONE terminal pair. Three coils do not fail together, but  
-one shared crimp does - and that explains total silence rather than a partial  
-release, plus the latch-until-disturbed behaviour and the spontaneous recovery.  
-
-SECOND SUSPECT - no flyback diode. M569.7 docs: OUT/FAN pins on Duet 3 have  
-flyback diodes, but if a HEATER output is used "you must add a flyback diode in  
-parallel with the brake solenoid". OUT1 is heater-class on the 6HC (same class  
-as OUT0 hotend and OUT7 bed SSR). Three inductive coils switched hard with no  
-diode, every enable/disable cycle for months, degrades before it fails outright.  
-
-NEXT STEP - meter it WHILE THE FAULT IS LATCHED, with OUT1 held on:  
- - 24V at OUT1 but not at T1/T2  -> loom, connector or crimp.  
- - nothing at OUT1               -> output stage gone; move the brakes to a  
-                                    fan-class OUT pin, which has the diode.  
-To hold the port on manually:  
-   M17 Z                    ; motors holding first  
-   M569.7 P0.0 C"nil"       ; hand OUT1 back  
-   M950 P2 C"out1"          ; claim it as plain GPIO (P2 and P3 are free)  
-   M42 P2 S1                ; drive it  
-Restore afterwards with M42 P2 S0, M950 P2 C"nil", M569.7 P0.0 C"out1" S200.  
-
-Per the standing hard rule, any brake config change is bench-tested in isolation  
-(motors decoupled, timing verified) before a live reload under load.  
-
----------------------------------------------------------------------------  
-1. HOTEND PT1000 REPLACEMENT  [blocks all hotend work]  
----------------------------------------------------------------------------  
-The fitted PT1000 has FAILED. Replacement on order, not yet arrived.  
-On fitting:  
- - Rebond the sensor into the block. Rutland Furnace Cement or Omega OB-200.  
- - Extend the cable as needed to reach T16/T17 on the HIGH block (TEMP0).  
- - Then run hotend PID autotune — the current M307 model is a placeholder.  
-Nothing hotend-side can be commissioned until this is done.  
-
----------------------------------------------------------------------------  
-2. PI F1 FUSE / DISPLAY SHORT  [blocks repowering the Pi + display]  
----------------------------------------------------------------------------  
-Root cause CONFIRMED: pogo pins on the back of the Waveshare display short to  
-chassis metal when the display is pressed or touched. This blew F1 (3.15A 5V  
-MDR, which covers Pi 4, Duet logic and the DSI display) — twice.  
-
-Sequence before repowering, in order:  
- a. Confirm the short is actually cleared (meter across the rail).  
- b. Inspect the pogo pins for damage — they may have taken current.  
- c. Replace F1 (3.15A 5V MDR). Spare needed, see PROCUREMENT.  
- d. Insulate the contact area BEFORE power. Either Kapton tape over the pin  
-    area, or a printed standoff/spacer holding the display face clear of the  
-    frame with real margin. Prefer the standoff — tape is a wear item here.  
-
-Note while working on the display: this unit's 15-pin FFC cables have contacts  
-on the SAME face at both ends, NOT the mirrored/"opposite direction" type that  
-generic Pi and Waveshare guides assume. Orientation is consistent at both  
-connectors. Confirmed by physical inspection.  
-
----------------------------------------------------------------------------  
-3. CPAP -> PUMP TACH REASSIGNMENT  [verification, quick]  
----------------------------------------------------------------------------  
-The plan was: pump tach -> OUT6.tach, CPAP tach dropped (pump flow confirmation  
-is more safety-relevant than part-cooling fan RPM). This was deferred to  
-execute at pump-wiring time. The pump has since been wired and commissioned,  
-but whether the tach swap was actually carried out at the same time is NOT  
-confirmed.  
-
-ACTION: check the physical wiring at the board. config.g currently says  
-out5.tach for the CPAP. If the swap was done, config.g needs updating to match;  
-if it wasn't, decide whether to do it now or leave it.  
-
----------------------------------------------------------------------------  
-4. PENDING CONFIG CHANGES — DRAFTED, NOT YET LIVE  
----------------------------------------------------------------------------  
-All three are written and agreed but not yet pasted/uploaded.  
-
-4a. config.g — deterministic ALPS probe enable state at boot.  
-    After the M950 P1 C"io6.out" line, add:  
-
-        M42 P1 S0    ; force ALPS probe enable LOW at boot - don't rely on  
-                     ; GPIO default state  
-
-    M409 K"state.gpOut" confirmed the pin was coincidentally already LOW. This  
-    makes it deterministic rather than relying on unconfirmed RRF default  
-    behaviour.  
-
-4b. sys/homez.g — abort guard. After the G30 line, add:  
-
-        if result != 0  
-            abort "Z homing failed: probe did not trigger"  
-
-    Closes the long-standing open item. NOTE: homez.g still does not check  
-    axes[0]/[1].homed before moving to bed centre. Flagged, not fixed —  
-    separate issue, decide separately.  
-
-4c. Delete sys/trigger0.g AND sys/trigger1.g.  
-    trigger0.g is the dead flow-switch file (flow switch removed, accepted  
-    risk). trigger1.g is also dead code — no M581 T1 binding exists in  
-    config.g — AND its header comment wrongly claims IO6 is the filament  
-    sensor pin, which now conflicts with the ALPS Z probe on IO6.  
-    trigger2.g (pause) and trigger3.g (stop) stay exactly as they are.  
-
----------------------------------------------------------------------------  
-5. global.awdDriveMode — REDESIGN OUTSTANDING  
----------------------------------------------------------------------------  
-Purpose: switch AWD drive mode from a DWC macro without hand-editing config.  
-
-First pass (REJECTED, do not implement as drafted): global.awdClosedLoop as a  
-0/1 boolean, with matching if/else blocks in the restore-mode section of  
-homex.g, homey.g and homeall.g, plus new sys/closedloop.g and sys/openloop.g  
-macros that flip the variable and trigger G28 X Y.  
-
-REQUIRED INSTEAD: the variable stores the ACTUAL D value (2 / 4 / 5) directly,  
-not a boolean, so any mode is selectable from one variable. Redesign not yet  
-done.  
-
-Relevant constraint: M569.1 issued WITH parameters drops drivers from D4 to D2  
-(open loop), so a re-home is required to restore closed loop. This is why the  
-mode restore lives in the homing files at all.  
+Ordered roughly by what blocks what. This is the working list. Numbers are  
+STABLE - completed items are deleted and their numbers are never reused, so  
+gaps in the sequence are expected.  
 
 ---------------------------------------------------------------------------  
 6. INPUT SHAPING / VIBRATION  [in progress]  
 ---------------------------------------------------------------------------  
-Done so far: ~127 Hz structural gantry mode treated with M593 P"zvd" F127,  
-which halved X ring-down rms.  
+Done: the only genuine isolated resonance on the squared machine is 146.9 Hz,  
+treated with M593 P"zvd" F147. The earlier F127 was derived on the slack,  
+racked, preloaded machine - superseded, do not go back to it.  
 
 Remaining, in priority order:  
 
- a. ~215 Hz mode — CONFIRMED as the first torsional mode of the X beam  
+ a. ~215 Hz mode - CONFIRMED as the first torsional mode of the X beam  
     (20x20x3mm 6063 aluminium, single MGN9 rail). Excited by Y acceleration  
     acting through the toolhead CoM offset below the beam shear centre.  
     Antinode at mid-span, confirmed by a three-position X test.  
@@ -310,7 +221,7 @@ Remaining, in priority order:
       - Constrained-layer damping tape inside the tube.  
     Shaping alone will not remove this; it is a stiffness/geometry problem.  
 
- b. ~312 Hz mode — local to the hotend mount. The ALPS strain gauge  
+ b. ~312 Hz mode - local to the hotend mount. The ALPS strain gauge  
     Z-compliance flexure is a likely contributor; the hotend is perceptibly  
     wobbly by hand. Stiffen the mount.  
 
@@ -318,15 +229,28 @@ Remaining, in priority order:
     Raising it depends on (a) and (b). Once resolved, raise M201/M203 from  
     their current placeholders.  
 
-MEASUREMENT DISCIPLINE — this has bitten before:  
- - Single accelerometer captures have ~15% run-to-run scatter. Do at least  
-   THREE runs before trusting any modest effect.  
+MEASUREMENT DISCIPLINE - every one of these has cost real time:  
+ - COMPARE STATES IN DISPLACEMENT, NOT ACCELERATION RMS.  
+   d = a * 9.81 / (2*pi*f)^2. Acceleration rms weights harmless 200Hz content  
+   the same as damaging 40Hz content. Hours went into chasing a "35% worse  
+   than benchmark" gap that did not exist once converted.  
+ - CHECK BELT TENSION BEFORE ANY COMPARISON. is_diag.g isolates one belt pair  
+   at a time and is directly exposed to a tension imbalance - an UNCHANGED  
+   machine gave 1.03x / 1.19x / 1.02x purely from slack belts, and that  
+   artefact was read as a rail asymmetry.  
+ - Single captures have ~15% run-to-run scatter. At least THREE runs before  
+   trusting any modest effect.  
+ - The accelerometer is config.g line 61, COMMENTED OUT - uncomment it for a  
+   session. There is NO macros/accel_setup.g, despite earlier notes saying so.  
+ - Do NOT write new sweep macros. Use macros/Frame/ (is_xpos.g, is_diag.g,  
+   is_x390_frontrear.g, belt_check.g) or the plugin, whose 135Hz ceiling is  
+   deliberate.  
+ - is_xpos.g / is_diag.g write FIXED filenames and silently overwrite. Archive  
+   to /home/trev/hevort_survey_data/ BEFORE re-running.  
  - Velocity sweeps distinguish structural modes (frequency does not scale with  
    velocity) from forced modes (belt tooth-passing, bearing ball-pass).  
- - Sensor relocation amplitude ratio confirms rotation axis and mode shape  
-   geometrically.  
- - Run macros/accel_setup.g manually before a session — the accelerometer  
-   config is deliberately NOT in config.g.  
+ - M956 accepts S3000 and A1 ("activate just before the next move") for exact  
+   position mapping - use that for localisation work, not S1000 A0.  
 
 ---------------------------------------------------------------------------  
 7. GRANITE SLAB  [blocks a large downstream set]  
@@ -351,8 +275,9 @@ ON ARRIVAL, in order:
     skim (trapped air voids become hot spots). NOT mechanically retained.  
  d. Drill the FR4 FROM THE GRANITE PATTERN DIRECTLY, do not mark out  
     independently. 2.5mm pilot then open to 4.5mm. Sacrificial ply backing.  
- e. Lock bed frame geometry, set M671 (Z0 front-left, Z1 rear, Z2 front-right  
-    — the M671 triples must be in that order).  
+ e. Lock bed frame geometry, set M671 (Z0 front-RIGHT, Z1 rear, Z2 front-LEFT  
+    — the M671 triples must be in that order). This entry previously said  
+    front-left/front-right the wrong way round; corrected 29/08/2026.  
  f. Reduce Z max in config.g by 1mm for the FR4.  
  g. Only then run the bed heater.  
 
@@ -376,77 +301,42 @@ NOT DECIDED. Settle this before the slab arrives if possible, since (a) and
 (b) imply different bonding steps at fit-up.  
 
 ---------------------------------------------------------------------------  
-9. G32 BED TRAMMING MACRO (bed.g)  [in progress, blocked by granite]  
+9. G32 BED TRAMMING - VALIDATE ON THE FINAL SLAB  [blocked by granite]  
 ---------------------------------------------------------------------------  
-bed.g is currently a single G29 stub. Iterative tramming macro in progress; a  
-probe feedrate issue was being resolved. M671 coordinates cannot be set until  
-the slab is in and the bed frame geometry is locked.  
+bed.g is no longer a G29 stub - it is an 86-line iterative 3-point tramming  
+macro using the ALPS probe and M671 geometry. M671 IS set, config.g line 78.  
+
+REMAINING: the geometry was locked against the TEMPORARY slab, so M671 and the  
+tramming result both need re-validating once the final slab is fitted.  
+
+M671 ARM ORDER IS SETTLED - Z0 front-RIGHT, Z1 rear, Z2 front-LEFT. Three  
+things agree and the coordinates themselves are the proof: config.g line 78 is  
+M671 X424.75:201:-22.75 Y-8.75:415:-8.75, which pairs Z0 to high-X/low-Y  
+(front-right), Z1 to mid-X/high-Y (rear) and Z2 to low-X/low-Y (front-left).  
+bed.g probes in that same order, and Trev confirmed it by watching the machine  
+run G32 on 29/08/2026: front-right, rear, front-left. Old item 7e had Z0/Z2  
+reversed and has been corrected.  
+
+Why it matters: RRF pairs G30 P<n> to the n-th M671 triple, so a mismatch  
+silently corrects the WRONG motor. It is invisible on a near-level bed - all  
+three corrections come out equal - and only surfaces as failure to converge  
+once the bed is genuinely out of tram.  
 
 REMINDER: M671 must be present in config.g before G32 will work at all. The  
-"does not support auto-calibration" error is caused by a missing M671, not by  
-anything in bed.g.  
+"does not support auto-calibration" error is a missing M671, not a bed.g fault.  
 
 ---------------------------------------------------------------------------  
-10. TOP PANEL INSULATION  
+13. DOOR SEAL  [low priority - not currently hurting anything]  
 ---------------------------------------------------------------------------  
-The only insulation panel still outstanding. Everything else (sides, rear,  
-return duct, base) is fitted. 25mm foil-faced PIR, 3mm aluminium outer.  
-Method: dry fit with mechanical retention, cut penetrations slightly oversize,  
-foil-tape the facer edges at the panel perimeter (or convective movement  
-behind the board partly defeats the insulation).  
+NO SEAL IS FITTED. The frame is built and glazed and the chamber is performing  
+acceptably without one, so this blocks nothing and may never need doing.  
+Revisit only if chamber performance or stratification turns out to want it -  
+re-measure stratification first now the top panel is on.  
 
-This is also the current cause of the ~6degC chamber stratification measured  
-during PID tuning — worth re-measuring stratification after fitting.  
-
----------------------------------------------------------------------------  
-11. UMBILICAL CABLE SUPPORT  [waiting on parts]  
----------------------------------------------------------------------------  
-SETTLED APPROACH: fixed anchor point through a hole in the top cover, centred  
-over the bed travel envelope. Worst-case diagonal reach sets the required  
-slack / cord length.  
-
-Boom design (fixed pivot arm off cross-drilled 2020 + bearings) REJECTED — no  
-travel clearance for a swept arm given toolhead reach into the corners.  
-
-Penetration: cut oversize through the aluminium+PIR stack, foil-tape at the  
-PIR edge, printed grommet/bushing to prevent chafing on the cut aluminium.  
-Same treatment as other panel penetrations — NOT a sealed gland.  
-
-Cord: Key-Bak retractable reel, clipped or zip-tied to the umbilical bundle  
-sleeve every 50-75mm so the bundle hangs in a shallow curve rather than  
-loading at a single point.  
-
-PART CHANGE: the 13oz reel already in hand is TOO STRONG for this load.  
-Replaced by the Key-Bak Sidekick — 4oz retraction force, Kevlar cord  
-(heat-tolerant for the chamber-side segment). ORDERED, awaiting arrival.  
-
-Bundle carries: CPAP cable, water lines (in + out), PTFE tube. Water lines  
-confirmed NOT heat-sensitive at this duty (closed loop, radiator-cooled), so  
-there is no PU tube temperature-rating concern.  
-
----------------------------------------------------------------------------  
-12. WATER LOOP PLUMBING AND PRESSURE TEST  [independent of granite]  
----------------------------------------------------------------------------  
-Pump, reservoir and radiator are mounted; the loop is not yet plumbed.  
-
-Loop order: pump outlet -> Goliath block -> NEMA14 motor plate -> rad top in  
--> rad bottom out -> reservoir -> pump.  
-
-Do this BEFORE the machine is fully buttoned up. A leak found on the bench is  
-much better than one found inside a finished chamber. Estimated fill ~0.9-1L,  
-Mayhems X1 Clear Premix (contains its own biocide — do not add more).  
-
-Set the pump dial to the desired flow rate and leave it; there is no PWM  
-speed control.  
-
----------------------------------------------------------------------------  
-13. DOOR SEAL COMPARISON  [bench test, parts in hand]  
----------------------------------------------------------------------------  
-Frame is built and glazed, so the comparison can now be run. Two candidates:  
+Parts are in hand for a comparison whenever it is worth running:  
  a. 10x3mm silicone foam tape on the frame face.  
- b. Silicone tube cord in the T-slot. Received in two bores, OD10xID6 and  
-    OD10xID8, 3m each, to test compression fit.  
-Not yet run.  
+ b. Silicone tube cord in the T-slot, received in two bores (OD10xID6 and  
+    OD10xID8, 3m each) to test compression fit.  
 
 ---------------------------------------------------------------------------  
 14. FILAMENT HANDLING — UNDECIDED  
@@ -477,44 +367,121 @@ IO4 are free, with IO3 reserved for a runout sensor.
     built.  
 
 ---------------------------------------------------------------------------  
-15. IN PROGRESS — MECHANICAL  
----------------------------------------------------------------------------  
-- Front frame extension: in progress.  
-- Waveshare display mount: designed in Onshape from the Waveshare STEP file,  
-  currently printing on the Voron V2. Not yet fitted. See item 2 before  
-  fitting — the pogo pin clearance is part of this mount's job now.  
-
----------------------------------------------------------------------------  
 16. REMAINING COMMISSIONING (after the above)  
 ---------------------------------------------------------------------------  
-- Continuity testing of the umbilical once run.  
-- Hotend PID autotune (needs item 1).  
-- ALPS probe: resolve P5 vs P9 probe mode (config currently P5, earlier notes  
-  said P9). Set trigger height and G31 offsets — currently placeholders.  
-  NOTE the ALPS value ceiling is 1000, so any G31 trigger above that never  
-  fires. Current G31 P500.  
-- Raise M201/M203 from placeholders once input shaping is settled.  
-- Re-check belt tension after the first hours of running.  
+- Continuity testing of the umbilical.  
+- Hotend PID autotune (item 1).  
+- ALPS probe: the P5-vs-P9 question is RESOLVED - config.g line 76 is P9. The  
+  trigger height is set and derived, G31 Z-0.030 (config.g line 77). The XY  
+  offsets are X0 Y0 and that is CORRECT, not a placeholder - the ALPS is a  
+  strain gauge on the HOTEND, so the nozzle itself is the probe and there is no  
+  XY offset to measure. Do not "fix" it.  
+  NOTE the ALPS value ceiling is 1000, so any G31 P above that never fires.  
+  Current P500.  
+- Re-do G31 at 150C standby now the hotend sensor is live.  
+- Raise M201/M203 from placeholders once input shaping is settled. Currently  
+  M201 X35000 Y35000, M203 X30000 Y30000.  
+- Re-check belt tension after the first hours of running - by PLUCK, ~40 N.  
+- VERIFY THE PERMANENT REAR-RIGHT SHIM: cold 7x7 mesh, M18 between runs, match  
+  or beat twist -0.005 / deviation 0.067. Rails are at 0.5 N.m - do not disturb  
+  that between now and the mesh.  
+- Re-measure chamber stratification now the top panel is fitted. It was ~6degC  
+  with the panel off during PID tuning.  
 - OB30 constants AirOff_Max_SP / AirOff_Safety_Limit currently 130.0/150.0,  
-  deliberately raised from 65.0/85.0. Commissioning flag still pending —  
+  deliberately raised from 65.0/85.0. Commissioning flag still pending -  
   decide whether these stay.  
+
+=======================================================================================================  
+FRAME GEOMETRY AND VIBRATION - SETTLED 23-26/08/2026  
+=======================================================================================================  
+Three days of work, several wrong turns, and one procedure change that matters  
+more than all the rest. Full detail in sys/is.txt and frame_survey_20260821.txt.  
+
+REAR-RIGHT Y RAIL SHIM - the machine's one shimmable geometry fault. 0.5mm at  
+the rear-right fastener. Confirmed by two independent methods:  
+   static   cold 4x4 mesh corner twist    0.283mm -> 0.011mm  
+   dynamic  127Hz band at X=390           2.25x rear-LOUDER -> 0.63x rear-QUIETER  
+PERMANENT SHIM FITTED 29/08/2026, replacing the temporary slip gauge at the  
+same ~0.5mm. NOT YET RE-VERIFIED: take a cold 7x7 and match or beat the  
+benchmark map mesh_7x7_cold_20260823_2201.csv (twist -0.005, deviation 0.067).  
+Until that mesh is taken, the shim is fitted but unproven - the slip-gauge  
+result does not carry over to a different piece of metal.  
+
+FASTENER TORQUE: 0.5 N.m, ALL RAILS, set 29/08/2026 with the torque screwdriver.  
+This is the documented, repeatable spec the rail investigation needed and never  
+had. USE THE SAME FIGURE for the verification mesh and for final assembly -  
+retorquing moves the twist by tens of microns per event, so changing it silently  
+invalidates the shim. For scale: 1.0 N.m was tested directly and was WAY too  
+tight, and the 2.0 N.m-floor ratchet bought early on cannot reach 0.5 at all.  
+
+THE RACKED GANTRY - the big one, and WE CREATED IT. The machine was square when  
+built. The rack appeared alongside belt removal and retensioning, because both  
+retensioning and slackening the motor couplings move the gantry while nothing  
+holds it square. Squaring it took belt_check peak effort from 227/240 to  
+133/134 - about 35% of motor authority recovered in a single step, more than  
+every other change of those three days combined.  
+ - THE MESH IS BLIND TO IT. A rack is an XY squareness error; twist read +0.001  
+   (essentially perfect) with the gantry badly out of square.  
+ - IT MASQUERADES AS SLACK BELTS. Raising tension 42 -> 64 N (+52%) moved peak  
+   effort not at all, 238.6 -> 239.6. Hours went into tensioning belts to fix  
+   what was actually a geometry fault.  
+ - HIGH TENSION MASKS IT. At 78 N the vibration numbers were the best ever  
+   measured while the motors sat at 89-94% authority. Both are the same finding:  
+   belt stiffness holding a racked gantry rigidly buys quiet at the cost of  
+   nearly all the control range. That "best state ever" was compensated, not  
+   healthy.  
+
+BELT TENSION - ~40 N per belt, set by PLUCK, T = 4L^2 f^2 mu (85/88 Hz on a  
+260mm span). The RC2 meter tops out at 29.4 N and is therefore useless on this  
+machine. The earlier 53-78 N figures were sized for a racked gantry - do not  
+use them.  
+
+MOTOR COUPLING RESYNC - the four closed-loop motors fight each other at  
+standstill after any belt refit, burning 366 units of PID authority against a  
+healthy ~70. This is a REASSEMBLY ARTEFACT and it RECURS.  
+ - SQUARE THE GANTRY FIRST. The resync makes each motor's zero agree with  
+   wherever the gantry currently is, so doing it racked makes the skew the  
+   reference - which is why the fight kept "returning" (366 -> 64 -> 16, each  
+   resync re-baselining onto a worse skew). LOW IDLE PID IS NOT A GEOMETRY  
+   CHECK.  
+ - Motors ENGAGED AND HOLDING, slacken one coupling at a time on the plain  
+   motor shaft, let the controller drive its own error to zero, re-clamp. Do  
+   NOT disable the motors to re-clamp - that locks in the mechanical rest  
+   position and the fight comes straight back.  
+
+BEST TENSIONING PROCEDURE. Tensioners are on the FRONT towers only and each  
+pair is a diagonal (X = 70 back-right + 71 front-left; Y = 72 front-right +  
+73 back-left), so tensioning changes belt length BETWEEN a pair and forces a  
+phase offset. Hold square against a fixture, slacken the couplings on 71 and 73  
+(both left, one per pair), tension with those pulleys free, then clamp. One  
+operation, one position, no resync needed afterwards.  
+
+REFERENCE STATE, SQUARE: plucked 85/88 Hz = 37/40 N, RC2 2.8, belt_check  
+133.4/133.9, standstill 70, silent. Mean displacement 8.4um across X.  
+
+RULED OUT WITH EVIDENCE - DO NOT RE-OPEN. Rails and blocks are FINE (hand-run  
+end to end with the belts off and under deliberate racking, inspected section  
+by section) - do not order replacements. Also excluded: the umbilical and  
+sensor lead, anything rotating (it would repeat every ~40mm), and open versus  
+closed loop (identical). TORQUE was never the variable - there is no sweet  
+spot, vibration falls monotonically to zero clamp force, because clamping a  
+straight rail against an untrue surface twists the carriage.  
 
 =======================================================================================================  
 PROCUREMENT — OUTSTANDING ONLY  
 =======================================================================================================  
 - Granite slab, Just Granite, £180 — ORDERED AND PAID, awaiting collection  
-- Hotend PT1000 replacement — original has FAILED  
-- Key-Bak Sidekick 4oz Kevlar retractable reel — ORDERED, awaiting arrival  
-- F1 3.15A 5V MDR fuse (spare) — needed before Pi repower  
-- Cable glands as required, Power Electrical Factors (commodity, not blocking)  
-- 20mm momentary push button for IO7 pause (commodity, not blocking)  
 
-Everything else is in hand. Full inventory in project-long.txt [PROCUREMENT].  
+That is the only thing outstanding. Fuses are stocked, cable glands are in hand  
+and ended up not being used, and the IO7 pause button is fitted and wired.  
+
+Everything else is in hand. Full inventory in project-long.txt  
+[PROCUREMENT — INVENTORY IN HAND].  
 
 Key suppliers: Just Granite (slab, 01785 711096), Ai Plastics (FR4), Tippers  
 (PIR, silicone, foil tape), Duet3D direct (TDB), Ooznest (extrusion, door  
 hardware), West3D (nozzles), Farnell (Dowsil 736 = 2289638, inserts =  
-2474931), Power Electrical Factors (glands, buttons).  
+2474931).  
 
 =======================================================================================================  
 GOTCHAS THAT KEEP BITING  
@@ -559,10 +526,35 @@ Hardware / electrical:
   io.in and io.out are NOT adjacent.  
 - Do not plug an M23CL into an already-live TDB — blows the motor's internal  
   2A fuse, not user-replaceable on pre-v1.2 units.  
+- Z brakes have intermittently failed to release (27/08/2026, two E-stops, Z  
+  motors grinding against locked brakes). Deprioritised, NOT fixed — it stopped  
+  on its own. Full diagnosis is in project-long.txt if it ever comes back.  
 - CF-filled nylon carries non-negligible conductivity and can corrupt 4-wire  
   Pt100 sense circuits via leakage across exposed solder joints.  
 - Acceleration ceiling is governed by frame resonance, not motor torque.  
   Beam stiffness scales as 1/L^3 — span is the dominant variable.  
+- RETENSIONING THE BELTS RACKS THE GANTRY unless it is physically held square.  
+  The rack is invisible to the mesh and reads as slack belts. See FRAME  
+  GEOMETRY AND VIBRATION.  
+- The RC2 belt meter tops out at 29.4 N, below this machine's ~40 N working  
+  tension. Pluck the belt and use T = 4L^2 f^2 mu instead.  
+- If a defect looks mechanical and permanent, RE-TEST AFTER A FEW HUNDRED  
+  PASSES before spending money. A position-locked, clamp-immune, non-periodic  
+  signature was twice read as a brinelled rail; it was belt tension both times.  
+- This Waveshare display's 15-pin FFC cables have contacts on the SAME face at  
+  both ends, NOT the mirrored type that generic Pi and Waveshare guides assume.  
+  Orientation is consistent at both connectors, confirmed by inspection.  
+
+Measurement:  
+- Bed mesh: M18 BETWEEN RUNS. Motors left on hold bed strain and corrupt the  
+  twist figure by up to 0.1mm - two agreeing runs prove nothing if the motors  
+  stayed energised throughout.  
+- Compare vibration states in DISPLACEMENT, not acceleration rms.  
+  d = a * 9.81 / (2*pi*f)^2.  
+- The ALPS probe cannot complete more than ~21-25 points in a hot chamber.  
+  4x4 hot, 7x7 cold.  
+- There is no macros/accel_setup.g. M955 is config.g line 61, commented out.  
+- Do not write new sweep macros - use macros/Frame/ or the plugin.  
 
 Tooling:  
 - AVIF images need `ffmpeg -y -i input.avif output.png` before viewing.  
@@ -591,11 +583,24 @@ DO NOT REOPEN (settled)
   irrelevant; matched tension is what matters.  
 - 4mm FR4, not 5mm or 3.2mm.  
 - Inrush: T2 is permanently powered, no limiter required.  
+- global.awdDriveMode — a switchable AWD drive mode set from a DWC macro.  
+  Trev's own idea, DROPPED 29/08/2026: closed loop is working well, so there is  
+  nothing to switch between and the complexity buys nothing. The hardcoded  
+  M569 D2/D4 pairs in homex.g, homey.g and homeall.g stay exactly as they are.  
+  Do not re-propose it.  
+- No M501, no config-override.g. config.g is HAND-EDITED and that is the  
+  deliberate, preferred workflow — do not propose M500/M501 or an override  
+  file. Consequence to remember, not a fault: an autotune result (M307, and  
+  anything else M500 would normally persist) lives in RAM only, so transcribe  
+  it into config.g by hand before the next M999 or power cycle.  
 
 =======================================================================================================  
 WHAT LIVES IN project-long.txt  
 =======================================================================================================  
-Fetch it only when the summaries above are insufficient. Sections:  
+project-long.txt holds RESOLVED WORK, REFERENCE DATA AND LONGER EXPLANATIONS  
+ONLY. It carries no to-do lists — THIS file is the only working list, and the  
+IMMEDIATE NEXT STEPS section that used to duplicate it was removed 29/08/2026.  
+Fetch project-long only when the summaries above are insufficient. Sections:  
 
 PRINTER HARDWARE SPECIFICATION     GANTRY 9->12mm CONVERSION  
 BELT TENSION                       FIRMWARE CONFIGURATION  
@@ -605,15 +610,17 @@ PLC PROGRAM STRUCTURE              DUET FILES
 POWER SUPPLIES                     CIRCUIT PROTECTION  
 CABLE GLANDS                       TERMINAL SCHEDULE  
 UMBILICAL CABLE SUPPORT            WATER COOLING LOOP  
-GRANITE BED                        IMMEDIATE NEXT STEPS  
-PROCUREMENT                        RASPBERRY PI / DISPLAY  
-ACCELEROMETER / INPUT SHAPING      FILAMENT HANDLING  
-IO ALLOCATION SUMMARY              KEY LEARNINGS & PRINCIPLES  
-TOOLS & RESOURCES  
+GRANITE BED                        PROCUREMENT (inventory in hand)  
+RASPBERRY PI / DISPLAY             ACCELEROMETER / INPUT SHAPING  
+FILAMENT HANDLING                  IO ALLOCATION SUMMARY  
+KEY LEARNINGS & PRINCIPLES         TOOLS & RESOURCES  
+FRAME GEOMETRY AND VIBRATION       CONFIG.G PROVENANCE  
+Z BRAKE FAULT (retired 29/08)  
 
 Typical reasons to fetch: full terminal schedule wiring, PLC tag addresses and  
 block structure, glazing/sealant specification, exact part numbers and order  
-references, historical reasoning behind a settled decision.  
+references, the frame-geometry evidence and procedures, historical reasoning  
+behind a settled decision.  
 
 =======================================================================================================  
 GOOGLE DRIVE IDs  
