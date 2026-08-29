@@ -49,7 +49,7 @@ M917 X100 Y100                                          ; X/Y standstill current
 M906 I100 T1800                                         ; Idle current factor 100%, 30 min idle timeout
 
 ; --- Axis Limits ---
-M208 X0:400 Y0:390 Z-10:300                             ; Axis limits (mm)
+M208 X0:400 Y0:400 Z-10:370                             ; Axis limits (mm)
 
 ; --- Speeds and Accelerations ---
 M566 X900 Y900 Z12 E120                                 ; Jerk (mm/min)
