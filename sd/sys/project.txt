@@ -1,6 +1,6 @@
 =======================================================================================================  
 HevORT Build — PROJECT INDEX / WORKING FILE  
-Last updated: 21/08/2026  
+Last updated: 29/08/2026  
 =======================================================================================================  
 
 This file carries everything needed for day-to-day work: current state, live  
@@ -8,7 +8,7 @@ reference maps, and FULL detail on what is outstanding or in progress.
 
 Resolved / settled work is summarised here in one or two lines only. The full  
 reasoning, derivations, part numbers and history live in project-long.txt in  
-the same sys folder (Drive ID: __FILL IN AFTER UPLOAD__). Fetch that file only  
+the same sys folder. Fetch that file only  
 when the summary here is genuinely insufficient — it is ~70KB and expensive to  
 pull for no reason.  
 
@@ -20,7 +20,8 @@ SESSION BOOTSTRAP
 4. config.g on Drive is AUTHORITATIVE for firmware settings. Both project files  
    are secondary and lag verbal session decisions — cross-check, don't assume.  
 5. Drive is the live source. Do NOT fetch from GitHub raw URLs.  
-6. Check gcodes.txt before issuing any GCode command.  
+6. Check gcodes.txt before issuing any GCode command. It lives at  
+   ~/hevort_project/gcodes.txt on the Pi (moved out of sys/ 29/08/2026).  
 
 WORKING STYLE  
 - Direct, technically precise. No hand-holding. One step at a time.  
@@ -182,6 +183,13 @@ One line each. Detail in project-long.txt under the named section.
 - IO7 pause button FITTED AND WIRED. Configured at config.g lines 123-124,  
   M950 J2 C"io7.in" + M581 T2 P2 S1 R0, firing sys/trigger2.g during a print.  
 - Dead trigger0.g and trigger1.g deleted 29/08/2026 (no M581 bindings existed).  
+- EXTRUDER DIRECTION WAS REVERSED. config.g line 24 was M569 P0.5 S1; a forced  
+  cold move (M302 P1, T0, M83, G1 E10) fed BACKWARDS. Corrected to S0 and  
+  re-tested forward, 29/08/2026. It had clearly never been driven - treat  
+  everything else extruder-side as unverified, M92 E420 especially.  
+- deployprobe.g now CYCLES the ALPS enable with a bounded retry instead of just  
+  asserting it, to force a re-tare if the gauge reads already-triggered. See  
+  THERMAL BEHAVIOUR - it has not yet caught a real failure, so it is unproven.  
 - MACHINE LIMITS raised and TESTED 29/08/2026: Y 390->400, Z 300->370. Both  
   driven and cleared. config.g line 52. Z370 is provisional pending the bed.  
 - Homing and tramming macros corrected 29/08/2026 for the new limits and the  
@@ -246,7 +254,7 @@ MEASUREMENT DISCIPLINE - every one of these has cost real time:
    is_x390_frontrear.g, belt_check.g) or the plugin, whose 135Hz ceiling is  
    deliberate.  
  - is_xpos.g / is_diag.g write FIXED filenames and silently overwrite. Archive  
-   to /home/trev/hevort_survey_data/ BEFORE re-running.  
+   to /home/trev/hevort_project/survey_data/ BEFORE re-running.  
  - Velocity sweeps distinguish structural modes (frequency does not scale with  
    velocity) from forced modes (belt tooth-passing, bearing ball-pass).  
  - M956 accepts S3000 and A1 ("activate just before the next move") for exact  
@@ -370,7 +378,6 @@ IO4 are free, with IO3 reserved for a runout sensor.
 16. REMAINING COMMISSIONING (after the above)  
 ---------------------------------------------------------------------------  
 - Continuity testing of the umbilical.  
-- Hotend PID autotune (item 1).  
 - ALPS probe: the P5-vs-P9 question is RESOLVED - config.g line 76 is P9. The  
   trigger height is set and derived, G31 Z-0.030 (config.g line 77). The XY  
   offsets are X0 Y0 and that is CORRECT, not a placeholder - the ALPS is a  
@@ -395,7 +402,9 @@ IO4 are free, with IO3 reserved for a runout sensor.
 FRAME GEOMETRY AND VIBRATION - SETTLED 23-26/08/2026  
 =======================================================================================================  
 Three days of work, several wrong turns, and one procedure change that matters  
-more than all the rest. Full detail in sys/is.txt and frame_survey_20260821.txt.  
+more than all the rest. Full detail in ~/hevort_project/is.txt and
+~/hevort_project/frame_survey_20260821.txt on the Pi (both moved out of sys/
+29/08/2026, so they are NOT on Drive).  
 
 REAR-RIGHT Y RAIL SHIM - the machine's one shimmable geometry fault. 0.5mm at  
 the rear-right fastener. Confirmed by two independent methods:  
@@ -468,6 +477,62 @@ spot, vibration falls monotonically to zero clamp force, because clamping a
 straight rail against an untrue surface twists the carriage.  
 
 =======================================================================================================  
+THERMAL BEHAVIOUR - MEASURED 29/08/2026  
+=======================================================================================================  
+The Z datum moves with CHAMBER temperature, and it is the single biggest source  
+of error in a hot mesh. Measured by repeated G30 S-1 at bed centre with the  
+hotend PINNED AT 150C throughout, so nozzle growth is excluded by construction.  
+
+   datum vs chamber      10.7 um per degC, R^2 = 0.93  
+   during a 40->60C climb   307 um of datum movement  
+   once chamber settled      23 um band, residual drift 1.2 um/min  
+
+THE HOTEND IS NOT THE DRIVER. It sat at 150.0 +/-0.2C while the datum moved  
+307um. Holding the hotend at temperature does NOT stabilise the datum.  
+
+10.7 um/degC sits close to the documented X beam bimetallic bow of -11.7 um/K  
+(frame_survey_20260821.txt) - two independent methods, ~9% apart. This is very  
+likely that same already-characterised frame expansion showing up in Z.  
+
+WHAT THIS MEANS IN PRACTICE  
+ - Never mesh or tram while the chamber is still MOVING. At 10.7 um/degC even  
+   5C of residual drift smears 50um across the map, comparable to real bed  
+   features.  
+ - The datum must be set at the same chamber temperature the mesh is taken at.  
+ - There is NO long soak needed. It settles within a minute or two of the  
+   chamber reaching setpoint - the requirement is stability, not waiting.  
+ - Residual 1.2 um/min still applies: a 10 minute 49-point mesh carries ~12um  
+   of drift as a gentle gradient.  
+
+THE CHAMBER SENSOR READS AIR, AND AIR CAN LIE ABOUT THE STRUCTURE  
+Opening the door to cool faster cools the AIR, not the frame or slab. Measured  
+29/08/2026: with the door open the air read 35.7C; closing it, the air CLIMBED  
+to 37.5C in five minutes as the mass fed heat back in. A threshold alone is  
+therefore not a safe trigger for meshing - the air must be steady WITH THE DOOR  
+SHUT. The rebound on closing the door is a free proxy for the structure, which  
+has no sensor of its own. Passive cooldown time constant is ~146 minutes.  
+
+HOT vs COLD MESH, 29/08/2026 - THE FRONT-TO-REAR TILT IS LARGELY THERMAL  
+                        pts     mean  deviation   range    twist  front-rear  
+  HOT  chamber60/hotend150  49  -0.1901   0.1844  0.7180  +0.0680    -0.3581  
+  COLD chamber28/hotend31   49  -0.0598   0.1088  0.4610  +0.0280    -0.1679  
+  BENCH cold 23/08          49  -0.0092   0.0667  0.3230  -0.0050    -0.0513  
+Hot minus cold is -0.130mm mean offset with 0.425mm of SPREAD - three times more  
+shape change than offset, so it is not a datum shift with a constant added. The  
+hot row means fall monotonically front to rear; the cold and benchmark maps turn  
+around and recover. Something bends front-to-rear with temperature.  
+CAVEAT: the "cold" map was taken at 28.5C minutes after the door was closed,  
+with the structure still cooling (it reached 26.4C by 22:00). It is NOT a  
+settled cold reference, which is the likely reason it sits between the hot map  
+and the benchmark rather than on the benchmark. Redo after an overnight soak  
+before drawing conclusions about the residual.  
+
+THE HOT MESH COMPLETED 49/49 POINTS AT 60C  
+Previous documented limit was ~21-25 points in a hot chamber. It is NOT proven  
+that the deployprobe.g retry caused this - the retry never fired (zero  
+"already triggered" events), so the run simply did not hit the failure.  
+
+=======================================================================================================  
 PROCUREMENT — OUTSTANDING ONLY  
 =======================================================================================================  
 - Granite slab, Just Granite, £180 — ORDERED AND PAID, awaiting collection  
@@ -511,8 +576,12 @@ Firmware:
 - RRF 3.6.x has no bitwise operators — use mod arithmetic.  
 - RRF 3.7.0: M575 P2 became P3. Already applied in config.g and daemon.g.  
 - RRF 3.7.0: a FAILED M261.1 leaks its V variable, permanently poisoning every  
-  later iteration of a while loop. daemon.g carries an exists()/break guard to  
-  recover. DO NOT REMOVE IT.  
+  later iteration of a while loop, and DSF escalates the error to a full  
+  EMERGENCY STOP. exists() guards were tried and do NOT prevent it - an  
+  earlier note here claiming daemon.g carries an exists()/break guard was  
+  WRONG, corrected 29/08/2026. The fix is daemon.g's single-pass loop block;  
+  do not 'fix' it to while true. See DAEMON.G SINGLE-PASS LOOP in  
+  project-long.txt and ~/duet_bug_report_20260829.txt.  
 - Brake configurations must be bench-tested in isolation (motors decoupled,  
   timing verified) before live reload under load. Hard rule after the Z brake  
   spring damage incident.  
@@ -538,6 +607,13 @@ Hardware / electrical:
   GEOMETRY AND VIBRATION.  
 - The RC2 belt meter tops out at 29.4 N, below this machine's ~40 N working  
   tension. Pluck the belt and use T = 4L^2 f^2 mu instead.  
+- The chamber sensor reads AIR. Opening the door decouples it from the frame and  
+  slab, so a cold reading can sit on top of a warm structure. Judge readiness by  
+  the air being STEADY with the door SHUT, never by the number alone.  
+- The `duet` client returns from a long macro (mesh.g) roughly 90s BEFORE the  
+  machine finishes it, printing "The operation was canceled". Do not archive  
+  heightmap.csv on that return - you will copy the PREVIOUS map. Wait for the  
+  "[MESH] saved" line in the journal.  
 - If a defect looks mechanical and permanent, RE-TEST AFTER A FEW HUNDRED  
   PASSES before spending money. A position-locked, clamp-immune, non-periodic  
   signature was twice read as a brinelled rail; it was belt tension both times.  
@@ -551,8 +627,10 @@ Measurement:
   stayed energised throughout.  
 - Compare vibration states in DISPLACEMENT, not acceleration rms.  
   d = a * 9.81 / (2*pi*f)^2.  
-- The ALPS probe cannot complete more than ~21-25 points in a hot chamber.  
-  4x4 hot, 7x7 cold.  
+- The ALPS probe historically could not complete more than ~21-25 points in a  
+  hot chamber. A 7x7 (49/49) completed at 60C on 29/08/2026 after deployprobe.g  
+  was changed to cycle the enable - but the retry never fired, so that fix is  
+  UNPROVEN and the old limit may still bite. See THERMAL BEHAVIOUR.  
 - There is no macros/accel_setup.g. M955 is config.g line 61, commented out.  
 - Do not write new sweep macros - use macros/Frame/ or the plugin.  
 
@@ -615,7 +693,8 @@ RASPBERRY PI / DISPLAY             ACCELEROMETER / INPUT SHAPING
 FILAMENT HANDLING                  IO ALLOCATION SUMMARY  
 KEY LEARNINGS & PRINCIPLES         TOOLS & RESOURCES  
 FRAME GEOMETRY AND VIBRATION       CONFIG.G PROVENANCE  
-Z BRAKE FAULT (retired 29/08)  
+Z BRAKE FAULT (retired 29/08)      THERMAL BEHAVIOUR OF THE Z DATUM  
+DAEMON.G SINGLE-PASS LOOP  
 
 Typical reasons to fetch: full terminal schedule wiring, PLC tag addresses and  
 block structure, glazing/sealant specification, exact part numbers and order  
@@ -626,7 +705,6 @@ behind a settled decision.
 GOOGLE DRIVE IDs  
 =======================================================================================================  
 project.txt        1D93u56_lanbWWxL06J5bvLS5Emb5yV4M  
-project-long.txt   __FILL IN AFTER UPLOAD__  
 sys folder         1gLAcXXCszW8oZrBpZwaeeRTaJNPs9gTI  
 macros folder      1oXYyhdUJHUqfROvr4jJeL3fo5T1uOwUI  
 HevORT root        1PoLWUQ7OmlYgXSx2vq1slJsSYNy9L-8e  
