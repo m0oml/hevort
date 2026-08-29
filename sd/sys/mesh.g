@@ -9,10 +9,10 @@
 ; macro RUNS G32 itself and verifies it converged before probing any grid.
 ;
 ; PREREQUISITES - mesh values are meaningless until these are real:
-;   - G31 Z trigger height is a PLACEHOLDER (0.7). Set it properly first.
-;   - M558 probe mode P5 vs P9 still unresolved (config.g currently P9).
-;   - Granite slab not yet fitted - the FR4-on-frame surface will not resemble
-;     the final bed, so treat any map taken now as a rehearsal, not a datum.
+;   - G31 Z trigger height is SET and derived: Z-0.030, config.g line 77.
+;   - M558 probe mode is RESOLVED: P9, config.g line 76.
+;   - The fitted granite is a TEMPORARY slab and will be replaced, so any map
+;     taken now is provisional - re-mesh after the swap before trusting it.
 ; ================================================================================
 
 ; --- 1. Kinematic state validation ---
@@ -43,12 +43,14 @@ M118 P0 S{"[MESH] G32 converged, residual " ^ move.calibration.initial.deviation
 
 ; --- 3. Grid definition ---
 ; Probe offsets are X0 Y0 (nozzle-coincident strain gauge), so the grid can use
-; the full reachable envelope less a small edge margin. M208 is X0:400 Y0:390;
-; Y is held to 16:380 to match the reachable band already proven in bed.g.
+; the full reachable envelope less a small edge margin. M208 is X0:400 Y0:400
+; Z-10:370 (Y raised from 390 and Z from 300, tested 29/08/2026). The Y16 floor
+; is kept because it is a REACH limit already proven in bed.g, not a preference;
+; the top is set so the grid centres on the bed centre, X200 Y200.
 ; P7:7 = 49 points, ~63mm X / ~61mm Y spacing. That suits a rigid granite slab.
 ; With M558 A8 averaging each point costs several seconds - raise to P9:9 or
 ; P11:11 only if the saved map shows real structure between existing points.
-M557 X10:390 Y16:380 P7:7                                        ; 7x7 grid over the reachable bed
+M557 X10:390 Y16:384 P7:7                                        ; 7x7 grid, centred on X200 Y200
 
 ; --- 4. Probe setup ---
 M561                                                             ; Clear any active bed transform - never mesh on top of a mesh
