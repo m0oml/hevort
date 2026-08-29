@@ -89,8 +89,8 @@ M308 S11 Y"drivers" A"Driver Temp"                      ; Driver temperature
 
 ; =================== Heaters ===========================
 M950 H1 C"out0" T0                                      ; Hotend heater on out0, sensor S0
-M143 H1 P0 T0 S350 A0                                   ; Hotend limit 350C on sensor S0
-M307 H1 R3.394 K0.346:0.369 D4.88 E1.35 S1.00 B0 V24.0  ; Hotend PID model
+M143 H1 P0 T0 S365 A0                                   ; Hotend limit 365C on sensor S0
+M307 H1 R5.147 K0.348:0.572 D2.53 E1.35 S1.00 B0 V24.0  ; Hotend PID model
 
 M950 H0 C"out7" T5 Q1                                   ; Bed heater SSR on out7, sensor S5
 M143 H0 P0 T5 S200 A0                                   ; Bed limit 200C on sensor S5
