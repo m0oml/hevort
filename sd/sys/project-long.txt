@@ -1612,9 +1612,26 @@ M575 P3 — RS485 to the Siemens S7-1200 for chamber heating. IO1 is dedicated t
 Z BRAKE INTERMITTENT RELEASE FAULT - retired from the working list 29/08/2026
 =======================================================================================================  
 Removed from project.txt OUTSTANDING at Trev's call: "remove point 0 if it
-reoccurs I'll jump on it". NOT fixed and NOT explained - it simply stopped
-happening and is not worth blocking on. Everything below is the state of the
-diagnosis when it was parked, kept so it does not have to be redone.
+reoccurs I'll jump on it". NOT fixed and NOT explained.
+
+IT HAS SINCE REOCCURRED - 30/08/2026, inside homeall.g at the M17 Z brake
+release during a G29, nine seconds in, E-stopped by Trev on hearing the Z
+motors grind. That is the third event after the two on 27/08. The line that
+said it 'simply stopped happening' was written before this and is wrong.
+
+TIMING IS RULED OUT, on Trev's evidence: the release delay has been run at
+200, 400, 800 and 1800ms and the fault still appears. Do NOT re-propose
+raising G4 - that avenue is closed. Since duration does not fix it, the
+mechanism is more likely current or voltage: all three brake coils are
+commoned on OUT1, and a coil that never pulls in will not pull in given
+longer. The open question is whether the SAME brake fails every time, which
+would separate an electrical margin from one sticking unit - M584
+single-driver jog is the technique, the same one that confirmed the Z0/Z1/Z2
+mapping on 21/08. Still parked and NOT blocking; this is recorded so the
+next person does not start from the timing hypothesis again.
+
+Everything below is the state of the diagnosis when it was parked, kept so it
+does not have to be redone.
 
 ---------------------------------------------------------------------------
 0. Z BRAKES INTERMITTENTLY FAIL TO RELEASE  [BLOCKS ALL MOTION - do not print]
