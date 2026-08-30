@@ -39,21 +39,21 @@ G1 Z20 F1000                                                     ; Lower bed to 
 ; --- 3. Iterative alignment loop ---
 while true
     ; Point 0: front-right, near Z0
-    G0 X398 Y16 F9000                                            ; Travel to front-right probe point (2mm off the X400 limit)
+    G0 X398 Y16 F18000                                            ; Travel to front-right probe point (2mm off the X400 limit)
     M400                                                          ; Wait for move to finish
     G4 P250                                                       ; Stabilisation delay
     G30 P0 X398 Y16 Z-99999                                       ; Probe and store as point 0
     G4 P250
 
     ; Point 1: rear, near Z1 (driver 0.1)
-    G0 X201 Y380 F9000                                           ; Travel to rear probe point
+    G0 X201 Y380 F18000                                           ; Travel to rear probe point
     M400                                                          ; Wait for move to finish
     G4 P250
     G30 P1 X201 Y380 Z-99999                                      ; Probe and store as point 1
     G4 P250
 
     ; Point 2: front-left, near Z2 (driver 0.2)
-    G0 X2 Y16 F9000                                              ; Travel to front-left probe point
+    G0 X2 Y16 F18000                                              ; Travel to front-left probe point
     M400                                                          ; Wait for move to finish
     G4 P250
     G30 P2 X2 Y16 Z-99999 S3                                      ; Probe point 2, calculate 3-motor correction
@@ -72,7 +72,7 @@ G1 Z5 F1000                                                      ; Return to div
                                                                  ; only 2mm off the bed, too close to start a G30 from
 var xCenter = move.axes[0].min + (move.axes[0].max - move.axes[0].min) / 2 - sensors.probes[0].offsets[0]
 var yCenter = move.axes[1].min + (move.axes[1].max - move.axes[1].min) / 2 - sensors.probes[0].offsets[1]
-G1 X{var.xCenter} Y{var.yCenter} F9000                           ; Move to bed centre
+G1 X{var.xCenter} Y{var.yCenter} F18000                           ; Move to bed centre
 M400
 G4 P1000                                                         ; Let the ALPS strain gauge fully release before the
                                                                  ; datum probe. 21/08/2026: this G30 failed with "probe
