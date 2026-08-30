@@ -276,6 +276,14 @@ that is not physically present. DO NOT RUN THE BED HEATER UNTIL THE SLAB IS
 FITTED.  
 
 ON ARRIVAL, in order:  
+ 0. BEFORE BONDING ANYTHING, while the slab is still loose and can be turned:  
+    three 7x7s with M18 between, rotate 90 degrees, three more. Confirms the  
+    machine astigmatism is still bowY-bowX = 0.238 (measured 30/08/2026) and  
+    gives the new stone's own figure. LAST OPPORTUNITY - the mid-slab RTD  
+    fixes the orientation permanently once fitted, and rotation is the only  
+    way to separate machine from stone. ~45 minutes. Soak overnight first;  
+    settled meshes are 2-10x more repeatable. Method and the 0.238 figure are  
+    in frame_survey_20260821.txt under BARE-GRANITE DATUM.  
  a. Fill the 8x 5mm waterjet through-holes with JB Weld High Heat 37901, then  
     bond the M3 Flow-Sert inserts (Farnell 2474931).  
  b. Bond kinematic brackets to the underside with Dowsil 736 RTV.  
@@ -389,9 +397,15 @@ IO4 are free, with IO3 reserved for a runout sensor.
 - Raise M201/M203 from placeholders once input shaping is settled. Currently  
   M201 X35000 Y35000, M203 X30000 Y30000.  
 - Re-check belt tension after the first hours of running - by PLUCK, ~40 N.  
-- VERIFY THE PERMANENT REAR-RIGHT SHIM: cold 7x7 mesh, M18 between runs, match  
-  or beat twist -0.005 / deviation 0.067. Rails are at 0.5 N.m - do not disturb  
-  that between now and the mesh.  
+- SHIM VERIFICATION: STRUCK 30/08/2026, do not reinstate. The criterion was a  
+  cold 7x7 matching twist -0.005 / deviation 0.067, and it is not achievable -  
+  the LOOSE FR4 moves mesh twist by ~0.24mm, roughly 47x the criterion, so the  
+  benchmark records one placement of a sheet rather than a machine property.  
+  Bare-granite twist measured +0.006 and +0.016 on 30/08 against ~0.28 before  
+  the shim: the shim is SOUND. Its real proof is the dynamic 127Hz result,  
+  which never touched the bed. Full detail in frame_survey_20260821.txt under  
+  BARE-GRANITE DATUM. Revisit mesh-based frame checks only once the final slab  
+  and FR4 are BONDED.  
 - Re-measure chamber stratification now the top panel is fitted. It was ~6degC  
   with the panel off during PID tuning.  
 - OB30 constants AirOff_Max_SP / AirOff_Safety_Limit currently 130.0/150.0,  
@@ -411,10 +425,12 @@ the rear-right fastener. Confirmed by two independent methods:
    static   cold 4x4 mesh corner twist    0.283mm -> 0.011mm  
    dynamic  127Hz band at X=390           2.25x rear-LOUDER -> 0.63x rear-QUIETER  
 PERMANENT SHIM FITTED 29/08/2026, replacing the temporary slip gauge at the  
-same ~0.5mm. NOT YET RE-VERIFIED: take a cold 7x7 and match or beat the  
-benchmark map mesh_7x7_cold_20260823_2201.csv (twist -0.005, deviation 0.067).  
-Until that mesh is taken, the shim is fitted but unproven - the slip-gauge  
-result does not carry over to a different piece of metal.  
+same ~0.5mm. VERIFIED SOUND 30/08/2026 by six bare-granite 7x7s: twist +0.006  
+and +0.016 against ~0.28 before the shim. The earlier plan to match the  
+benchmark map is STRUCK - that map was taken through the loose FR4, which  
+moves twist by ~0.24mm on its own. NOTE the static 4x4 evidence above  
+(0.283 -> 0.011) was also measured through the sheet and is contaminated; the  
+DYNAMIC 127Hz result is the shim's real proof. See frame_survey_20260821.txt.  
 
 FASTENER TORQUE: 0.5 N.m, ALL RAILS, set 29/08/2026 with the torque screwdriver.  
 This is the documented, repeatable spec the rail investigation needed and never  
@@ -595,9 +611,21 @@ Hardware / electrical:
   io.in and io.out are NOT adjacent.  
 - Do not plug an M23CL into an already-live TDB — blows the motor's internal  
   2A fuse, not user-replaceable on pre-v1.2 units.  
-- Z brakes have intermittently failed to release (27/08/2026, two E-stops, Z  
-  motors grinding against locked brakes). Deprioritised, NOT fixed — it stopped  
-  on its own. Full diagnosis is in project-long.txt if it ever comes back.  
+- Z brakes intermittently fail to release. THREE events: 27/08/2026 x2, and  
+  30/08/2026 during a G29 (fault fired inside homeall.g at the M17 Z / brake  
+  release, 9s in; Trev E-stopped on hearing the motors grind). The earlier  
+  note here said it 'stopped on its own' - that is now FALSE, it recurred.  
+  IT IS NOT A TIMING PROBLEM. The release delay has been walked 200 -> 400  
+  -> 800 -> 1800ms and it still faults; do not 'fix' it by raising G4 again.  
+  Files currently hold 1500ms (homeall.g:22, mesh.g:62) and 800ms (homez.g:12),  
+  both BELOW the 1800 already tried and found wanting.  
+  Still deprioritised at Trev's call, NOT blocking. If it is ever picked up:  
+  timing-independence points at current or voltage, not duration - three brake  
+  coils are commoned on OUT1 and a coil that never pulls in will not pull in  
+  with more waiting. Establishing whether it is always the SAME one of the  
+  three would separate an electrical margin from one sticking brake (M584  
+  single-driver jog, the method that confirmed Z0/Z1/Z2 on 21/08). Diagnosis  
+  so far is in project-long.txt under Z BRAKE INTERMITTENT RELEASE FAULT.  
 - CF-filled nylon carries non-negligible conductivity and can corrupt 4-wire  
   Pt100 sense circuits via leakage across exposed solder joints.  
 - Acceleration ceiling is governed by frame resonance, not motor torque.  
