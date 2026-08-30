@@ -73,7 +73,7 @@ M574 Z1 S2                                              ; Z endstop via probe
 ; Z Probe
 M950 P1 C"io6.out"                                      ; GPIO 1: ALPS probe enable
 M42 P1 S0                                               ; ALPS enable LOW at boot
-M558 K0 P9 C"io6.in" H5:2 F600:300 T3000 A8 S0.02       ; ALPS probe on io6.in
+M558 K0 P9 C"io6.in" H5:2 F600:300 T12000 A8 S0.02      ; ALPS probe on io6.in
 G31 P500 X0 Y0 Z-0.030                                  ; Probe trigger height and XY offsets
 M671 X424.75:201:-22.75 Y-8.75:415:-8.75 S40            ; Z0 front-right, Z1 rear, Z2 front-left; max 40mm correction
 
