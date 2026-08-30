@@ -54,7 +54,7 @@ M557 X10:390 Y16:384 P7:7                                        ; 7x7 grid, cen
 
 ; --- 4. Probe setup ---
 M561                                                             ; Clear any active bed transform - never mesh on top of a mesh
-M558 K0 H5:2 F600:300 T3000 A8 S0.02                             ; Normal dive height; restate in case bed.g left it wide
+M558 K0 H5:2 F600:300 T12000 A8 S0.02                             ; Normal dive height; restate in case bed.g left it wide
 
 ; M569.7 fires the brake port at the same time as driver enable, but RRF gives
 ; no automatic delay in this direction - force enable and wait before moving Z.
