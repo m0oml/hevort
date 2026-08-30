@@ -284,8 +284,18 @@ ON ARRIVAL, in order:
     way to separate machine from stone. ~45 minutes. Soak overnight first;  
     settled meshes are 2-10x more repeatable. Method and the 0.238 figure are  
     in frame_survey_20260821.txt under BARE-GRANITE DATUM.  
+    LET IT SETTLE FIRST. A slab that has just been moved is NOT stable: after  
+    the 90-degree rotation on 30/08 the twist term sat 0.025mm off where it  
+    later settled, and the datum taken 20 minutes after the move was the  
+    loosest set of the day. It took hours and a lot of machine motion to  
+    settle, after which repeatability was the best ever measured (mean  
+    +/-0.0009, dev +/-0.0004). Soak overnight AND run several meshes before  
+    trusting any figure.  
  a. Fill the 8x 5mm waterjet through-holes with JB Weld High Heat 37901, then  
-    bond the M3 Flow-Sert inserts (Farnell 2474931).  
+    bond the M3 Flow-Sert inserts (Farnell 2474931). The 8 holes are an  
+    8-hole pattern AROUND THE PERIMETER of the slab; the FR4 is drilled to  
+    match (step d) and BOLTED to them. The FR4 is never bonded - only the  
+    mat and the kinematic brackets are.  
  b. Bond kinematic brackets to the underside with Dowsil 736 RTV.  
  c. Bond the heater mat full-face with Dowsil 736 — bead/dot grid, NOT a full  
     skim (trapped air voids become hot spots). NOT mechanically retained.  
@@ -295,7 +305,25 @@ ON ARRIVAL, in order:
     — the M671 triples must be in that order). This entry previously said  
     front-left/front-right the wrong way round; corrected 29/08/2026.  
  f. Reduce Z max in config.g by 1mm for the FR4.  
- g. Only then run the bed heater.  
+ g. Only then run the bed heater. BEFORE first heat, check all four:  
+    - config.g is ALREADY ARMED FOR THE PRODUCTION SLAB and needs no edit:  
+      M950 H0 C"out7" T5 Q1 (SSR1 on out7, sensor S5), M143 H0 P0 T5 S200,  
+      M307 H0 A100.0 C200.0 D5.0 B0, M140 P0 H0. The bare-mat model was  
+      removed deliberately - do not put it back.  
+    - S5 (spi.cs1, slab Pt100) must read a sane ambient value first. It  
+      currently reads hardwareError / 2000.0 open-circuit because the  
+      temporary slab has no RTD, and THAT FAULT is the only thing presently  
+      stopping the heater running. Once the RTD is attached that protection  
+      disappears - do not treat "it never came on before" as a safeguard.  
+    - THERE IS NO SECOND TEMPERATURE LIMIT. The mat surface sensor S2 is not  
+      fitted, and both its M308 (config.g line 84) and its 125C mat cutout  
+      M143 H0 P1 T2 S125 (line 97) are COMMENTED OUT. S5 is the sole source  
+      for control and for the 200C limit, so one RTD failure is uncovered on  
+      a 1400W mat bonded to granite. Decide before first heat whether to fit  
+      S2 and uncomment both lines.  
+    - The M307 model is CALCULATED, not measured. Re-run the autotune on the  
+      real bonded assembly, and transcribe the result into config.g by hand -  
+      there is no M501, so it lives in RAM only until you do.  
 
 ---------------------------------------------------------------------------  
 8. BED MOUNTING METHOD — UNDECIDED  
@@ -405,7 +433,10 @@ IO4 are free, with IO3 reserved for a runout sensor.
   the shim: the shim is SOUND. Its real proof is the dynamic 127Hz result,  
   which never touched the bed. Full detail in frame_survey_20260821.txt under  
   BARE-GRANITE DATUM. Revisit mesh-based frame checks only once the final slab  
-  and FR4 are BONDED.  
+  is fitted and the FR4 is BOLTED DOWN to it. NOTE the FR4 is never bonded -  
+  it is drilled from the granite pattern (step d) and screwed to the M3  
+  Flow-Serts (step a). Only the mat is bonded. An earlier version of this  
+  line said 'FR4 are BONDED' and was wrong.  
 - Re-measure chamber stratification now the top panel is fitted. It was ~6degC  
   with the panel off during PID tuning.  
 - OB30 constants AirOff_Max_SP / AirOff_Safety_Limit currently 130.0/150.0,  
