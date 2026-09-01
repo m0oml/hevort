@@ -116,6 +116,14 @@ M106 P3 S0 L0 X1 H4:1 T30:50                            ; Fan 3 thermostatic on 
 ; ======================== Tools =======================
 M563 P0 D0 H1 F1                                        ; Tool 0: Extruder 0, Heater 1, Fan 1
 M568 P0 R0 S0                                           ; Tool 0 standby/active temps to 0C
+M207 P0 S0.3 R0 F3600 Z0                                ; Firmware retraction for G10/G11.
+                                                        ; S0.3 starting point, direct drive
+                                                        ; VZ-HextrudORT - calibrate it.
+                                                        ; Z0 deliberately: M201 Z20 means a
+                                                        ; hop costs ~1s in ramp alone. Use
+                                                        ; the slicer retract_lift instead.
+                                                        ; A filament profile can override
+                                                        ; with its own M207 at print start.
 
 ; ======================= Inputs ========================
 ; M950 J1 C"io3.in"                                     ; Input 1: filament sensor (not fitted)
