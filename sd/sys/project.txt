@@ -66,8 +66,17 @@ Z        : 3x 42HSB47A41505 brake steppers, drivers 0.0/0.1/0.2, brakes OUT1.
 Toolhead : Goliath water-cooled + VZ-HextrudORT Low Plus (12mm bore).  
            Mellow ALPS strain-gauge Z probe on IO6. WS7040 CPAP part cooling.  
 Bed      : 440x440x20mm granite + 4mm FR4, 400x400mm 1400W polyimide mat.  
-Chamber  : 1400W PTC, Siemens S7-1212C PLC (FW V4.3.1), cascade PID,  
-           Modbus RTU to Duet on IO1 (M575 P3 B9600 S7).  
+Chamber  : HEATER ASSEMBLY REMOVED 31/08/2026 - its recirculation fan (shaded  
+           pole, no forced cooling over the motor) burnt out. Always a risk  
+           with that configuration. REPLACEMENT PLAN: 24V DC fan blowing  
+           OUTSIDE air into the heater housing over the motor, powered from  
+           the pilot relay that switches the fan contactor - self-interlocked  
+           (runs whenever the motor runs), already on a control fuse, no new  
+           control needed. The PLC drops the fan when air-off falls below  
+           ~45-50C, so the cooling fan inherits that overrun for free.  
+           Was: 1400W PTC, Siemens S7-1212C PLC (FW V4.3.1), cascade PID,  
+           Modbus RTU to Duet on IO1 (M575 P3 B9600 S7). PLC and Modbus  
+           link remain live; only the heater assembly is out.  
 Network  : PROFINET 192.168.32.x — Pi .70, PLC .71, KTP700 .72, switch .73.  
 
 =======================================================================================================  
@@ -106,13 +115,22 @@ DUET IO
  J0, J1 free.  
 
 DUET OUTPUTS  
- OUT0 hotend   OUT1 Z brakes (all three commoned)   OUT2 water pump  
+ OUT0 hotend   OUT1 Z BRAKE RELAY COIL (R4) - not the brakes direct, rewired  
+               31/08/2026 to get the coil load off the board   OUT2 water pump  
  OUT4 enclosure fan   OUT6 bay/rad fan   OUT7 SSR1 bed gate  
  OUT8 R1 relay coil -> PLC %I0.0   OUT9 CPAP  
 
 PLC / RELAYS / CONTACTORS  
  R1 = Duet OUT8 -> PLC %I0.0      R2 = Q13.0 -> K1 coil  
- R3 = Q13.1 -> K2 coil            R4 = Q13.3 -> spare switched 24V (F6)  
+ R3 = Q13.1 -> K2 coil  
+ R4 = Z BRAKES (was Q13.3 spare switched 24V). Coil now exercised by Duet  
+      OUT1; contacts switch the three commoned brake coils from the F6 24V  
+      common. Rewired 31/08/2026. M569.7 P0.0 C"out1" is UNCHANGED and still  
+      correct - the Duet commands the brakes exactly as before, it just  
+      drives a relay coil instead of three solenoids.  
+      F6 is 1A and has held so far; Trev will fit 3.15A if it nuisance-blows.  
+      A blown F6 = brakes that never release, which looks exactly like the  
+      old intermittent fault - check the fuse FIRST if it recurs.  
  K1 = two-pole contactor, mains to SSR2.  K2 = contactor, shaded-pole fan.  
  SSR1 = bed gate (Duet OUT7).     SSR2 = chamber gate (PLC Q13.2).  
  SM1222 slot 3, base %QB13. Q13.0-Q13.3 active, Q13.4-7 spare.  
@@ -629,6 +647,10 @@ Firmware:
   WRONG, corrected 29/08/2026. The fix is daemon.g's single-pass loop block;  
   do not 'fix' it to while true. See DAEMON.G SINGLE-PASS LOOP in  
   project-long.txt and ~/duet_bug_report_20260829.txt.  
+  UPSTREAM: Duet3D commit 363e8743 fixes the LEAK (failed M260.1/M261.1 no  
+  longer register result variables) and the top-level declaration defect. It  
+  does NOT address the read-ahead-error-to-EMERGENCY-STOP escalation. KEEP  
+  the single-pass loop regardless. Post-dates our 3.7.0-beta.3.  
 - Brake configurations must be bench-tested in isolation (motors decoupled,  
   timing verified) before live reload under load. Hard rule after the Z brake  
   spring damage incident.  
@@ -642,7 +664,14 @@ Hardware / electrical:
   io.in and io.out are NOT adjacent.  
 - Do not plug an M23CL into an already-live TDB — blows the motor's internal  
   2A fuse, not user-replaceable on pre-v1.2 units.  
-- Z brakes intermittently fail to release. THREE events: 27/08/2026 x2, and  
+- Z brakes: REWIRED THROUGH A RELAY 31/08/2026 to take the coil load off the  
+  board. NO RECURRENCE SINCE - 38 homeall.g invocations, 23 G32 cycles and 15  
+  meshes to 01/09 morning, zero E-stops, zero aborts. Not proof (it was always  
+  intermittent) but well past what it previously tolerated. During that work  
+  the rear Z motor DROPPED ~100mm and was wound back up by hand - see  
+  frame_survey POST-BRAKE-REWIRE STATE, the bed twist term stepped +0.100mm  
+  across that event and has not returned.  
+  History, for context. THREE events: 27/08/2026 x2, and  
   30/08/2026 during a G29 (fault fired inside homeall.g at the M17 Z / brake  
   release, 9s in; Trev E-stopped on hearing the motors grind). The earlier  
   note here said it 'stopped on its own' - that is now FALSE, it recurred.  
