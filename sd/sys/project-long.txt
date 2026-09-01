@@ -784,7 +784,11 @@ DC Fuse Block (8-position):
  F3 1A 24V MDR PLC CPU + SM1231  
  F4 500mA 24V MDR SM1222 L+ (SSR2 signal + 3x relay coils)  
  F5 1A 24V MDR KTP700 + Helmholz switch  
- F6 1A 24V LRS R4 switched 24V common (spare)  
+ F6 1A 24V LRS R4 switched 24V common - NOW THE Z BRAKES (31/08/2026,  
+    was spare). Feeds the three commoned brake coils through R4's contacts.  
+    1A has held so far; fit 3.15A if it nuisance-blows. A BLOWN F6 MEANS THE  
+    BRAKES NEVER RELEASE, which presents exactly like the old intermittent  
+    fault - check this fuse FIRST before re-opening that diagnosis.  
  F7 2A 24V LRS Water pump  
  F8 5A 24V LRS WS7040 CPAP blower  
 
@@ -814,8 +818,10 @@ FUSE RATING — 5A, NOT 3A (settled, do not revisit):
  - 4x5A = 20A matches the TDB input connector rating exactly.  
 
 24V Printer Rail — no external DC fuses. The Duet board fuse (15A) covers all  
-OUT port loads, Z brakes and the R1 coil. OUT0 hotend heater has its own 5A  
-on-board fuse.  
+OUT port loads and the R1 coil. OUT0 hotend heater has its own 5A on-board  
+fuse. THE Z BRAKES ARE NO LONGER ON THE BOARD FUSE - rewired 31/08/2026, OUT1  
+now exercises the R4 coil only and the brake coils draw from F6 instead. That  
+was the point of the change: get the coil load off the board.  
 
 IO Signal Wiring:  
  Red 5V / Yellow signal / White GND. 24 AWG for IO signals, 1.5mm^2 for hotend  
@@ -908,8 +914,15 @@ Duet IO6 header pin order (all 9 IO headers are identical), top to bottom:
 Note io6.in and io6.out are NOT adjacent — GND sits between them.  
 
 LOW Block (21 terminals):  
- T1 Z brake + Duet OUT1 signal (all three brakes commoned)  
- T2 Z brake GND Duet OUT1 GND  
+ T1 Z brake + NOW FED FROM R4 CONTACTS / F6, not OUT1 direct (31/08/2026).  
+    All three brakes still commoned on this terminal pair.  
+ T2 Z brake GND  
+    OUT1 now goes to the R4 COIL instead - see PLC/RELAYS in project.txt.  
+    NOTE the Z BRAKE FAULT section below names T1/T2 as the prime suspect  
+    for the original intermittent fault, on the reasoning that one shared  
+    crimp explains total silence. That analysis PREDATES the rewire and the  
+    commoning point is unchanged, so it still stands as a candidate if the  
+    fault ever returns.  
  T3 Z0 B1 (red) Duet driver 0.0 front-right arm  
  T4 Z0 B2 (blue) Duet driver 0.0  
  T5 Z0 A1 (green) Duet driver 0.0  
@@ -1614,7 +1627,20 @@ Z BRAKE INTERMITTENT RELEASE FAULT - retired from the working list 29/08/2026
 Removed from project.txt OUTSTANDING at Trev's call: "remove point 0 if it
 reoccurs I'll jump on it". NOT fixed and NOT explained.
 
-IT HAS SINCE REOCCURRED - 30/08/2026, inside homeall.g at the M17 Z brake
+RESOLVED, PROBABLY - REWIRED THROUGH A RELAY 31/08/2026. Trev moved the brake
+coils behind a relay so the load is off the board. NO RECURRENCE SINCE: 38
+homeall.g invocations, 23 G32 tram cycles and 15 completed meshes between
+31/08 14:44 and 01/09 08:45, with zero emergency stops and zero aborts. Given
+timing was already eliminated (200/400/800/1800ms all faulted), board load was
+the remaining hypothesis and this is consistent with it. NOT proof - the fault
+was always intermittent - but 38 clean cycles is far past its previous run.
+Note the rear Z motor dropped ~100mm during that work and was wound back up by
+hand; the bed twist term stepped +0.100mm across the same window and has not
+returned. See frame_survey_20260821.txt, POST-BRAKE-REWIRE STATE.
+
+Everything below predates the rewire.
+
+IT HAD REOCCURRED - 30/08/2026, inside homeall.g at the M17 Z brake
 release during a G29, nine seconds in, E-stopped by Trev on hearing the Z
 motors grind. That is the third event after the two on 27/08. The line that
 said it 'simply stopped happening' was written before this and is wrong.
@@ -1732,6 +1758,24 @@ claimed daemon.g "carries an exists()/break guard to recover" - that was WRONG,
 corrected 29/08/2026. There is no such guard and there never was one that
 helped; the only exists() in the file guards vars.g loading, not plcRegs. The
 single-pass scope is the entire fix.
+
+UPSTREAM FIX EXISTS - Duet3D commit 363e8743, checked 01/09/2026
+"Fixed tracking of local variables from M260.1/M261.1" (KeywordHandler.cs,
+MCodeHandler.cs, CodeBlock.cs, CodeFile.cs). It fixes the top-level declaration
+defect AND the leak that caused our two emergency stops: failed M260.1/M261.1
+no longer register result variables, and leftovers are deleted before the
+firmware declares new ones.
+
+BUT KEEP THIS WORKAROUND ANYWAY. The commit removes the trigger, not the
+amplifier - it says nothing about an expression error during READ-AHEAD
+escalating to a full emergency stop, which was the HIGH severity defect in
+/home/trev/duet_bug_report_20260829.txt section 4 and remains open. The
+single-pass loop costs nothing and closes the scope on every invocation
+whatever fails inside it. Do NOT revert to a top-level M261.1 or a persistent
+loop just because the declaration bug is fixed upstream.
+We run DSF 3.7.0-beta.3; the commit post-dates it, so the fix lands in a later
+beta or the release. Full mapping of the commit onto our three reported defects
+is in section 13 of the bug report.
 
 EDITING IT
 daemon.g cannot be edited in place while RRF is running it - rename it (e.g.
