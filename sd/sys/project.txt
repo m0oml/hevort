@@ -322,7 +322,12 @@ ON ARRIVAL, in order:
  e. Lock bed frame geometry, set M671 (Z0 front-RIGHT, Z1 rear, Z2 front-LEFT  
     — the M671 triples must be in that order). This entry previously said  
     front-left/front-right the wrong way round; corrected 29/08/2026.  
- f. Reduce Z max in config.g by 1mm for the FR4.  
+ f. Z MAX NEEDS NO CHANGE FOR THE FR4 - this step used to say 'reduce by  
+    1mm' and that is WRONG, corrected 01/09/2026. Z370 was set and driven  
+    on 29/08/2026 with the CURRENT 5mm sheet already in place. The final  
+    sheet is 4mm (on order, awaiting stock), so the stack gets 1mm THINNER  
+    and Z could go UP, not down. Trev is running ~20mm of headroom below  
+    the real limit anyway, so nothing needs doing here at all.  
  g. Only then run the bed heater. BEFORE first heat, check all four:  
     - config.g is ALREADY ARMED FOR THE PRODUCTION SLAB and needs no edit:  
       M950 H0 C"out7" T5 Q1 (SSR1 on out7, sensor S5), M143 H0 P0 T5 S200,  
