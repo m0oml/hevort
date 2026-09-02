@@ -669,14 +669,28 @@ Hardware / electrical:
   io.in and io.out are NOT adjacent.  
 - Do not plug an M23CL into an already-live TDB — blows the motor's internal  
   2A fuse, not user-replaceable on pre-v1.2 units.  
-- Z brakes: REWIRED THROUGH A RELAY 31/08/2026 to take the coil load off the  
-  board. NO RECURRENCE SINCE - 38 homeall.g invocations, 23 G32 cycles and 15  
-  meshes to 01/09 morning, zero E-stops, zero aborts. Not proof (it was always  
-  intermittent) but well past what it previously tolerated. During that work  
-  the rear Z motor DROPPED ~100mm and was wound back up by hand - see  
-  frame_survey POST-BRAKE-REWIRE STATE, the bed twist term stepped +0.100mm  
-  across that event and has not returned.  
-  History, for context. THREE events: 27/08/2026 x2, and  
+- Z BRAKES INTERMITTENTLY FAIL TO RELEASE. STILL UNSOLVED as of 01/09/2026.  
+  IT IS THE DUET OUTPUT, NOT THE LOAD. Recurred 01/09/2026 afternoon with the  
+  relay fitted, and THE RELAY DID NOT ENERGISE - so OUT1 never drove. The coil  
+  is ~20mA; the load hypothesis is dead. It has also done this on BOTH 3.6.3  
+  AND 3.7.0-beta.3, so it is not a firmware regression either.  
+  WHAT IS NOW ELIMINATED:  
+    timing    - 200/400/800/1800ms release delays ALL faulted (Trev)  
+    coil load - relay rewire 31/08 did not fix it; relay never energised  
+    fw version- occurs on 3.6.3 and 3.7.0-beta.3 alike  
+  WHAT IS LEFT: OUT1 itself, or how RRF drives it via M569.7 P0.0 C"out1".  
+  DISCRIMINATING TEST, cheap and not yet done: move the relay coil to OUT3  
+  (free - OUT0 hotend, OUT1 brakes, OUT2 pump, OUT4/6/7/8/9 assigned, OUT5 is  
+  the pump tach). One wire, one config line. Still fails = firmware. Runs  
+  clean = OUT1 hardware fault.  
+  NOTE the 31/08 rewire DID run 38 homeall.g invocations, 23 G32 cycles and 15  
+  meshes clean before recurring - that was recorded here as evidence the relay  
+  had fixed it. IT HAD NOT. The fault is intermittent enough to survive 38  
+  clean cycles, so treat any future 'no recurrence' claim with that in mind.  
+  During the rewire the rear Z motor DROPPED ~100mm and was wound back by hand  
+  - see frame_survey POST-BRAKE-REWIRE STATE, the bed twist term stepped  
+  +0.100mm across that event and has not returned.  
+  History, for context. Earlier events: 27/08/2026 x2, and  
   30/08/2026 during a G29 (fault fired inside homeall.g at the M17 Z / brake  
   release, 9s in; Trev E-stopped on hearing the motors grind). The earlier  
   note here said it 'stopped on its own' - that is now FALSE, it recurred.  
