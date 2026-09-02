@@ -1627,13 +1627,37 @@ Z BRAKE INTERMITTENT RELEASE FAULT - retired from the working list 29/08/2026
 Removed from project.txt OUTSTANDING at Trev's call: "remove point 0 if it
 reoccurs I'll jump on it". NOT fixed and NOT explained.
 
-RESOLVED, PROBABLY - REWIRED THROUGH A RELAY 31/08/2026. Trev moved the brake
-coils behind a relay so the load is off the board. NO RECURRENCE SINCE: 38
-homeall.g invocations, 23 G32 tram cycles and 15 completed meshes between
-31/08 14:44 and 01/09 08:45, with zero emergency stops and zero aborts. Given
-timing was already eliminated (200/400/800/1800ms all faulted), board load was
-the remaining hypothesis and this is consistent with it. NOT proof - the fault
-was always intermittent - but 38 clean cycles is far past its previous run.
+NOT RESOLVED. AN EARLIER VERSION OF THIS SECTION SAID THE RELAY REWIRE HAD
+PROBABLY FIXED IT. IT HAD NOT - withdrawn 01/09/2026.
+
+Trev rewired the brake coils behind a relay on 31/08/2026 to take the load off
+the board, and it then ran 38 homeall.g invocations, 23 G32 cycles and 15
+meshes clean to 01/09 08:45. That was recorded here as evidence the load was
+the cause. IT RECURRED on the afternoon of 01/09 - and crucially THE RELAY DID
+NOT ENERGISE, so OUT1 never drove at all. A relay coil is ~20mA. The load
+hypothesis is dead, and so is the idea that 38 clean cycles means anything:
+this fault is intermittent enough to hide for that long.
+
+IT IS THE DUET OUTPUT. Trev's assessment, and the evidence supports it. Also
+note it has done this on BOTH 3.6.3 and 3.7.0-beta.3, so it is not a firmware
+regression tied to one version.
+
+ELIMINATED SO FAR:
+  timing       200/400/800/1800ms release delays all faulted
+  coil load    relay rewire did not fix it; relay never energised
+  fw version   occurs on 3.6.3 and 3.7.0-beta.3 alike
+  wiring       the commoning point at T1/T2 is downstream of the relay now,
+               and the relay itself did not fire, so T1/T2 is not implicated
+               in THIS event
+
+WHAT IS LEFT: OUT1 itself, or how RRF drives it via M569.7 P0.0 C"out1".
+
+DISCRIMINATING TEST - CHEAP, NOT YET DONE: move the relay coil to OUT3, which
+is free (OUT0 hotend, OUT1 brakes, OUT2 pump, OUT4/6/7/8/9 assigned, OUT5 is
+the pump tach). One wire and one config line. If it still fails intermittently
+the output is innocent and it is firmware; if it runs clean, OUT1 has a
+hardware fault. This is the only test identified that separates the two
+without putting a scope on the output pin.
 Note the rear Z motor dropped ~100mm during that work and was wound back up by
 hand; the bed twist term stepped +0.100mm across the same window and has not
 returned. See frame_survey_20260821.txt, POST-BRAKE-REWIRE STATE.
