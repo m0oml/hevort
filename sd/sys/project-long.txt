@@ -1652,12 +1652,28 @@ ELIMINATED SO FAR:
 
 WHAT IS LEFT: OUT1 itself, or how RRF drives it via M569.7 P0.0 C"out1".
 
-DISCRIMINATING TEST - CHEAP, NOT YET DONE: move the relay coil to OUT3, which
-is free (OUT0 hotend, OUT1 brakes, OUT2 pump, OUT4/6/7/8/9 assigned, OUT5 is
-the pump tach). One wire and one config line. If it still fails intermittently
-the output is innocent and it is firmware; if it runs clean, OUT1 has a
-hardware fault. This is the only test identified that separates the two
-without putting a scope on the output pin.
+ASSESSED AS FIRMWARE - 02/09/2026, Trev's call. The OUT3 swap was considered
+and DECLINED. DO NOT RE-PROPOSE IT. Reasoning: the port works perfectly for
+dozens of cycles, then occasionally fails to trigger, then works again. That
+behaviour is a race condition, not a marginal pin - a hardware fault on an
+output is persistent or degrades, it does not sit perfectly intermittent
+across two firmware versions and a rewire.
+
+FOR A BUG REPORT, IF ONE IS RAISED. The only documented brake defect on the
+Duet3D forum was introduced by PWM support ADDED FOR THE 1HCL AND M23CL, and
+it broke turning the motor off and engaging the brake on the 6HC and 6XD
+(PinAccess::write0 versus PinAccess::pwm, plus the PWM voltage divider). One
+user fixed it locally by recompiling without SUPPORT_BRAKE_PWM. It was fixed
+in 3.5-dev and 3.6-dev so it is present in both versions we run, and it
+concerned ENGAGE rather than RELEASE - so it is not our fault. BUT: this
+machine has four M23CLs on CAN alongside mainboard brake ports, so both code
+paths are compiled and live in the same build. That is an unusual
+configuration and worth stating in any report.
+
+Our symptom has no matching forum thread: intermittent failure to RELEASE, on
+3.6.3 and 3.7.0-beta.3 alike, config M569.7 P0.0 C"out1" S200 with NO V
+parameter so the PWM path is not engaged, and the relay rewire proving the
+output never drove at all.
 Note the rear Z motor dropped ~100mm during that work and was wound back up by
 hand; the bed twist term stepped +0.100mm across the same window and has not
 returned. See frame_survey_20260821.txt, POST-BRAKE-REWIRE STATE.
