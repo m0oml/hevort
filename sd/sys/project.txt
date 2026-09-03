@@ -679,10 +679,21 @@ Hardware / electrical:
     coil load - relay rewire 31/08 did not fix it; relay never energised  
     fw version- occurs on 3.6.3 and 3.7.0-beta.3 alike  
   WHAT IS LEFT: OUT1 itself, or how RRF drives it via M569.7 P0.0 C"out1".  
-  DISCRIMINATING TEST, cheap and not yet done: move the relay coil to OUT3  
-  (free - OUT0 hotend, OUT1 brakes, OUT2 pump, OUT4/6/7/8/9 assigned, OUT5 is  
-  the pump tach). One wire, one config line. Still fails = firmware. Runs  
-  clean = OUT1 hardware fault.  
+  ASSESSED AS FIRMWARE, 02/09/2026, Trev's call. DO NOT RE-PROPOSE MOVING IT  
+  TO ANOTHER OUTPUT. The reasoning: it works perfectly for dozens of cycles,  
+  then occasionally does not trigger, then works again. That is a race, not a  
+  marginal pin - hardware faults on an output are persistent or get steadily  
+  worse, they are not perfectly intermittent. The OUT3 swap was considered and  
+  declined on that basis.  
+  SUPPORTING CONTEXT FOR A BUG REPORT: the one known brake defect on the
+  Duet3D forum was introduced by PWM support ADDED FOR THE 1HCL AND M23CL,
+  which broke turning the motor off and engaging the brake on the 6HC and
+  6XD (PinAccess::write0 vs PinAccess::pwm, and the PWM voltage divider).
+  That was fixed in 3.5-dev/3.6-dev so it is in both our versions, and it was
+  about ENGAGE not RELEASE - but note THIS MACHINE HAS FOUR M23CLs on CAN as
+  well as mainboard brakes, so both code paths are live here. No forum thread
+  matches our symptom: intermittent failure to RELEASE, on 3.6.3 and
+  3.7.0-beta.3 alike, with the relay proving the output never drove.
   NOTE the 31/08 rewire DID run 38 homeall.g invocations, 23 G32 cycles and 15  
   meshes clean before recurring - that was recorded here as evidence the relay  
   had fixed it. IT HAD NOT. The fault is intermittent enough to survive 38  
