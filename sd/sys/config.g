@@ -81,7 +81,7 @@ M671 X424.75:201:-22.75 Y-8.75:415:-8.75 S40            ; Z0 front-right, Z1 rea
 M912 P0 S-5.2                                           ; MCU temperature calibration offset
 M308 S0 P"temp0" Y"pt1000" A"Hotend"                    ; Hotend PT1000
 M308 S1 P"temp1" Y"thermistor" A"Coolant" T10000 B3950  ; Coolant NTC 10K B3950
-;M308 S2 P"temp2" Y"thermistor" A"BedMat" T10000 B3950   ; Bed mat surface 10K B3950
+M308 S2 P"temp2" Y"thermistor" A"BedMat" T100000 B3950   ; Bed mat surface 10K B3950
 M308 S4 P"spi.cs0" Y"rtd-max31865" A"ElecBay"           ; Elec bay RTD Pt100 4-wire, SPI ch0
 M308 S5 P"spi.cs1" Y"rtd-max31865" A"Bed"               ; Bed slab RTD Pt100 4-wire, SPI ch1
 M308 S10 Y"mcu-temp" A"MCU Temp"                        ; MCU temperature sensor
@@ -92,10 +92,13 @@ M950 H1 C"out0" T0                                      ; Hotend heater on out0,
 M143 H1 P0 T0 S365 A0                                   ; Hotend limit 365C on sensor S0
 M307 H1 R5.147 K0.348:0.572 D2.53 E1.35 S1.00 B0 V24.0  ; Hotend PID model
 
-M950 H0 C"out7" T5 Q1                                   ; Bed heater SSR on out7, sensor S5
-M143 H0 P0 T5 S200 A0                                   ; Bed limit 200C on sensor S5
+;M950 H0 C"out7" T5 Q1                                   ; Bed heater SSR on out7, sensor S5
+M950 H0 C"out7" T2 Q1                                   ; Bed heater SSR on out7, sensor S5
+M143 H0 P1 T2 S110 A0 
+
+;M143 H0 P0 T5 S200 A0                                   ; Bed limit 200C on sensor S5
 ;M143 H0 P1 T2 S125 A0                                   ; Bed mat cutout 125C on sensor S2
-M307 H0 A100.0 C200.0 D5.0 B0                           ; Bed PID model
+;M307 H0 A100.0 C200.0 D5.0 B0                           ; Bed PID model
 
 ; Map bed heater
 M140 P0 H0                                              ; Map H0 to bed slot 0
