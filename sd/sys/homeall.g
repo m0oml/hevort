@@ -19,7 +19,7 @@ M569 P73.0 S1 D2                                                ; Y2 open loop
 ; no automatic delay in this direction (S param on M569.7 only covers the
 ; engage-on-disable side). Force enable and wait before the first Z move.
 M17 Z                                                            ; Enable Z, releasing brakes
-G4 P1500                                                         ; Wait for brake solenoids to fully release (raised from 800ms 22/08/2026 - brakes failed to release in time, forced an E-stop)
+G4 P200                                                          ; Wait for brake solenoids to fully release (200ms verified 05/09/2026, 20 clean engage/release cycles; the intermittent fault is OUT1 not driving at all, which no delay fixes)
 
 ; --- 2. Z Clearance ---
 G91                                                             ; Relative positioning
