@@ -65,7 +65,7 @@ Z        : 3x 42HSB47A41505 brake steppers, drivers 0.0/0.1/0.2, brakes OUT1.
            Confirmed physically 21/08/2026 by M584 single-driver jog.  
 Toolhead : Goliath water-cooled + VZ-HextrudORT Low Plus (12mm bore).  
            Mellow ALPS strain-gauge Z probe on IO6. WS7040 CPAP part cooling.  
-Bed      : 440x440x20mm granite + 4mm FR4, 400x400mm 1400W polyimide mat.  
+Bed      : 440x440x20mm granite + 4mm FR4, 400x400mm 1400W silicone mat.  
 Chamber  : HEATER ASSEMBLY REMOVED 31/08/2026 - its recirculation fan (shaded  
            pole, no forced cooling over the motor) burnt out. Always a risk  
            with that configuration. REPLACEMENT PLAN: 24V DC fan blowing  
@@ -281,8 +281,9 @@ MEASUREMENT DISCIPLINE - every one of these has cost real time:
 ---------------------------------------------------------------------------  
 7. GRANITE SLAB  [blocks a large downstream set]  
 ---------------------------------------------------------------------------  
-ORDERED AND PAID (£180, Just Granite Ltd, 01785 711096). Awaiting collection.  
-Chase if not heard within a reasonable window.  
+ORDERED AND PAID (£180, Just Granite Ltd, 01785 711096). COLLECTED and in  
+hand. The stone was WET on collection and was only surface-dried before  
+bonding - see step g, it must be dried out before it is ever run hot.  
 
 Blocks: bed frame geometry lock, M671 coordinates, FR4 hole positions, Z  
 endstop configuration, and ANY bed heating.  
@@ -309,14 +310,33 @@ ON ARRIVAL, in order:
     settle, after which repeatability was the best ever measured (mean  
     +/-0.0009, dev +/-0.0004). Soak overnight AND run several meshes before  
     trusting any figure.  
+    STILL AVAILABLE as of 05/09/2026 - NOT YET DONE. The bonded mat does not  
+    prevent rotation; only the mid-slab RTD fixes orientation permanently, so  
+    this must happen before the RTD goes in.  
  a. Fill the 8x 5mm waterjet through-holes with JB Weld High Heat 37901, then  
     bond the M3 Flow-Sert inserts (Farnell 2474931). The 8 holes are an  
     8-hole pattern AROUND THE PERIMETER of the slab; the FR4 is drilled to  
     match (step d) and BOLTED to them. The FR4 is never bonded - only the  
     mat and the kinematic brackets are.  
  b. Bond kinematic brackets to the underside with Dowsil 736 RTV.  
- c. Bond the heater mat full-face with Dowsil 736 — bead/dot grid, NOT a full  
-    skim (trapped air voids become hot spots). NOT mechanically retained.  
+ c. DONE 04/09/2026 15:46. Heater mat bonded full-face with Dowsil 736, NOT  
+    mechanically retained. DEVIATES FROM THE ORIGINAL PLAN, which specified a  
+    bead/dot grid rather than a full skim so trapped air voids could not  
+    become hot spots. A CONTINUOUS ~1mm layer was laid instead and rolled out  
+    so no air was trapped - same concern addressed, with better thermal  
+    contact, but no open channels for moisture in or acetic acid out.  
+    Clamped under 2020 extrusion, the second granite slab and a toolbox.  
+    Cure: 736 is acetoxy, i.e. moisture cure. Edges and squeeze-out were  
+    fully rubbery within 3 hours, but that is the exposed bead in free air  
+    and says NOTHING about the sealed centre. The centre is fed by moisture  
+    permeating the silicone mat and by the wet granite's own pore water.  
+    Endpoint is the acetic acid smell being GONE - judged cold, first thing,  
+    ideally by a nose coming in from outside, as yours adapts within minutes.  
+    Estimate ~7 days from bonding (so 11/09/2026); do not power the mat  
+    before that however solid the edges feel.  
+    NOT pre-wetted, and correctly so: the cure needs only a few grams of  
+    water and the stone holds ~20g, but a visibly wet surface would have  
+    spoiled adhesion. Dry surface, wet bulk is the right combination.  
  d. Drill the FR4 FROM THE GRANITE PATTERN DIRECTLY, do not mark out  
     independently. 2.5mm pilot then open to 4.5mm. Sacrificial ply backing.  
  e. Lock bed frame geometry, set M671 (Z0 front-RIGHT, Z1 rear, Z2 front-LEFT  
@@ -347,6 +367,15 @@ ON ARRIVAL, in order:
     - The M307 model is CALCULATED, not measured. Re-run the autotune on the  
       real bonded assembly, and transcribe the result into config.g by hand -  
       there is no M501, so it lives in RAM only until you do.  
+    - THE SLAB WAS WET WHEN COLLECTED and one face is now sealed by the  
+      bonded mat, so its remaining water can only leave via the top face and  
+      edges. FIRST POWER-UP IS A DRYING CYCLE, NOT A HEAT TEST: 50-60C held  
+      for several hours with the FR4 OFF and the top face open to air, before  
+      going any higher. Vapour that cannot escape sideways collects at the  
+      bonded interface and lifts the mat or opens voids - the same hot-spot  
+      failure the bonding note guards against, reached by another route. Wet  
+      stone heated fast can also spall. Run the M307 autotune AFTER this  
+      cycle, never before: wet stone has a different effective thermal mass.  
 
 ---------------------------------------------------------------------------  
 8. BED MOUNTING METHOD — UNDECIDED  
@@ -605,7 +634,8 @@ that the deployprobe.g retry caused this - the retry never fired (zero
 =======================================================================================================  
 PROCUREMENT — OUTSTANDING ONLY  
 =======================================================================================================  
-- Granite slab, Just Granite, £180 — ORDERED AND PAID, awaiting collection  
+- 4mm FR4 sheet — on order, awaiting stock (step f). Slab COLLECTED 09/2026,  
+  no longer outstanding.  
 
 That is the only thing outstanding. Fuses are stocked, cable glands are in hand  
 and ended up not being used, and the IO7 pause button is fitted and wired.  
