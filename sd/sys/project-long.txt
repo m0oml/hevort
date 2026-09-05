@@ -1091,8 +1091,12 @@ FR4 retention plate: Epoxy 4W/EP (FR-4, BSEN60893 3-2-EPGC202), 4mm, 440x440mm
  — final size, matches the granite footprint exactly, no cutting required.  
  2 sheets from Ai Plastics, order #000007557, £104.88 (£62.40 material + £25  
  shipping + £17.48 tax). Second sheet is a spare.  
- RECEIVED 12/08/2026 (an earlier entry logging this as received on 04/08 was  
- incorrect — it was ordered then, not delivered).  
+ NOT RECEIVED. ON BACKORDER as of 05/09/2026, confirmed by Trev.  
+ THIS ENTRY HAS NOW BEEN WRONG TWICE IN THE SAME WAY: it logged 04/08 as  
+ received (that was the ORDER date), then 12/08 as received (also wrong).  
+ Do not mark it received again without Trev confirming delivery in person.  
+ The 5mm sheet used for ALL testing to date, and referenced throughout  
+ frame_survey_20260821.txt, is a DIFFERENT sheet and is not one of these.  
  4mm over the standard 3.2mm: the plate is edge-retained on oversized holes  
  for thermal expansion rather than fully bonded, so it must resist sag between  
  the 8 anchor points under nozzle contact and adhesion pull.  
@@ -1134,7 +1138,8 @@ door hardware and 3030; extrusion drill/tap jig and stock; T1-T4 PSUs; Omron
 endstops; stop button; Waveshare display; SPI daughterboard; bed heater mat;  
 Noctua NF-F12 iPPC PWM; 3x Z brake steppers; Undertaker nozzle; full water  
 cooling set (pump/res, radiator, Barrow sensor, stainless fittings, PU tubing,  
-Mayhems X1); XNQ PT100 (spare); FR4 sheets x2; JB Weld 37901; Dowsil 736;  
+Mayhems X1); XNQ PT100 (spare); 5mm FR4 test sheet only (2x 4mm on  
+backorder); JB Weld 37901; Dowsil 736;  
 Dowsil 799; Labfacility DM-514-D; M3 Flow-Sert inserts; PIR insulation; foil  
 tape; Bond It silicone; silicone door seal tube.  
 
