@@ -66,6 +66,10 @@ Z        : 3x 42HSB47A41505 brake steppers, drivers 0.0/0.1/0.2, brakes OUT1.
 Toolhead : Goliath water-cooled + VZ-HextrudORT Low Plus (12mm bore).  
            Mellow ALPS strain-gauge Z probe on IO6. WS7040 CPAP part cooling.  
 Bed      : 440x440x20mm granite + 4mm FR4, 400x400mm 1400W silicone mat.  
+           Slab has a 6mm x 35mm RTD pocket drilled into one SIDE, done at  
+           manufacture, so its INSTALLED orientation was fixed before  
+           delivery. That does not prevent the temporary 90-degree rotation  
+           measurement in step 0.  
 Chamber  : HEATER ASSEMBLY REMOVED 31/08/2026 - its recirculation fan (shaded  
            pole, no forced cooling over the motor) burnt out. Always a risk  
            with that configuration. REPLACEMENT PLAN: 24V DC fan blowing  
@@ -295,24 +299,29 @@ that is not physically present. DO NOT RUN THE BED HEATER UNTIL THE SLAB IS
 FITTED.  
 
 ON ARRIVAL, in order:  
- 0. BEFORE BONDING ANYTHING, while the slab is still loose and can be turned:  
-    three 7x7s with M18 between, rotate 90 degrees, three more. Confirms the  
-    machine astigmatism is still bowY-bowX = 0.238 (measured 30/08/2026) and  
-    gives the new stone's own figure. LAST OPPORTUNITY - the mid-slab RTD  
-    fixes the orientation permanently once fitted, and rotation is the only  
-    way to separate machine from stone. ~45 minutes. Soak overnight first;  
-    settled meshes are 2-10x more repeatable. Method and the 0.238 figure are  
-    in frame_survey_20260821.txt under BARE-GRANITE DATUM.  
-    LET IT SETTLE FIRST. A slab that has just been moved is NOT stable: after  
-    the 90-degree rotation on 30/08 the twist term sat 0.025mm off where it  
-    later settled, and the datum taken 20 minutes after the move was the  
-    loosest set of the day. It took hours and a lot of machine motion to  
-    settle, after which repeatability was the best ever measured (mean  
-    +/-0.0009, dev +/-0.0004). Soak overnight AND run several meshes before  
-    trusting any figure.  
-    STILL AVAILABLE as of 05/09/2026 - NOT YET DONE. The bonded mat does not  
-    prevent rotation; only the mid-slab RTD fixes orientation permanently, so  
-    this must happen before the RTD goes in.  
+ 0. MODEL THE SLAB'S FIGURE AGAINST THE X BEAM BOW. STILL OUTSTANDING as of  
+    06/09/2026. Three 7x7s with M18 between, rotate the slab 90 degrees,  
+    three more, then put it back. Whatever rotates with the stone is the  
+    stone; whatever stays put is the machine. Gives the new slab's own figure  
+    and confirms the machine astigmatism is still bowY-bowX = 0.238 (measured  
+    30/08/2026). ~45 minutes. Method and the 0.238 figure are in  
+    frame_survey_20260821.txt under BARE-GRANITE DATUM.  
+    THIS IS A MEASUREMENT, NOT AN ORIENTATION DECISION. The rotation is  
+    TEMPORARY - the slab is turned back afterwards. Corrected 06/09/2026 by  
+    Trev after this step had been wrong in two opposite directions: it once  
+    read as a LAST OPPORTUNITY that would be lost the moment the mid-slab RTD  
+    was fitted, and was then rewritten as VOID on the grounds that the 6x35mm  
+    RTD pocket fixes orientation. BOTH WERE WRONG. The pocket fixes the  
+    slab's INSTALLED orientation and did so before delivery, but that has  
+    nothing to do with turning the stone through 90 degrees to take a second  
+    set of meshes. Neither the RTD nor the bonded mat gates this.  
+    LET IT SETTLE. A slab that has just been  
+    moved is NOT stable: after the 90-degree rotation on 30/08 the twist term  
+    sat 0.025mm off where it later settled, and the datum taken 20 minutes  
+    after the move was the loosest set of the day. It took hours and a lot of  
+    machine motion to settle, after which repeatability was the best ever  
+    measured (mean +/-0.0009, dev +/-0.0004). Soak overnight AND run several  
+    meshes before trusting any figure from a slab that has been handled.  
  a. Fill the 8x 5mm waterjet through-holes with JB Weld High Heat 37901, then  
     bond the M3 Flow-Sert inserts (Farnell 2474931). The 8 holes are an  
     8-hole pattern AROUND THE PERIMETER of the slab; the FR4 is drilled to  
