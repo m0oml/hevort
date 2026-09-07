@@ -371,10 +371,11 @@ ON ARRIVAL, in order:
  f. Z MAX NEEDS NO CHANGE FOR THE FR4 - this step used to say 'reduce by  
     1mm' and that is WRONG, corrected 01/09/2026. Z370 was set and driven  
     on 29/08/2026 with the CURRENT 5mm sheet already in place. The final  
-    sheet is 4mm, ON BACKORDER as of 05/09/2026 and NOT yet in hand, so  
-    the stack gets 1mm THINNER  
-    and Z could go UP, not down. Trev is running ~20mm of headroom below  
-    the real limit anyway, so nothing needs doing here at all.  
+    sheet is 4mm, ON BACKORDER as of 05/09/2026 and NOT yet in hand - but  
+    the 5mm IS in hand and THE BED CAN BE FINISHED ON IT. Nothing waits on  
+    the 4mm. Whenever it does arrive, swapping 5mm for 4mm makes the stack  
+    1mm THINNER, so Z could go UP, not down. Trev is running ~20mm of  
+    headroom below the real limit anyway, so nothing needs doing here at all.  
  g. Only then run the bed heater. BEFORE first heat, check all five:  
     - config.g is ALREADY ARMED FOR THE PRODUCTION SLAB and needs no edit:  
       M950 H0 C"out7" T5 Q1 (SSR1 on out7, sensor S5), M143 H0 P0 T5 S200,  
@@ -664,8 +665,14 @@ PROCUREMENT — OUTSTANDING ONLY
 - 4mm FR4, Ai Plastics order #000007557, 2 sheets — ON BACKORDER as of  
   05/09/2026, NOT received. project-long.txt has twice logged this as  
   received and been wrong both times; do not mark it received without Trev  
-  confirming delivery. The 5mm sheet in the machine for all testing to date  
-  is a DIFFERENT sheet and is not one of these.  
+  confirming delivery.  
+  THIS DOES NOT BLOCK ANYTHING. A 5mm FR4 sheet IS IN HAND and is a  
+  different sheet from these two. It has already been drilled, BOLTED DOWN  
+  and meshed through (frame_survey_20260821.txt, FR4 BOLTED DOWN - MEASURED  
+  30/08/2026). The bed can be completed on the 5mm. The 4mm is a 1mm-thinner  
+  REFINEMENT, not a prerequisite - see step f, the thinner stack only means  
+  Z could go up, and Trev runs ~20mm of headroom anyway. Do NOT describe the  
+  build, the drying cycle or first heat as waiting on FR4.  
 - Granite slab: COLLECTED and bonded, no longer outstanding.  
 
 That is the only thing outstanding. Fuses are stocked, cable glands are in hand  
