@@ -222,9 +222,26 @@ One line each. Detail in project-long.txt under the named section.
   with its G30 P0 coordinate matched. VALIDATED by a real G28 + G32 - converged  
   at 0.0058mm residual against bed.g's own 0.02mm criterion, zero errors.  
 - daemon.g REWRITTEN 29/08/2026 to "while { iterations < 1 }" - a loop block  
-  that runs once per invocation instead of a persistent loop. Fixes the DSF  
-  fault that emergency-stopped the machine twice. See FRAME/daemon notes in  
-  project-long.txt and /home/trev/duet_bug_report_20260829.txt.  
+  that runs once per invocation instead of a persistent loop. Written to fix  
+  the DSF fault that had emergency-stopped the machine twice.  
+  IT REDUCED THE EXPOSURE BUT DID NOT ELIMINATE IT. The machine halted again  
+  on 07/09/2026 06:16:01, idle, THIRD occurrence (23/08 21:41, 29/08  
+  14:54:38, 07/09 06:16:01). Journal: "in file daemon.g line 57: unknown  
+  variable 'plcRegs'", CodeParserException raised from  
+  EvaluateExpressionToValueAsync inside ReadCodeAsync - i.e. READ-AHEAD, not  
+  execution - then "Emergency Stop! Reset the controller to continue.",  
+  daemon.g aborted, boards 70-73 off CAN 5 seconds later. Board did NOT  
+  reset: state "halted", error status 0x00, CAN Disabled, HEAT task  
+  suspended, Move/TMC/Can* tasks gone, drivers reads 0/writes 0. daemon.g's  
+  stack never unwound, so 657 further daemon requests were discarded at 10s  
+  intervals before it was noticed. The last good PLC read was healthy  
+  (chamberStatus 96 = PLC running + Duet comms OK, all fault bits clear), so  
+  it was ONE transient failed Modbus transaction, not a dead PLC. Recovered  
+  by M999 at 08:07:32; CAN, all tasks and polling normal within 23 seconds,  
+  and clean since. Root cause and upstream fix: see the RRF 3.7.0 M261.1  
+  entry in the quirks list below.  
+  See FRAME/daemon notes in project-long.txt and  
+  /home/trev/duet_bug_report_20260829.txt.  
 
 =======================================================================================================  
 OUTSTANDING WORK — FULL DETAIL  
@@ -696,10 +713,31 @@ Firmware:
   WRONG, corrected 29/08/2026. The fix is daemon.g's single-pass loop block;  
   do not 'fix' it to while true. See DAEMON.G SINGLE-PASS LOOP in  
   project-long.txt and ~/duet_bug_report_20260829.txt.  
-  UPSTREAM: Duet3D commit 363e8743 fixes the LEAK (failed M260.1/M261.1 no  
-  longer register result variables) and the top-level declaration defect. It  
-  does NOT address the read-ahead-error-to-EMERGENCY-STOP escalation. KEEP  
-  the single-pass loop regardless. Post-dates our 3.7.0-beta.3.  
+  UPSTREAM - ROOT CAUSE FOUND AND FIXED BY DUET3D, from Trev's own bug  
+  report. Commit 363e8743, 31/08/2026, chrishamm, "Fixed tracking of local  
+  variables from M260.1/M261.1". Per Trev it was fixed within about 30  
+  minutes of the report being received. Forum thread:  
+  https://forum.duet3d.com/topic/39425/3.7.0-beta.3-modbus-daemon.g-issues/4  
+  Four fixes in it. TWO ARE OUR EXACT FAILURE, and both surface as  
+  "unknown variable 'plcRegs'":  
+    - result variables did not mark their code block as having local  
+      variables, so the BLOCK WAS CLOSED WITHOUT WAITING for codes that  
+      still referenced them - i.e. plcRegs was torn down while read-ahead  
+      was still parsing the line that uses it. That is the race, and it is  
+      why the fault is intermittent rather than every-time;  
+    - a failed M260.1/M261.1 still REGISTERED its result variable, so  
+      deleting it later reported an unknown variable.  
+  A third fix - variables declared before any code block was opened are now  
+  tracked instead of only warned about - RETIRES THE SINGLE-PASS LOOP  
+  WORKAROUND once we are on a build that has it. M261.1 ... V"plcRegs" will  
+  then be legal at file top level.  
+  WE DO NOT HAVE IT. The commit is 31/08/2026; our DSF is 3.7.0-beta.3 built  
+  18/08/2026, so it post-dates us by 13 days. Checked 07/09/2026: beta.3 is  
+  STILL the newest release, so the fix is master-only. Until we run a build  
+  containing 363e8743, KEEP the single-pass loop exactly as it is.  
+  WHAT THE COMMIT DOES NOT CHANGE: an expression error raised during  
+  read-ahead still escalates to a full EMERGENCY STOP. That policy stands,  
+  so the same class of halt stays reachable by other means.  
 - Brake configurations must be bench-tested in isolation (motors decoupled,  
   timing verified) before live reload under load. Hard rule after the Z brake  
   spring damage incident.  
