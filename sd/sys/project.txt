@@ -53,7 +53,7 @@ not the frame size: X0:400 Y0:400 Z-10:370, config.g line 52. Y raised 390->400
 and Z 300->370 on 29/08/2026, both driven and cleared; Z370 is provisional and  
 gets revisited when the bed goes in.  
 Duet 3 6HC v1.02c, SBC mode over USB since 27/08/2026 (was SPI).  
-Pi 4, hostname hevort, user trev. RRF 3.7.0-beta.3 as of 20/08/2026.  
+Pi 4, hostname hevort, user trev. RRF + DSF 3.7.0-rc.1 as of 08/09/2026.  
 
 Motion   : 4x M23CL-76-2804 CAN-FD on 48V via TDB v1.0. D4 closed loop, tuned.  
            CAN 70 = X1 back-right, 71 = X2 front-left,  
@@ -738,10 +738,13 @@ Firmware:
   tracked instead of only warned about - RETIRES THE SINGLE-PASS LOOP  
   WORKAROUND once we are on a build that has it. M261.1 ... V"plcRegs" will  
   then be legal at file top level.  
-  WE DO NOT HAVE IT. The commit is 31/08/2026; our DSF is 3.7.0-beta.3 built  
-  18/08/2026, so it post-dates us by 13 days. Checked 07/09/2026: beta.3 is  
-  STILL the newest release, so the fix is master-only. Until we run a build  
-  containing 363e8743, KEEP the single-pass loop exactly as it is.  
+  WE NOW HAVE IT - CONFIRMED 08/09/2026. Commit 363e8743 (31/08/2026) is an  
+  ancestor of tag v3.7.0-rc.1: the GitHub compare API reports behind_by 0,  
+  ahead_by 7. The rc.1 release notes also list all three bug fixes verbatim  
+  under "Bug fixes". We upgraded beta.3 -> rc.1 on 08/09/2026.  
+  KEEP THE SINGLE-PASS LOOP ANYWAY - see the next paragraph. The declaration  
+  bug being fixed does NOT make a top-level M261.1 safe here, and we have not  
+  tested one, deliberately.  
   WHAT THE COMMIT DOES NOT CHANGE: an expression error raised during  
   read-ahead still escalates to a full EMERGENCY STOP. That policy stands,  
   so the same class of halt stays reachable by other means.  
