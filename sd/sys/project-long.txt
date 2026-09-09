@@ -93,7 +93,7 @@ XY/AWD motors : 4x M23CL-76-2804 (18.9 kg/cm, 0.48 kg/cm^2 rotor inertia),
  M8 connectors are MALE on the motor housing (3-pin power,  
  4-pin CAN), cables supplied with the motors, star topology  
  to the TDB.  
-Motion controller: Duet 3 6HC v1.02c SBC mode over USB, RRF 3.7.0-beta.3  
+Motion controller: Duet 3 6HC v1.02c SBC mode over USB, RRF 3.7.0-rc.1  
 Toolhead : Mellow CNC Vz-HextrudORT water-cooled, Goliath hotend  
  (water-cooled variant). Fully assembled.  
  Z PROBE: Mellow ALPS Pressure Sensor Module (SKU 5030721022),  
@@ -1320,7 +1320,7 @@ TOOLS & RESOURCES
 =======================================================================================================  
 
 Core system:  
- Duet 3 6HC v1.02c, RRF 3.7.0-beta.3, SBC mode over USB, Pi 4 (hostname hevort, user trev)  
+ Duet 3 6HC v1.02c, RRF 3.7.0-rc.1, SBC mode over USB, Pi 4 (hostname hevort, user trev)  
  Siemens S7-1212C DC/DC/Rly FW V4.3.1, SM1222 slot 3 base %QB13, SM1231 RTD  
  KTP700 Basic PN HMI, Helmholz 700-850-4PS01 PROFINET switch  
  DuetWebControl with Closed Loop plugin  
@@ -1818,9 +1818,11 @@ escalating to a full emergency stop, which was the HIGH severity defect in
 single-pass loop costs nothing and closes the scope on every invocation
 whatever fails inside it. Do NOT revert to a top-level M261.1 or a persistent
 loop just because the declaration bug is fixed upstream.
-We run DSF 3.7.0-beta.3; the commit post-dates it, so the fix lands in a later
-beta or the release. Full mapping of the commit onto our three reported defects
-is in section 13 of the bug report.
+We ran DSF 3.7.0-beta.3 when this was written. On 08/09/2026 we upgraded to
+3.7.0-rc.1, which CONTAINS the commit - confirmed by ancestry (behind_by 0)
+and by the rc.1 release notes, which list all three bug fixes verbatim. The
+workaround stays regardless, for the reason given above. Full mapping of the
+commit onto our three reported defects is in section 13 of the bug report.
 
 EDITING IT
 daemon.g cannot be edited in place while RRF is running it - rename it (e.g.
