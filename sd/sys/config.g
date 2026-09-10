@@ -81,7 +81,7 @@ M671 X424.75:201:-22.75 Y-8.75:415:-8.75 S40            ; Z0 front-right, Z1 rea
 M912 P0 S-5.2                                           ; MCU temperature calibration offset
 M308 S0 P"temp0" Y"pt1000" A"Hotend"                    ; Hotend PT1000
 M308 S1 P"temp1" Y"thermistor" A"Coolant" T10000 B3950  ; Coolant NTC 10K B3950
-M308 S2 P"temp2" Y"thermistor" A"BedMat" T100000 B3950   ; Bed mat surface 10K B3950
+M308 S2 P"temp2" Y"thermistor" A"BedMat" T100000 B3950 U-2.91   ; Bed mat surface 100K B3950; U: reads +2.91C vs slab Pt100 at equilibrium, 1051 samples 09-10/09/2026, see survey_data/bedmat_offset_cooldown_20260909.txt
 M308 S4 P"spi.cs0" Y"rtd-max31865" A"ElecBay"           ; Elec bay RTD Pt100 4-wire, SPI ch0
 M308 S5 P"spi.cs1" Y"rtd-max31865" A"Bed"               ; Bed slab RTD Pt100 4-wire, SPI ch1
 M308 S10 Y"mcu-temp" A"MCU Temp"                        ; MCU temperature sensor
@@ -94,7 +94,8 @@ M307 H1 R5.147 K0.348:0.572 D2.53 E1.35 S1.00 B0 V24.0  ; Hotend PID model
 
 ;M950 H0 C"out7" T5 Q1                                   ; Bed heater SSR on out7, sensor S5
 M950 H0 C"out7" T2 Q1                                   ; Bed heater SSR on out7, sensor S5
-M143 H0 P1 T2 S110 A0 
+M143 H0 P1 T2 S150 A2                                   ; Bed mat SOFT limit 150C on S2: A2 clamps PWM to 0 while above, self-recovering, no fault
+M143 H0 P2 T2 S170 A0                                   ; Bed mat HARD limit 170C on S2: A0 latches a heater fault, clear with M562 P0. Mat working limit is 180C
 
 ;M143 H0 P0 T5 S200 A0                                   ; Bed limit 200C on sensor S5
 ;M143 H0 P1 T2 S125 A0                                   ; Bed mat cutout 125C on sensor S2
