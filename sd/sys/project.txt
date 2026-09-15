@@ -76,12 +76,11 @@ Chamber  : HEATER ASSEMBLY REINSTALLED 15/09/2026. 1400W PTC, Siemens
            degree) or chamber_heat.g S<degC>; daemon.g writes it to PLC R0.
            First test 15/09: SP 45C, air 23.7 -> 33.6C in ~70s, 45.3C when
            set back to 0. Status 112, no fault bits.
+           Motor cooling fan FITTED with the refit: 60mm 240V fan blowing
+           OUTSIDE air over the recirculation fan motor. 240V instead of
+           the planned 24V DC because it made the wiring easier.
            History: removed 31/08/2026 when its recirculation fan (shaded
-           pole, no forced cooling over the motor) burnt out. Planned fix
-           was a 24V DC fan blowing OUTSIDE air over the motor, powered from
-           the fan contactor's pilot relay (self-interlocked, inherits the
-           PLC's ~45-50C fan overrun). NOT RECORDED whether that cooling fan
-           went in with the refit - confirm with Trev.
+           pole, no forced cooling over the motor) burnt out.
 Network  : PROFINET 192.168.32.x — Pi .70, PLC .71, KTP700 .72, switch .73.  
 
 =======================================================================================================  
@@ -208,8 +207,17 @@ One line each. Detail in project-long.txt under the named section.
 - Dead trigger0.g and trigger1.g deleted 29/08/2026 (no M581 bindings existed).  
 - EXTRUDER DIRECTION WAS REVERSED. config.g line 24 was M569 P0.5 S1; a forced  
   cold move (M302 P1, T0, M83, G1 E10) fed BACKWARDS. Corrected to S0 and  
-  re-tested forward, 29/08/2026. It had clearly never been driven - treat  
-  everything else extruder-side as unverified, M92 E420 especially.  
+  re-tested forward, 29/08/2026.
+- EXTRUDER CALIBRATED 15/09/2026. M92 E536 (was E420, which matched nothing;
+  Mellow's figure for the Low Plus 10T is 534-538 at 16x). M906 E600 (was
+  1000; Mellow range 0.6-1A, started at the low end - raise in 100mA steps
+  if it skips under real melt). Tests, hotend off unless stated:
+   - 100mm requested, flush-cut stick-out measured exactly 100mm -> E536 correct
+   - 50mm at 37.4mm/s (90mm3/s, 400mm/s x 0.6 x 0.3 +25%) - no skipping
+   - 100mm at 9.35mm/s - clean
+   - HOT, 220C: 50mm at 50mm3/s (20.8mm/s) - no skipping, heater held 220.0C
+     (move only 2.4s, too short to show droop)
+  Hotend melt ceiling not yet found - needs a longer hot flow test.
 - deployprobe.g now CYCLES the ALPS enable with a bounded retry instead of just  
   asserting it, to force a re-tare if the gauge reads already-triggered. See  
   THERMAL BEHAVIOUR - it has not yet caught a real failure, so it is unproven.  
