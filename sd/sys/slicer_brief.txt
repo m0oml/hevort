@@ -33,10 +33,11 @@ TOOLHEAD
             (CF/GF filaments fine). Base line widths/layer heights on 0.6mm.
   Extruder: Mellow VZ-HextrudORT Low Plus, direct drive, NEMA14 (Moons 10T).
             Filament diameter 1.75mm.
-            WARNING: the extruder has essentially never printed. Its direction was
-            found reversed and fixed on 29/08/2026, and E steps (M92 E420) are
-            UNCALIBRATED. First job is e-steps, then flow, then pressure advance,
-            then retraction. Treat every extrusion number as a starting point.
+            E steps CALIBRATED 15/09/2026: M92 E536, 100mm requested = 100mm fed.
+            Extruder current 600mA. Fed 50mm3/s at 220C without skipping; the
+            hotend's real melt limit is not yet measured, so do not set max
+            volumetric speed above ~40mm3/s until it is. The extruder has still
+            never printed: flow, then pressure advance, then retraction are next.
   Probe   : Mellow ALPS strain gauge on the hotend — THE NOZZLE IS THE PROBE.
             XY offset is 0,0 and that is correct. See START G-CODE for what
             that implies (clean nozzle, probe cool, lift straight after).
