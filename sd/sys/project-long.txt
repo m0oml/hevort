@@ -327,8 +327,9 @@ overshoot badly — it expects ~10kg of thermal mass that is not yet present.
 OTHER OPEN CONFIG ITEMS:  
 - M569 P0.5 S0 — extruder direction. Was S1 and fed BACKWARDS; caught 29/08/2026  
  by a forced cold move with no filament (M302 P1, T0, M83, G1 E10 F300) and  
- corrected. It had never been driven, so nothing else extruder-side should be  
- assumed correct - M92 E420 in particular has not been calibrated.  
+ corrected.
+- M92 E536 / M906 E600 — extruder steps and current, calibrated 15/09/2026
+ (was E420 / E1000). 100mm requested gave exactly 100mm. Details in project.txt.
 - M917 X100 Y100 — AWD standstill current is 100%, config.g line 48, confirmed  
  live at move.axes[0].percentStstCurrent = 100 on 29/08/2026. This entry  
  previously read "M917 X0 Y0 sets AWD holding current to zero ... CLOSED" and  
