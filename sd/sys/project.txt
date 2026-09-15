@@ -70,17 +70,18 @@ Bed      : 440x440x20mm granite + 4mm FR4, 400x400mm 1400W silicone mat.
            manufacture, so its INSTALLED orientation was fixed before  
            delivery. That does not prevent the temporary 90-degree rotation  
            measurement in step 0.  
-Chamber  : HEATER ASSEMBLY REMOVED 31/08/2026 - its recirculation fan (shaded  
-           pole, no forced cooling over the motor) burnt out. Always a risk  
-           with that configuration. REPLACEMENT PLAN: 24V DC fan blowing  
-           OUTSIDE air into the heater housing over the motor, powered from  
-           the pilot relay that switches the fan contactor - self-interlocked  
-           (runs whenever the motor runs), already on a control fuse, no new  
-           control needed. The PLC drops the fan when air-off falls below  
-           ~45-50C, so the cooling fan inherits that overrun for free.  
-           Was: 1400W PTC, Siemens S7-1212C PLC (FW V4.3.1), cascade PID,  
-           Modbus RTU to Duet on IO1 (M575 P3 B9600 S7). PLC and Modbus  
-           link remain live; only the heater assembly is out.  
+Chamber  : HEATER ASSEMBLY REINSTALLED 15/09/2026. 1400W PTC, Siemens
+           S7-1212C PLC (FW V4.3.1), cascade PID, Modbus RTU to Duet on IO1
+           (M575 P3 B9600 S7). Control: set global.chamberSP (tenths of a
+           degree) or chamber_heat.g S<degC>; daemon.g writes it to PLC R0.
+           First test 15/09: SP 45C, air 23.7 -> 33.6C in ~70s, 45.3C when
+           set back to 0. Status 112, no fault bits.
+           History: removed 31/08/2026 when its recirculation fan (shaded
+           pole, no forced cooling over the motor) burnt out. Planned fix
+           was a 24V DC fan blowing OUTSIDE air over the motor, powered from
+           the fan contactor's pilot relay (self-interlocked, inherits the
+           PLC's ~45-50C fan overrun). NOT RECORDED whether that cooling fan
+           went in with the refit - confirm with Trev.
 Network  : PROFINET 192.168.32.x — Pi .70, PLC .71, KTP700 .72, switch .73.  
 
 =======================================================================================================  
