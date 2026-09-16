@@ -89,14 +89,11 @@ LIVE REFERENCE MAPS
 TEMPERATURE SENSORS  
  S0  temp0     Hotend PT1000, replaced and PID tuned 29/08/2026, reads ok  
  S1  temp1     Coolant, Barrow G1/4 10K B3950 NTC  
- S2  NOT FITTED. The bed mat surface sensor is COMMENTED OUT at config.g line  
-     84 and does not exist in the object model. Do not cite it as a safety limit.  
+ S2  temp2     Bed mat 100K B3950 NTC, U-2.91. LIMITS ONLY for the bed heater:
+     soft 165C (A2), hard 180C (A0). Not the control sensor.
  S4  spi.cs0   ElecBay Pt100 4-wire (SPI daughterboard ch0)  
- S5  spi.cs1   Bed slab Pt100 4-wire (ch1) — bed PID source.  
-     READS state "hardwareError", value 2000.0 (open circuit) as of 29/08/2026.  
-     Expected, not a new fault: the temporary slab has no heater mat and no RTD  
-     attached. It will read properly once the final slab and mat are fitted.  
-     The bed heater is barred until then anyway (see item 7).  
+ S5  spi.cs1   Bed slab Pt100 4-wire (ch1) — bed heater CONTROL sensor, 150C
+     fault limit. Reads ok (24.02C vs mat 23.84C at ambient, 15/09/2026).
  S10 MCU temp / S11 Driver temp  
  temp3 FREE. XNQ PT100 probe is spare, unassigned.  
 
@@ -318,11 +315,11 @@ bonding - see step g, it must be dried out before it is ever run hot.
 Blocks: bed frame geometry lock, M671 coordinates, FR4 hole positions, Z  
 endstop configuration, and ANY bed heating.  
 
-BED HEATER WARNING: the active M307 PID model is the calculated one for a 20mm  
-granite slab. The bare-mat model has been removed. Running the bed on the bare  
-mat with this model will overshoot badly — it expects ~10kg of thermal mass  
-that is not physically present. DO NOT RUN THE BED HEATER UNTIL THE SLAB IS  
-FITTED.  
+BED HEATER - SLAB CONTROL RESTORED 15/09/2026. The slab is fitted. H0 is
+controlled from the slab RTD (S5) with the CALCULATED model M307 H0 A100.0
+C200.0 D5.0 B0 (PID). The mat NTC (S2) is limits only. No autotune - on the
+granite it would take about a week. The temporary mat-control setup used to
+cure the bed has been removed.
 
 ON ARRIVAL, in order:  
  0. MODEL THE SLAB'S FIGURE AGAINST THE X BEAM BOW. STILL OUTSTANDING as of  
@@ -386,24 +383,15 @@ ON ARRIVAL, in order:
     1mm THINNER, so Z could go UP, not down. Trev is running ~20mm of  
     headroom below the real limit anyway, so nothing needs doing here at all.  
  g. Only then run the bed heater. BEFORE first heat, check all five:  
-    - config.g is ALREADY ARMED FOR THE PRODUCTION SLAB and needs no edit:  
-      M950 H0 C"out7" T5 Q1 (SSR1 on out7, sensor S5), M143 H0 P0 T5 S200,  
-      M307 H0 A100.0 C200.0 D5.0 B0, M140 P0 H0. The bare-mat model was  
-      removed deliberately - do not put it back.  
-    - S5 (spi.cs1, slab Pt100) must read a sane ambient value first. It  
-      currently reads hardwareError / 2000.0 open-circuit because the  
-      temporary slab has no RTD, and THAT FAULT is the only thing presently  
-      stopping the heater running. Once the RTD is attached that protection  
-      disappears - do not treat "it never came on before" as a safeguard.  
-    - THERE IS NO SECOND TEMPERATURE LIMIT. The mat surface sensor S2 is not  
-      fitted, and both its M308 (config.g line 84) and its 125C mat cutout  
-      M143 H0 P1 T2 S125 (line 97) are COMMENTED OUT. S5 is the sole source  
-      for control and for the 200C limit, so one RTD failure is uncovered on  
-      a 1400W mat bonded to granite. Decide before first heat whether to fit  
-      S2 and uncomment both lines.  
-    - The M307 model is CALCULATED, not measured. Re-run the autotune on the  
-      real bonded assembly, and transcribe the result into config.g by hand -  
-      there is no M501, so it lives in RAM only until you do.  
+    - DONE 15/09/2026: config.g restored to slab control - M950 H0 C"out7" T5
+      Q1, M143 H0 P0 T5 S200 A0, M307 H0 A100.0 C200.0 D5.0 B0, M140 P0 H0.
+    - DONE: S5 reads ok. S2 is fitted and is the mat limit (soft 165C A2,
+      hard 180C A0), so the mat has its own protection if S5 fails.
+    - The M307 model is CALCULATED and stays that way - no autotune (Trev,
+      15/09: about a week on this much granite). The first heat 15/09 faulted
+      within 16s as heating slower than the model expects, so config.g now has
+      M570 H0 P600 T15 (600s anomaly time). With that it heated slab 25 -> 50C
+      in ~12.5 min, mat capped at 90-110C, overshoot to ~54C.
     - THE SLAB WAS WET WHEN COLLECTED and one face is now sealed by the  
       bonded mat, so its remaining water can only leave via the top face and  
       edges. FIRST POWER-UP IS A DRYING CYCLE, NOT A HEAT TEST: 50-60C held  
