@@ -83,9 +83,13 @@ RETRACTION
   start G-code once calibrated (start at 0).
 
 HEATED BED — READ BEFORE SETTING BED TEMPS
-  Heater H0 (SSR), mapped as bed. Controlled from the mat surface sensor S2 with a
-  SOFT limit of 150C (heater clamps off above it) and a HARD limit of 170C
-  (heater fault). So nothing above ~140C bed in any profile.
+  Heater H0 (SSR), mapped as bed. Controlled from the SLAB RTD S5, so the bed
+  temperature in the slicer is the granite temperature. The mat sensor S2 is a
+  limit only: SOFT 165C (heater clamps off above it) and HARD 180C (heater
+  fault). Slab fault limit 150C. The slab can never run hotter than the mat, so
+  keep bed temps to ~110C max in any profile.
+  First heat 15/09/2026: slab 25 -> 50C in about 12.5 min (mat capped at
+  90-110C), with a few degrees of overshoot past 50C.
   The slab is ~10kg of granite: heat-up is SLOW (tens of minutes+). Use M190 (wait)
   but expect it; a separate preheat macro may suit Trev better - ASK TREV.
   The slab was WET and needed a 50-60C drying cycle before running hotter. Whether
@@ -106,8 +110,10 @@ CHAMBER HEATING — CONTROLLED BY MACRO, NOT BY M141
   - Aborts (heater off) if the PLC reports a heater fault.
   - TIMES OUT after 3600 s and CONTINUES THE PRINT anyway, with a console warning.
   - Can be aborted from DWC/PanelDue with macros/chamber_abort.g.
-  - The macro's own menu offers 60C and 75C. Max chamber temp for the profile:
-    ASK TREV; until then do not exceed 75.
+  - The macro's own menu offers 60C and 75C. Trev prints with a 60C chamber
+    and a 105C bed. No chamber ceiling: hotter is better (Trev, 15/09/2026).
+    The bed alone heats the chamber a lot: with the chamber heater OFF and the
+    door shut, a 105C bed took the air past 53C and still climbing.
   - The PLC safety relay (Duet OUT8) must be enabled, which config.g does at boot
     when the stop button is healthy. Nothing for the slicer to do.
 
@@ -185,10 +191,12 @@ OTHER SETTINGS
     config.g is hand-edited and those are machine settings, not per-print ones.
 
 QUESTIONS TO PUT TO TREV BEFORE FINISHING THE PROFILE
-  - Maximum chamber temperature for the profile?
+  - Maximum chamber temperature: ANSWERED 15/09 - no ceiling, hotter is
+    better. Prints at 60C chamber.
   - Should the chamber switch off at the end of a print, or keep going for a
     post-print soak?
-  - Is the bed drying cycle done, and what max bed temp is allowed now?
+  - Max bed temp: ANSWERED 15/09 - prints at 105C, keep profiles to ~110C.
+    (Whether the slab drying cycle is complete was not separately confirmed.)
   - Has the bed been re-meshed on the final slab (so G29 S1 is safe)?
   - Which filaments first (PLA / PETG / ABS / ASA / nylon ...)?
   - Printer's network address for upload, and DWC password?
