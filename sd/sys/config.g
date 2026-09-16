@@ -92,14 +92,12 @@ M950 H1 C"out0" T0                                      ; Hotend heater on out0,
 M143 H1 P0 T0 S365 A0                                   ; Hotend limit 365C on sensor S0
 M307 H1 R5.147 K0.348:0.572 D2.53 E1.35 S1.00 B0 V24.0  ; Hotend PID model
 
-;M950 H0 C"out7" T5 Q1                                   ; Bed heater SSR on out7, sensor S5
-M950 H0 C"out7" T2 Q1                                   ; Bed heater SSR on out7, sensor S5
-M143 H0 P1 T2 S150 A2                                   ; Bed mat SOFT limit 150C on S2: A2 clamps PWM to 0 while above, self-recovering, no fault
-M143 H0 P2 T2 S170 A0                                   ; Bed mat HARD limit 170C on S2: A0 latches a heater fault, clear with M562 P0. Mat working limit is 180C
-
-;M143 H0 P0 T5 S200 A0                                   ; Bed limit 200C on sensor S5
-;M143 H0 P1 T2 S125 A0                                   ; Bed mat cutout 125C on sensor S2
-;M307 H0 A100.0 C200.0 D5.0 B0                           ; Bed PID model
+M950 H0 C"out7" T5 Q1                                   ; Bed heater SSR on out7, sensor S5
+M143 H0 P0 T5 S150 A0                                   ; Bed limit 150C on sensor S5
+M143 H0 P1 T2 S165 A2                                   ; Bed mat SOFT limit 165C on S2: A2 clamps PWM to 0 while above, self-recovering, no fault
+M143 H0 P2 T2 S180 A0                                   ; Bed mat HARD limit 180C on S2: A0 latches a heater fault, clear with M562 P0. Mat working limit is 180C
+M307 H0 A100.0 C200.0 D5.0 B0                           ; Bed PID model
+M570 H0 P600 T15                                        ; Bed heater fault detection: 600s anomaly time, 15C excursion
 
 ; Map bed heater
 M140 P0 H0                                              ; Map H0 to bed slot 0
